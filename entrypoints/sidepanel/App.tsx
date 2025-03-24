@@ -48,22 +48,53 @@ const menuItems: MenuItem[] = [
 ];
 
 function App() {
+  /** Main input text content */
   const [input, setInput] = useState('');
+
+  /** Current operation mode - either 'agent' or 'ask' */
   const [mode, setMode] = useState<Mode>('agent');
+
+  /** Controls visibility of suggestion dropdown menu */
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  /** Position coordinates for suggestion dropdown */
   const [cursorPosition, setCursorPosition] = useState<{ top: number; left: number } | null>(null);
+
+  /** Array of selected menu item IDs representing current path */
   const [selectedPath, setSelectedPath] = useState<string[]>([]);
+
+  /** Currently displayed menu items in dropdown */
   const [currentMenuItems, setCurrentMenuItems] = useState<MenuItem[]>(menuItems);
+
+  /** Index of currently selected suggestion item */
   const [selectedIndex, setSelectedIndex] = useState(-1);
+
+  /** Current search term for filtering suggestions */
   const [searchTerm, setSearchTerm] = useState('');
+
+  /** Reference to main textarea element */
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Whether currently accepting user input for a menu item */
   const [isUserInput, setIsUserInput] = useState(false);
+
+  /** Value of user input field */
   const [userInputValue, setUserInputValue] = useState('');
 
+  /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  /**
+   * Constructs a full path string from an array of menu item IDs
+   * @param path - Array of menu item IDs representing the selected path
+   * @param userInput - Optional user input value for menu items requiring input
+   * @returns A formatted string starting with '@' followed by menu item labels joined with '/'
+   * @example
+   * getFullPath(['web', 'web-google-search']) // returns '@Web/Google search/'
+   * getFullPath(['web', 'go-to-url']) // returns '@Web/Go to url/'
+   */
   const getFullPath = (path: string[], userInput?: string): string => {
     let result = '@';
     let currentItems = menuItems;
@@ -72,6 +103,7 @@ function App() {
       const id = path[i];
       const item = currentItems.find(i => i.id === id);
       if (item) {
+        // Remove '@' from the first item
         const label = i === 0 ? item.label.replace('@', '') : item.label;
         if (!item.needUserInput) {
           result += label + '/';
@@ -98,15 +130,6 @@ function App() {
           setSelectedIndex(prev => prev > 0 ? prev - 1 : prev);
           break;
         case 'Tab':
-          e.preventDefault();
-          if (selectedIndex >= 0 && selectedIndex < filteredMenuItems.length) {
-            const selectedItem = filteredMenuItems[selectedIndex];
-            if (selectedItem.children) {
-              handleMenuItemClick(selectedItem);
-            }
-          }
-          break;
-        case 'Enter':
           e.preventDefault();
           if (selectedIndex >= 0 && selectedIndex < filteredMenuItems.length) {
             handleMenuItemClick(filteredMenuItems[selectedIndex]);
@@ -364,6 +387,12 @@ function App() {
   );
 }
 
+/**
+ * Calculates caret coordinates in a textarea
+ * @param element - Target textarea element
+ * @param position - Caret position in the text
+ * @returns Coordinates {left, top} of the caret position
+ */
 function getCaretCoordinates(element: HTMLTextAreaElement, position: number) {
   const { offsetLeft, offsetTop } = element;
   const div = document.createElement('div');
