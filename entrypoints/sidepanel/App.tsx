@@ -22,16 +22,12 @@ const menuItems: MenuItem[] = [
       {
         id: 'web-google-search',
         label: 'Google search',
-        children: [
-          { id: 'web-google-search-input', label: '+', needUserInput: true }
-        ]
+        needUserInput: true
       },
       {
         id: 'go-to-url',
         label: 'Go to url',
-        children: [
-          { id: 'go-to-url-input', label: '+', needUserInput: true }
-        ]
+        needUserInput: true
       },
     ]
   },
@@ -105,9 +101,7 @@ function App() {
       if (item) {
         // Remove '@' from the first item
         const label = i === 0 ? item.label.replace('@', '') : item.label;
-        if (!item.needUserInput) {
-          result += label + '/';
-        }
+        result += label + '/';
         currentItems = item.children || [];
       }
     }
@@ -134,6 +128,9 @@ function App() {
           if (selectedIndex >= 0 && selectedIndex < filteredMenuItems.length) {
             handleMenuItemClick(filteredMenuItems[selectedIndex]);
           }
+          break;
+        case 'Enter':
+          e.preventDefault(); // 阻止默认行为
           break;
         case 'Escape':
           e.preventDefault();
@@ -230,6 +227,7 @@ function App() {
 
       let newPath;
       if (item.needUserInput) {
+        setSelectedPath(fullPath);
         setIsUserInput(true);
         setUserInputValue('');
         setSelectedIndex(-1);
@@ -312,7 +310,7 @@ function App() {
             ref={textareaRef}
             value={input}
             onChange={handleInputChange}
-            placeholder="Plan, search, build anything"
+            placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
           />
