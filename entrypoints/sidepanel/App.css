@@ -98,6 +98,8 @@
   font-size: 12px;
   cursor: pointer;
   outline: none;
+  height: 28px;
+  box-sizing: border-box;
 }
 
 .mode-select:hover,
@@ -110,12 +112,14 @@
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
+  height: 28px;
+  box-sizing: border-box;
 }
 
 .send-button:disabled {
@@ -272,6 +276,8 @@
   background-color: #ffc107; /* 黄色背景 */
   color: #212529;
   transition: background-color 0.2s;
+  height: 28px;
+  box-sizing: border-box;
 }
 
 .pause-resume-button:hover {
@@ -291,13 +297,15 @@
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 6px 12px;
+  padding: 4px 12px;
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: the4px;
   font-weight: 500;
+  height: 28px;
+  box-sizing: border-box;
 }
 
 .stop-button:hover {
