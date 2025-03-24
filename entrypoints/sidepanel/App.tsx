@@ -274,6 +274,25 @@ function App() {
     }
   };
 
+  /**
+   * Handles keyboard events for user input field that appears when a menu item with needUserInput is selected
+   *
+   * This function processes:
+   * - Enter key: Commits the input by adding it to the main textarea with proper formatting
+   * - Escape key: Cancels the input operation and returns to menu selection
+   *
+   * @param e - React keyboard event from the input field
+   *
+   * On Enter press:
+   * 1. Gets the full menu path string
+   * 2. Creates a markdown-style link: [path](userInput)
+   * 3. Inserts it into the main textarea at @ position
+   * 4. Resets the menu state and focus
+   *
+   * @example
+   * // If user selects '@Web/Google search' and enters 'react hooks':
+   * // Input will become: '[Web/Google search](react hooks)'
+   */
   const handleUserInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && userInputValue.trim()) {
       e.preventDefault();
