@@ -1,42 +1,204 @@
 #root {
-  max-width: 1280px;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.app-container {
+  width: 100%;
+  height: 100vh;
+  background-color: #1e1e1e;
+  color: #ffffff;
+  padding: 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-container {
+  position: relative;
+  width: calc(100% - 24px);
+  background-color: #2d2d2d;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #54bc4ae0);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.input-wrapper {
+  position: relative;
+  width: 100%;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.main-input {
+  width: calc(100% - 16px);
+  min-height: 100px;
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  resize: vertical;
+  outline: none;
+  padding: 8px;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  caret-color: #ffffff;
+  position: relative;
+  z-index: 2;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.main-input::placeholder {
+  color: #888888;
 }
 
-.card {
-  padding: 2em;
+.main-input::selection {
+  background-color: #2b7eef80;
+  color: #ffffff;
 }
 
-.read-the-docs {
-  color: #888;
+.main-input::-moz-selection {
+  background-color: #2b7eef80;
+  color: #ffffff;
+}
+
+.input-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #3d3d3d;
+}
+
+.left-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-select,
+.llm-select {
+  background-color: #3d3d3d;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+
+.mode-select:hover,
+.llm-select:hover {
+  background-color: #4d4d4d;
+}
+
+.send-button {
+  background-color: #2b7eef;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.send-button:hover {
+  background-color: #3889f0;
+}
+
+.suggestions-dropdown {
+  position: fixed;
+  background-color: #2d2d2d;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #3d3d3d;
+  background-color: #252525;
+}
+
+.menu-back {
+  background: none;
+  border: none;
+  color: #2b7eef;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 8px;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.menu-back:hover {
+  background-color: #3d3d3d;
+}
+
+.menu-path {
+  color: #ffffff;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  transition: background-color 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.suggestion-item .input-preview {
+  color: #888888;
+  font-style: italic;
+}
+
+.suggestion-item.selected {
+  background-color: #4a4a4a;
+}
+
+.suggestion-item:hover {
+  background-color: #3d3d3d;
+}
+
+.submenu-indicator {
+  color: #666;
+  margin-left: 8px;
+}
+
+.user-input-container {
+  padding: 8px 12px;
+}
+
+.user-input {
+  width: 100%;
+  background-color: #3d3d3d;
+  border: 1px solid #4d4d4d;
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+}
+
+.user-input:focus {
+  border-color: #2b7eef;
 }
