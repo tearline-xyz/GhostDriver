@@ -298,8 +298,37 @@ function App() {
     }
   };
 
-  const handleSend = () => {
-    console.log('Sending:', input);
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !showSuggestions) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSend = async () => {
+    try {
+      const response = await fetch('https://auto.test.tearline.io/tasks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: input,
+          crx_mode: true
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Response:', data);
+      // 可以在这里处理响应，比如清空输入框或显示成功消息
+    } catch (error) {
+      console.error('Error sending request:', error);
+      // 错误处理逻辑
+    }
   };
 
   return (
@@ -310,6 +339,7 @@ function App() {
             ref={textareaRef}
             value={input}
             onChange={handleInputChange}
+            onKeyDown={handleTextareaKeyDown}
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
