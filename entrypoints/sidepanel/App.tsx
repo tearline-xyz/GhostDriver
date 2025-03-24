@@ -77,6 +77,13 @@ function App() {
   /** Value of user input field */
   const [userInputValue, setUserInputValue] = useState('');
 
+  /** 操作结果信息 */
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error' | 'info', visible: boolean}>({
+    message: '',
+    type: 'info',
+    visible: false
+  });
+
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -307,6 +314,12 @@ function App() {
 
   const handleSend = async () => {
     try {
+      setNotification({
+        message: 'Sending your request...',
+        type: 'info',
+        visible: true
+      });
+
       const response = await fetch('https://auto.test.tearline.io/tasks', {
         method: 'POST',
         headers: {
@@ -319,15 +332,37 @@ function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`Request failed with status: ${response.status}`);
       }
 
       const data = await response.json();
       console.log('Response:', data);
-      // 可以在这里处理响应，比如清空输入框或显示成功消息
+
+      setNotification({
+        message: 'Your request was sent successfully!',
+        type: 'success',
+        visible: true
+      });
+
+      setInput(''); // 清空输入框
+
+      // 5秒后自动关闭通知
+      setTimeout(() => {
+        setNotification(prev => ({...prev, visible: false}));
+      }, 5000);
+
     } catch (error) {
-      console.error('Error sending request:', error);
-      // 错误处理逻辑
+      console.error('Error:', error);
+      setNotification({
+        message: error instanceof Error ? error.message : 'An unknown error occurred',
+        type: 'error',
+        visible: true
+      });
+
+      // 8秒后自动关闭错误通知
+      setTimeout(() => {
+        setNotification(prev => ({...prev, visible: false}));
+      }, 8000);
     }
   };
 
@@ -411,6 +446,20 @@ function App() {
           </button>
         </div>
       </div>
+
+      {notification.visible && (
+        <div className={`notification notification-${notification.type}`}>
+          <div className="notification-content">
+            <span>{notification.message}</span>
+            <button
+              className="notification-close"
+              onClick={() => setNotification(prev => ({...prev, visible: false}))}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
