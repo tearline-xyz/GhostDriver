@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
-type Mode = 'agent' | 'ask';
+type Mode = 'agent' | 'chat';
 
 interface MenuItem {
   id: string;
@@ -47,7 +47,7 @@ function App() {
   /** Main input text content */
   const [input, setInput] = useState('');
 
-  /** Current operation mode - either 'agent' or 'ask' */
+  /** Current operation mode - either 'agent' or 'chat' */
   const [mode, setMode] = useState<Mode>('agent');
 
   /** Controls visibility of suggestion dropdown menu */
@@ -416,7 +416,7 @@ function App() {
         visible: true
       });
 
-      // 关闭通知后，保持控制按钮可见
+      // 关闭通知
       setTimeout(() => {
         setNotification(prev => ({...prev, visible: false}));
       }, 2000);
@@ -525,14 +525,15 @@ function App() {
               disabled={inputDisabled}
             >
               <option value="agent">Agent</option>
-              <option value="ask">Ask</option>
+              <option value="chat">Chat</option>
             </select>
             <select
               className="llm-select"
               disabled={inputDisabled}
             >
-              <option value="gpt4">GPT-4</option>
-              <option value="claude">Claude</option>
+              <option value="gpt4">GPT-4o</option>
+              <option value="claude">Claude 3.5</option>
+              <option value="claude">DeepSeek</option>
             </select>
           </div>
 
