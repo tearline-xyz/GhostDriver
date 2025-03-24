@@ -235,6 +235,29 @@ function App() {
     return currentItem;
   };
 
+  /**
+   * Handles the selection of an item from the suggestion menu dropdown
+   *
+   * This function processes two main scenarios:
+   * 1. When a menu item with children is selected (navigation into submenu)
+   * 2. When a terminal menu item is selected (insertion into textarea)
+   *
+   * @param item - The menu item that was clicked or selected
+   *
+   * For items with children:
+   * - Updates current menu display to show children items
+   * - Adds the selected item's ID to the path
+   *
+   * For terminal items:
+   * - If item requires user input: Opens user input field
+   * - If not: Creates a markdown-style link in the format [path]()
+   *   and inserts it at the @ position in the textarea
+   * - Resets menu state and returns focus to textarea
+   *
+   * @example
+   * // Clicking on '@Web' (with children) will display Web submenu items
+   * // Clicking on 'Ask me' (without children) will insert '[Action/Ask me]()'
+   */
   const handleMenuItemClick = (item: MenuItem) => {
     if (item.children) {
       setCurrentMenuItems(item.children);
