@@ -84,6 +84,9 @@ function App() {
     visible: false
   });
 
+  /** 控制输入框是否禁用 */
+  const [inputDisabled, setInputDisabled] = useState(false);
+
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -320,6 +323,9 @@ function App() {
         visible: true
       });
 
+      // 禁用输入框
+      setInputDisabled(true);
+
       const response = await fetch('https://auto.test.tearline.io/tasks', {
         method: 'POST',
         headers: {
@@ -344,11 +350,11 @@ function App() {
         visible: true
       });
 
-      setInput(''); // 清空输入框
-
       // close the notification after seconds
       setTimeout(() => {
         setNotification(prev => ({...prev, visible: false}));
+        // 重新启用输入框
+        setInputDisabled(false);
       }, 2000);
 
     } catch (error) {
@@ -358,6 +364,9 @@ function App() {
         type: 'error',
         visible: true
       });
+
+      // 出错时也要重新启用输入框
+      setInputDisabled(false);
     }
   };
 
@@ -373,6 +382,7 @@ function App() {
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
+            disabled={inputDisabled}  // 添加disabled属性
           />
         </div>
 
@@ -436,7 +446,11 @@ function App() {
             </select>
           </div>
 
-          <button className="send-button" onClick={handleSend}>
+          <button
+            className="send-button"
+            onClick={handleSend}
+            disabled={inputDisabled}  // 同时禁用发送按钮
+          >
             Send ⏎
           </button>
         </div>

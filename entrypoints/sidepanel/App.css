@@ -50,6 +50,11 @@
   z-index: 2;
 }
 
+.main-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .main-input::placeholder {
   color: #888888;
 }
@@ -105,6 +110,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.send-button:disabled {
+  background-color: #666;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .send-button:hover {
