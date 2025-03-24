@@ -109,10 +109,10 @@ function App() {
    * @param userInput - Optional user input value for menu items requiring input
    * @returns A formatted string starting with '@' followed by menu item labels joined with '/'
    * @example
-   * getFullPath(['web', 'web-google-search']) // returns '@Web/Google search/'
-   * getFullPath(['web', 'go-to-url']) // returns '@Web/Go to url/'
+   * buildMenuPathString(['web', 'web-google-search']) // returns '@Web/Google search/'
+   * buildMenuPathString(['web', 'go-to-url']) // returns '@Web/Go to url/'
    */
-  const getFullPath = (path: string[], userInput?: string): string => {
+  const buildMenuPathString = (path: string[], userInput?: string): string => {
     let result = '@';
     let currentItems = menuItems;
 
@@ -147,7 +147,7 @@ function App() {
         case 'Tab':
           e.preventDefault();
           if (selectedIndex >= 0 && selectedIndex < filteredMenuItems.length) {
-            handleMenuItemClick(filteredMenuItems[selectedIndex]);
+            handleMenuItemSelection(filteredMenuItems[selectedIndex]);
           }
           break;
         case 'Enter':
@@ -155,7 +155,7 @@ function App() {
           break;
         case 'Escape':
           e.preventDefault();
-          closeMenu();
+          closeAndResetMenu();
           break;
       }
     };
@@ -170,7 +170,7 @@ function App() {
     }
   }, [showSuggestions, filteredMenuItems]);
 
-  const closeMenu = () => {
+  const closeAndResetMenu = () => {
     setShowSuggestions(false);
     setSelectedIndex(-1);
     setSearchTerm('');
@@ -182,20 +182,20 @@ function App() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextInputAndSuggestions = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     const cursorPos = e.target.selectionStart;
 
-    const lastAtIndex = value.lastIndexOf('@', cursorPos);
-    if (lastAtIndex > 0 && value[lastAtIndex - 1] !== ' ') {
+    const lastAtSymbolPosition = value.lastIndexOf('@', cursorPos);
+    if (lastAtSymbolPosition > 0 && value[lastAtSymbolPosition - 1] !== ' ') {
       setShowSuggestions(false);
       setInput(value);
       return;
     }
 
-    if (lastAtIndex !== -1 && lastAtIndex === cursorPos - 1) {
+    if (lastAtSymbolPosition !== -1 && lastAtSymbolPosition === cursorPos - 1) {
       const rect = e.target.getBoundingClientRect();
-      const position = getCaretCoordinates(e.target, lastAtIndex);
+      const position = calculateTextareaCaretPosition(e.target, lastAtSymbolPosition);
       setShowSuggestions(true);
       setCursorPosition({
         top: rect.top + position.top,
@@ -205,23 +205,23 @@ function App() {
       setSelectedPath([]);
       setSelectedIndex(0);
       setSearchTerm('');
-    } else if (lastAtIndex !== -1 && cursorPos > lastAtIndex) {
-      const newSearchTerm = value.substring(lastAtIndex + 1, cursorPos);
+    } else if (lastAtSymbolPosition !== -1 && cursorPos > lastAtSymbolPosition) {
+      const newSearchTerm = value.substring(lastAtSymbolPosition + 1, cursorPos);
       setSearchTerm(newSearchTerm);
       setShowSuggestions(true);
 
-      const currentItem = getCurrentMenuItem();
+      const currentItem = findCurrentMenuItemByPath();
       if (currentItem?.needUserInput) {
         return;
       }
     } else {
-      closeMenu();
+      closeAndResetMenu();
     }
 
     setInput(value);
   };
 
-  const getCurrentMenuItem = (): MenuItem | undefined => {
+  const findCurrentMenuItemByPath = (): MenuItem | undefined => {
     let currentItems = menuItems;
     let currentItem;
 
@@ -258,7 +258,7 @@ function App() {
    * // Clicking on '@Web' (with children) will display Web submenu items
    * // Clicking on 'Ask me' (without children) will insert '[Action/Ask me]()'
    */
-  const handleMenuItemClick = (item: MenuItem) => {
+  const handleMenuItemSelection = (item: MenuItem) => {
     if (item.children) {
       setCurrentMenuItems(item.children);
       setSelectedPath([...selectedPath, item.id]);
@@ -266,7 +266,7 @@ function App() {
       setSearchTerm('');
     } else {
       const fullPath = [...selectedPath, item.id];
-      const fullLabel = getFullPath(fullPath);
+      const fullLabel = buildMenuPathString(fullPath);
       const lastAtIndex = input.lastIndexOf('@');
 
       let newPath;
@@ -316,11 +316,11 @@ function App() {
    * // If user selects '@Web/Google search' and enters 'react hooks':
    * // Input will become: '[Web/Google search](react hooks)'
    */
-  const handleUserInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleUserInputMenuSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && userInputValue.trim()) {
       e.preventDefault();
       const fullPath = [...selectedPath];
-      const menuPath = getFullPath(fullPath);
+      const menuPath = buildMenuPathString(fullPath);
       const lastAtIndex = input.lastIndexOf('@');
       const newPath = `[${menuPath}](${userInputValue.trim()})`;
       const newInput = input.substring(0, lastAtIndex) + newPath + input.substring(lastAtIndex + menuPath.length);
@@ -343,7 +343,7 @@ function App() {
     }
   };
 
-  const handleMenuBack = () => {
+  const handleMenuNavigationBack = () => {
     if (selectedPath.length > 0) {
       const newPath = selectedPath.slice(0, -1);
       setSelectedPath(newPath);
@@ -361,14 +361,14 @@ function App() {
     }
   };
 
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleTextareaEnterKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !showSuggestions) {
       e.preventDefault();
-      handleSend();
+      handleTaskSubmission();
     }
   };
 
-  const handleSend = async () => {
+  const handleTaskSubmission = async () => {
     try {
       setNotification({
         message: 'Sending your request...',
@@ -436,14 +436,14 @@ function App() {
   };
 
   // 切换暂停/恢复状态
-  const togglePauseResume = () => {
+  const toggleTaskPauseState = () => {
     setTaskState(prev => ({...prev, running: !prev.running}));
     // 这里可以添加实际的API调用
     console.log(`Task ${taskState.running ? 'paused' : 'resumed'}: ${taskState.taskId}`);
   };
 
   // 停止任务
-  const stopTask = () => {
+  const stopAndResetTask = () => {
     // 这里可以添加实际的API调用
     console.log(`Task stopped: ${taskState.taskId}`);
 
@@ -463,8 +463,8 @@ function App() {
           <textarea
             ref={textareaRef}
             value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleTextareaKeyDown}
+            onChange={handleTextInputAndSuggestions}
+            onKeyDown={handleTextareaEnterKey}
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
@@ -482,10 +482,10 @@ function App() {
           >
             {selectedPath.length > 0 && (
               <div className="menu-header">
-                <button className="menu-back" onClick={handleMenuBack}>
+                <button className="menu-back" onClick={handleMenuNavigationBack}>
                   ← Back
                 </button>
-                <span className="menu-path">{getFullPath(selectedPath)}</span>
+                <span className="menu-path">{buildMenuPathString(selectedPath)}</span>
               </div>
             )}
             {isUserInput ? (
@@ -494,7 +494,7 @@ function App() {
                   type="text"
                   value={userInputValue}
                   onChange={(e) => setUserInputValue(e.target.value)}
-                  onKeyDown={handleUserInput}
+                  onKeyDown={handleUserInputMenuSubmit}
                   placeholder="Type and press Enter"
                   autoFocus
                   className="user-input"
@@ -505,7 +505,7 @@ function App() {
                 <div
                   key={item.id}
                   className={`suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
-                  onClick={() => handleMenuItemClick(item)}
+                  onClick={() => handleMenuItemSelection(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   {item.label}
@@ -542,13 +542,13 @@ function App() {
               <>
                 <button
                   className={`pause-resume-button ${taskState.running ? 'running' : 'paused'}`}
-                  onClick={togglePauseResume}
+                  onClick={toggleTaskPauseState}
                 >
                   {taskState.running ? 'Pause' : 'Resume'}
                 </button>
                 <button
                   className="stop-button"
-                  onClick={stopTask}
+                  onClick={stopAndResetTask}
                 >
                   Stop
                 </button>
@@ -556,7 +556,7 @@ function App() {
             ) : (
               <button
                 className="send-button"
-                onClick={handleSend}
+                onClick={handleTaskSubmission}
                 disabled={inputDisabled}
               >
                 Send ⏎
@@ -589,7 +589,7 @@ function App() {
  * @param position - Caret position in the text
  * @returns Coordinates {left, top} of the caret position
  */
-function getCaretCoordinates(element: HTMLTextAreaElement, position: number) {
+function calculateTextareaCaretPosition(element: HTMLTextAreaElement, position: number) {
   const { offsetLeft, offsetTop } = element;
   const div = document.createElement('div');
   const style = getComputedStyle(element);
