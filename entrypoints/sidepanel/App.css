@@ -204,9 +204,9 @@
 }
 
 .notification {
-  margin-top: 16px;
-  padding: 12px;
-  border-radius: 8px;
+  margin:  12px 0px;
+  padding: 0px 12px;
+  border-radius: 6px;
   color: #ffffff;
   animation: slideIn 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -216,6 +216,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  line-height: 1;
 }
 
 .notification-success {
@@ -227,7 +228,7 @@
 }
 
 .notification-info {
-  background-color: #17a2b8;
+  background-color: #3889f0;
 }
 
 .notification-close {

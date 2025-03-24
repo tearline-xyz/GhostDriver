@@ -346,10 +346,10 @@ function App() {
 
       setInput(''); // 清空输入框
 
-      // 5秒后自动关闭通知
+      // close the notification after seconds
       setTimeout(() => {
         setNotification(prev => ({...prev, visible: false}));
-      }, 5000);
+      }, 2000);
 
     } catch (error) {
       console.error('Error:', error);
@@ -358,11 +358,6 @@ function App() {
         type: 'error',
         visible: true
       });
-
-      // 8秒后自动关闭错误通知
-      setTimeout(() => {
-        setNotification(prev => ({...prev, visible: false}));
-      }, 8000);
     }
   };
 
