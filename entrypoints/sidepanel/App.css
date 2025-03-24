@@ -82,6 +82,12 @@
   gap: 8px;
 }
 
+.right-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .mode-select,
 .llm-select {
   background-color: #3d3d3d;
@@ -254,6 +260,48 @@
 
 .notification-close:hover {
   opacity: 1;
+}
+
+.pause-resume-button {
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ffc107; /* 黄色背景 */
+  color: #212529;
+  transition: background-color 0.2s;
+}
+
+.pause-resume-button:hover {
+  opacity: 0.9;
+}
+
+.pause-resume-button.running {
+  background-color: #ffc107; /* 运行状态为黄色 */
+}
+
+.pause-resume-button.paused {
+  background-color: #28a745; /* 暂停状态为绿色 */
+}
+
+.stop-button {
+  background-color: #dc3545; /* 红色背景 */
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: the4px;
+  font-weight: 500;
+}
+
+.stop-button:hover {
+  background-color: #c82333;
 }
 
 @keyframes slideIn {

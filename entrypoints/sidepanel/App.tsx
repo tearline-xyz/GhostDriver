@@ -87,6 +87,17 @@ function App() {
   /** 控制输入框是否禁用 */
   const [inputDisabled, setInputDisabled] = useState(false);
 
+  /** 控制任务状态 */
+  const [taskState, setTaskState] = useState<{
+    running: boolean;
+    taskId?: string;
+    showControls: boolean;
+  }>({
+    running: false,
+    taskId: undefined,
+    showControls: false
+  });
+
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -326,6 +337,13 @@ function App() {
       // 禁用输入框
       setInputDisabled(true);
 
+      // 开始任务，默认为运行状态，并显示控制按钮
+      setTaskState({
+        running: true,
+        showControls: true,
+        taskId: undefined // 初始未知ID
+      });
+
       const response = await fetch('https://auto.test.tearline.io/tasks', {
         method: 'POST',
         headers: {
@@ -344,17 +362,21 @@ function App() {
       const data = await response.json();
       console.log('Response:', data);
 
+      // 更新任务ID
+      setTaskState(prev => ({
+        ...prev,
+        taskId: data.id || 'unknown'
+      }));
+
       setNotification({
         message: 'Your request was sent successfully!',
         type: 'success',
         visible: true
       });
 
-      // close the notification after seconds
+      // 关闭通知后，保持控制按钮可见
       setTimeout(() => {
         setNotification(prev => ({...prev, visible: false}));
-        // 重新启用输入框
-        setInputDisabled(false);
       }, 2000);
 
     } catch (error) {
@@ -365,9 +387,31 @@ function App() {
         visible: true
       });
 
-      // 出错时也要重新启用输入框
+      // 出错时重新启用输入框并隐藏控制按钮
       setInputDisabled(false);
+      setTaskState(prev => ({...prev, showControls: false}));
     }
+  };
+
+  // 切换暂停/恢复状态
+  const togglePauseResume = () => {
+    setTaskState(prev => ({...prev, running: !prev.running}));
+    // 这里可以添加实际的API调用
+    console.log(`Task ${taskState.running ? 'paused' : 'resumed'}: ${taskState.taskId}`);
+  };
+
+  // 停止任务
+  const stopTask = () => {
+    // 这里可以添加实际的API调用
+    console.log(`Task stopped: ${taskState.taskId}`);
+
+    // 重置所有状态
+    setTaskState({
+      running: false,
+      taskId: undefined,
+      showControls: false
+    });
+    setInputDisabled(false);
   };
 
   return (
@@ -436,23 +480,47 @@ function App() {
               value={mode}
               onChange={(e) => setMode(e.target.value as Mode)}
               className="mode-select"
+              disabled={inputDisabled}
             >
               <option value="agent">Agent</option>
               <option value="ask">Ask</option>
             </select>
-            <select className="llm-select">
+            <select
+              className="llm-select"
+              disabled={inputDisabled}
+            >
               <option value="gpt4">GPT-4</option>
               <option value="claude">Claude</option>
             </select>
           </div>
 
-          <button
-            className="send-button"
-            onClick={handleSend}
-            disabled={inputDisabled}  // 同时禁用发送按钮
-          >
-            Send ⏎
-          </button>
+          <div className="right-controls">
+            {/* Pause/Resume 和 Stop 按钮 */}
+            {taskState.showControls ? (
+              <>
+                <button
+                  className={`pause-resume-button ${taskState.running ? 'running' : 'paused'}`}
+                  onClick={togglePauseResume}
+                >
+                  {taskState.running ? 'Pause' : 'Resume'}
+                </button>
+                <button
+                  className="stop-button"
+                  onClick={stopTask}
+                >
+                  Stop
+                </button>
+              </>
+            ) : (
+              <button
+                className="send-button"
+                onClick={handleSend}
+                disabled={inputDisabled}
+              >
+                Send ⏎
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
