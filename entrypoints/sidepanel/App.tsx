@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
-type Mode = 'agent' | 'ask';
+type Mode = 'agent' | 'chat';
 
 interface MenuItem {
   id: string;
@@ -47,7 +47,7 @@ function App() {
   /** Main input text content */
   const [input, setInput] = useState('');
 
-  /** Current operation mode - either 'agent' or 'ask' */
+  /** Current operation mode - either 'agent' or 'chat' */
   const [mode, setMode] = useState<Mode>('agent');
 
   /** Controls visibility of suggestion dropdown menu */
@@ -98,6 +98,9 @@ function App() {
     showControls: false
   });
 
+  /** 控制是否显示任务ID信息 */
+  const [showTaskId, setShowTaskId] = useState(false);
+
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -109,10 +112,10 @@ function App() {
    * @param userInput - Optional user input value for menu items requiring input
    * @returns A formatted string starting with '@' followed by menu item labels joined with '/'
    * @example
-   * getFullPath(['web', 'web-google-search']) // returns '@Web/Google search/'
-   * getFullPath(['web', 'go-to-url']) // returns '@Web/Go to url/'
+   * buildMenuPathString(['web', 'web-google-search']) // returns '@Web/Google search/'
+   * buildMenuPathString(['web', 'go-to-url']) // returns '@Web/Go to url/'
    */
-  const getFullPath = (path: string[], userInput?: string): string => {
+  const buildMenuPathString = (path: string[], userInput?: string): string => {
     let result = '@';
     let currentItems = menuItems;
 
@@ -147,7 +150,7 @@ function App() {
         case 'Tab':
           e.preventDefault();
           if (selectedIndex >= 0 && selectedIndex < filteredMenuItems.length) {
-            handleMenuItemClick(filteredMenuItems[selectedIndex]);
+            handleMenuItemSelection(filteredMenuItems[selectedIndex]);
           }
           break;
         case 'Enter':
@@ -155,7 +158,7 @@ function App() {
           break;
         case 'Escape':
           e.preventDefault();
-          closeMenu();
+          closeAndResetMenu();
           break;
       }
     };
@@ -170,7 +173,7 @@ function App() {
     }
   }, [showSuggestions, filteredMenuItems]);
 
-  const closeMenu = () => {
+  const closeAndResetMenu = () => {
     setShowSuggestions(false);
     setSelectedIndex(-1);
     setSearchTerm('');
@@ -182,20 +185,20 @@ function App() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextInputAndSuggestions = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     const cursorPos = e.target.selectionStart;
 
-    const lastAtIndex = value.lastIndexOf('@', cursorPos);
-    if (lastAtIndex > 0 && value[lastAtIndex - 1] !== ' ') {
+    const lastAtSymbolPosition = value.lastIndexOf('@', cursorPos);
+    if (lastAtSymbolPosition > 0 && value[lastAtSymbolPosition - 1] !== ' ') {
       setShowSuggestions(false);
       setInput(value);
       return;
     }
 
-    if (lastAtIndex !== -1 && lastAtIndex === cursorPos - 1) {
+    if (lastAtSymbolPosition !== -1 && lastAtSymbolPosition === cursorPos - 1) {
       const rect = e.target.getBoundingClientRect();
-      const position = getCaretCoordinates(e.target, lastAtIndex);
+      const position = calculateTextareaCaretPosition(e.target, lastAtSymbolPosition);
       setShowSuggestions(true);
       setCursorPosition({
         top: rect.top + position.top,
@@ -205,23 +208,23 @@ function App() {
       setSelectedPath([]);
       setSelectedIndex(0);
       setSearchTerm('');
-    } else if (lastAtIndex !== -1 && cursorPos > lastAtIndex) {
-      const newSearchTerm = value.substring(lastAtIndex + 1, cursorPos);
+    } else if (lastAtSymbolPosition !== -1 && cursorPos > lastAtSymbolPosition) {
+      const newSearchTerm = value.substring(lastAtSymbolPosition + 1, cursorPos);
       setSearchTerm(newSearchTerm);
       setShowSuggestions(true);
 
-      const currentItem = getCurrentMenuItem();
+      const currentItem = findCurrentMenuItemByPath();
       if (currentItem?.needUserInput) {
         return;
       }
     } else {
-      closeMenu();
+      closeAndResetMenu();
     }
 
     setInput(value);
   };
 
-  const getCurrentMenuItem = (): MenuItem | undefined => {
+  const findCurrentMenuItemByPath = (): MenuItem | undefined => {
     let currentItems = menuItems;
     let currentItem;
 
@@ -235,7 +238,30 @@ function App() {
     return currentItem;
   };
 
-  const handleMenuItemClick = (item: MenuItem) => {
+  /**
+   * Handles the selection of an item from the suggestion menu dropdown
+   *
+   * This function processes two main scenarios:
+   * 1. When a menu item with children is selected (navigation into submenu)
+   * 2. When a terminal menu item is selected (insertion into textarea)
+   *
+   * @param item - The menu item that was clicked or selected
+   *
+   * For items with children:
+   * - Updates current menu display to show children items
+   * - Adds the selected item's ID to the path
+   *
+   * For terminal items:
+   * - If item requires user input: Opens user input field
+   * - If not: Creates a markdown-style link in the format [path]()
+   *   and inserts it at the @ position in the textarea
+   * - Resets menu state and returns focus to textarea
+   *
+   * @example
+   * // Clicking on '@Web' (with children) will display Web submenu items
+   * // Clicking on 'Ask me' (without children) will insert '[Action/Ask me]()'
+   */
+  const handleMenuItemSelection = (item: MenuItem) => {
     if (item.children) {
       setCurrentMenuItems(item.children);
       setSelectedPath([...selectedPath, item.id]);
@@ -243,7 +269,7 @@ function App() {
       setSearchTerm('');
     } else {
       const fullPath = [...selectedPath, item.id];
-      const fullLabel = getFullPath(fullPath);
+      const fullLabel = buildMenuPathString(fullPath);
       const lastAtIndex = input.lastIndexOf('@');
 
       let newPath;
@@ -274,11 +300,30 @@ function App() {
     }
   };
 
-  const handleUserInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  /**
+   * Handles keyboard events for user input field that appears when a menu item with needUserInput is selected
+   *
+   * This function processes:
+   * - Enter key: Commits the input by adding it to the main textarea with proper formatting
+   * - Escape key: Cancels the input operation and returns to menu selection
+   *
+   * @param e - React keyboard event from the input field
+   *
+   * On Enter press:
+   * 1. Gets the full menu path string
+   * 2. Creates a markdown-style link: [path](userInput)
+   * 3. Inserts it into the main textarea at @ position
+   * 4. Resets the menu state and focus
+   *
+   * @example
+   * // If user selects '@Web/Google search' and enters 'react hooks':
+   * // Input will become: '[Web/Google search](react hooks)'
+   */
+  const handleUserInputMenuSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && userInputValue.trim()) {
       e.preventDefault();
       const fullPath = [...selectedPath];
-      const menuPath = getFullPath(fullPath);
+      const menuPath = buildMenuPathString(fullPath);
       const lastAtIndex = input.lastIndexOf('@');
       const newPath = `[${menuPath}](${userInputValue.trim()})`;
       const newInput = input.substring(0, lastAtIndex) + newPath + input.substring(lastAtIndex + menuPath.length);
@@ -301,7 +346,7 @@ function App() {
     }
   };
 
-  const handleMenuBack = () => {
+  const handleMenuNavigationBack = () => {
     if (selectedPath.length > 0) {
       const newPath = selectedPath.slice(0, -1);
       setSelectedPath(newPath);
@@ -319,14 +364,14 @@ function App() {
     }
   };
 
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleTextareaEnterKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !showSuggestions) {
       e.preventDefault();
-      handleSend();
+      handleTaskSubmission();
     }
   };
 
-  const handleSend = async () => {
+  const handleTaskSubmission = async () => {
     try {
       setNotification({
         message: 'Sending your request...',
@@ -374,9 +419,11 @@ function App() {
         visible: true
       });
 
-      // 关闭通知后，保持控制按钮可见
+      // 关闭通知
       setTimeout(() => {
         setNotification(prev => ({...prev, visible: false}));
+        // Show task ID after notification closes
+        setShowTaskId(true);
       }, 2000);
 
     } catch (error) {
@@ -394,14 +441,14 @@ function App() {
   };
 
   // 切换暂停/恢复状态
-  const togglePauseResume = () => {
+  const toggleTaskPauseState = () => {
     setTaskState(prev => ({...prev, running: !prev.running}));
     // 这里可以添加实际的API调用
     console.log(`Task ${taskState.running ? 'paused' : 'resumed'}: ${taskState.taskId}`);
   };
 
   // 停止任务
-  const stopTask = () => {
+  const stopAndResetTask = () => {
     // 这里可以添加实际的API调用
     console.log(`Task stopped: ${taskState.taskId}`);
 
@@ -421,8 +468,8 @@ function App() {
           <textarea
             ref={textareaRef}
             value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleTextareaKeyDown}
+            onChange={handleTextInputAndSuggestions}
+            onKeyDown={handleTextareaEnterKey}
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
@@ -440,10 +487,10 @@ function App() {
           >
             {selectedPath.length > 0 && (
               <div className="menu-header">
-                <button className="menu-back" onClick={handleMenuBack}>
+                <button className="menu-back" onClick={handleMenuNavigationBack}>
                   ← Back
                 </button>
-                <span className="menu-path">{getFullPath(selectedPath)}</span>
+                <span className="menu-path">{buildMenuPathString(selectedPath)}</span>
               </div>
             )}
             {isUserInput ? (
@@ -452,7 +499,7 @@ function App() {
                   type="text"
                   value={userInputValue}
                   onChange={(e) => setUserInputValue(e.target.value)}
-                  onKeyDown={handleUserInput}
+                  onKeyDown={handleUserInputMenuSubmit}
                   placeholder="Type and press Enter"
                   autoFocus
                   className="user-input"
@@ -463,7 +510,7 @@ function App() {
                 <div
                   key={item.id}
                   className={`suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
-                  onClick={() => handleMenuItemClick(item)}
+                  onClick={() => handleMenuItemSelection(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   {item.label}
@@ -483,14 +530,15 @@ function App() {
               disabled={inputDisabled}
             >
               <option value="agent">Agent</option>
-              <option value="ask">Ask</option>
+              <option value="chat">Chat</option>
             </select>
             <select
               className="llm-select"
               disabled={inputDisabled}
             >
-              <option value="gpt4">GPT-4</option>
-              <option value="claude">Claude</option>
+              <option value="gpt4">GPT-4o</option>
+              <option value="claude">Claude 3.5</option>
+              <option value="claude">DeepSeek</option>
             </select>
           </div>
 
@@ -500,13 +548,13 @@ function App() {
               <>
                 <button
                   className={`pause-resume-button ${taskState.running ? 'running' : 'paused'}`}
-                  onClick={togglePauseResume}
+                  onClick={toggleTaskPauseState}
                 >
                   {taskState.running ? 'Pause' : 'Resume'}
                 </button>
                 <button
                   className="stop-button"
-                  onClick={stopTask}
+                  onClick={stopAndResetTask}
                 >
                   Stop
                 </button>
@@ -514,7 +562,7 @@ function App() {
             ) : (
               <button
                 className="send-button"
-                onClick={handleSend}
+                onClick={handleTaskSubmission}
                 disabled={inputDisabled}
               >
                 Send ⏎
@@ -537,6 +585,13 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Display task ID when notification is closed and we have a task running */}
+      {showTaskId && taskState.taskId && !notification.visible && (
+        <div className="task-id-display">
+          <small>Task ID: {taskState.taskId}</small>
+        </div>
+      )}
     </div>
   );
 }
@@ -547,7 +602,7 @@ function App() {
  * @param position - Caret position in the text
  * @returns Coordinates {left, top} of the caret position
  */
-function getCaretCoordinates(element: HTMLTextAreaElement, position: number) {
+function calculateTextareaCaretPosition(element: HTMLTextAreaElement, position: number) {
   const { offsetLeft, offsetTop } = element;
   const div = document.createElement('div');
   const style = getComputedStyle(element);
