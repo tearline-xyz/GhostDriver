@@ -13,22 +13,36 @@ const App: React.FC = () => {
   const [host, setHost] = useState<string>(AVAILABLE_HOSTS[0]);
   const [status, setStatus] = useState<{ message: string; type: string } | null>(null);
   const [activePage, setActivePage] = useState<string>('Account');
+  const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(false);
 
   // Load saved settings from chrome.storage.sync
   useEffect(() => {
-    chrome.storage.sync.get({ host: AVAILABLE_HOSTS[0] }, (items: { host: string }) => {
-      setHost(items.host);
-    });
+    chrome.storage.sync.get(
+      {
+        host: AVAILABLE_HOSTS[0],
+        enableAtSyntax: false
+      },
+      (items) => {
+        setHost(items.host);
+        setEnableAtSyntax(items.enableAtSyntax);
+      }
+    );
   }, []);
 
   // Save settings to chrome.storage.sync
   const saveOptions = () => {
-    chrome.storage.sync.set({ host }, () => {
-      showStatus('Settings saved successfully!', 'success');
-      setTimeout(() => {
-        setStatus(null);
-      }, 2000);
-    });
+    chrome.storage.sync.set(
+      {
+        host,
+        enableAtSyntax
+      },
+      () => {
+        showStatus('Settings saved successfully!', 'success');
+        setTimeout(() => {
+          setStatus(null);
+        }, 2000);
+      }
+    );
   };
 
   // Display status message
@@ -92,7 +106,12 @@ const App: React.FC = () => {
               <label>Feature Toggles:</label>
               <div className="toggle-options">
                 <div className="toggle-item">
-                  <input type="checkbox" id="enable-at-syntax" />
+                  <input
+                    type="checkbox"
+                    id="enable-at-syntax"
+                    checked={enableAtSyntax}
+                    onChange={(e) => setEnableAtSyntax(e.target.checked)}
+                  />
                   <label htmlFor="enable-at-syntax">Enable @ syntax</label>
                 </div>
               </div>
