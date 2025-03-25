@@ -4,9 +4,9 @@ import './App.css';
 
 // Available hosts for the extension
 const AVAILABLE_HOSTS = [
-  'auto.test.tearline.io',
-  'auto.tearline.io',
-  'auto.dev.tearline.io'
+  'http://localhost:8000',
+  'http://172.31.16.11:8004',
+  'https://auto.test.tearline.io',
 ];
 
 const App: React.FC = () => {
@@ -43,8 +43,22 @@ const App: React.FC = () => {
         return (
           <>
             <h2>Account Settings</h2>
-            <p>Manage your account settings here.</p>
-            <button onClick={saveOptions}>Save</button>
+            <div className="account-container">
+              <div className="profile-section">
+                <div className="avatar-container">
+                  {/* Default profile avatar */}
+                  <div className="profile-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                    </svg>
+                  </div>
+                </div>
+                <div className="profile-info">
+                  <p>Not logged in</p>
+                  <button className="login-button">Login</button>
+                </div>
+              </div>
+            </div>
           </>
         );
       case 'About':
@@ -75,17 +89,13 @@ const App: React.FC = () => {
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor="debug-mode">Debug Mode:</label>
-              <input type="checkbox" id="debug-mode" />
-            </div>
-            <div className="form-group">
-              <label htmlFor="log-level">Log Level:</label>
-              <select id="log-level">
-                <option value="error">Error</option>
-                <option value="warn">Warning</option>
-                <option value="info">Info</option>
-                <option value="debug">Debug</option>
-              </select>
+              <label>Feature Toggles:</label>
+              <div className="toggle-options">
+                <div className="toggle-item">
+                  <input type="checkbox" id="enable-at-syntax" />
+                  <label htmlFor="enable-at-syntax">Enable @ syntax</label>
+                </div>
+              </div>
             </div>
             <button onClick={saveOptions}>Save</button>
           </>
