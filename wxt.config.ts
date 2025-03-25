@@ -1,10 +1,11 @@
-import { defineConfig } from 'wxt';
+import { defineConfig } from "wxt"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
+  outDir: "dist",
   browser: "chrome",
-  extensionApi: 'chrome',
-  modules: ['@wxt-dev/module-react'],
+  extensionApi: "chrome",
+  modules: ["@wxt-dev/module-react"],
   manifestVersion: 3,
   manifest: {
     name: "Tearline Auto Browser",
@@ -15,25 +16,20 @@ export default defineConfig({
       "storage",
       "sidePanel",
       "background",
-      "activeTab"
+      "activeTab",
     ],
     commands: {
-      "_execute_action": {
+      _execute_action: {
         suggested_key: {
           default: "Alt+T",
-          mac: "Alt+T"
+          mac: "Alt+T",
         },
-        description: "Start the extension"
-      }
+        description: "Start the extension",
+      },
     },
-    host_permissions: [
-      "http://*/*",
-      "https://*/*",
-      "ws://*/*",
-      "wss://*/*"
-    ],
+    host_permissions: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"],
     action: {
-      default_title: "Click to open panel"
+      default_title: "Click to open panel",
     },
-  }
-});
+  },
+})

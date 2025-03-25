@@ -1,0 +1,11 @@
+# 构建输出
+.output
+dist
+build
+
+# 依赖
+node_modules
+
+# 其他不需要格式化的文件
+*.min.js
+*.d.ts
