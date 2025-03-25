@@ -9,33 +9,41 @@ const AVAILABLE_HOSTS = [
   'https://auto.test.tearline.io',
 ];
 
+// Default settings
+const DEFAULT_SETTINGS = {
+  apiHost: AVAILABLE_HOSTS[0],
+  enableAtSyntax: false
+};
+
 const App: React.FC = () => {
-  const [host, setHost] = useState<string>(AVAILABLE_HOSTS[0]);
+  const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
   const [status, setStatus] = useState<{ message: string; type: string } | null>(null);
   const [activePage, setActivePage] = useState<string>('Account');
-  const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(false);
+  const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(DEFAULT_SETTINGS.enableAtSyntax);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Load saved settings from chrome.storage.sync
   useEffect(() => {
+    setIsLoading(true);
     chrome.storage.sync.get(
-      {
-        host: AVAILABLE_HOSTS[0],
-        enableAtSyntax: false
-      },
+      DEFAULT_SETTINGS,
       (items) => {
-        setHost(items.host);
+        setApiHost(items.apiHost);
         setEnableAtSyntax(items.enableAtSyntax);
+        setIsLoading(false);
       }
     );
   }, []);
 
   // Save settings to chrome.storage.sync
   const saveOptions = () => {
+    const settings = {
+      apiHost,
+      enableAtSyntax
+    };
+
     chrome.storage.sync.set(
-      {
-        host,
-        enableAtSyntax
-      },
+      settings,
       () => {
         showStatus('Settings saved successfully!', 'success');
         setTimeout(() => {
@@ -52,6 +60,10 @@ const App: React.FC = () => {
 
   // Render different content based on active page
   const renderContent = () => {
+    if (isLoading) {
+      return <div>Loading settings...</div>;
+    }
+
     switch (activePage) {
       case 'Account':
         return (
@@ -89,11 +101,11 @@ const App: React.FC = () => {
           <>
             <h2>Developer Settings</h2>
             <div className="form-group">
-              <label htmlFor="host-select">API Host:</label>
+              <label htmlFor="api-host-select">API Host:</label>
               <select
-                id="host-select"
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
+                id="api-host-select"
+                value={apiHost}
+                onChange={(e) => setApiHost(e.target.value)}
               >
                 {AVAILABLE_HOSTS.map((hostOption) => (
                   <option key={hostOption} value={hostOption}>
