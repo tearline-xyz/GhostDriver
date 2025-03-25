@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import './App.css';
 
 // Available hosts for the extension
 const AVAILABLE_HOSTS = [
@@ -8,7 +9,7 @@ const AVAILABLE_HOSTS = [
   'auto.dev.tearline.io'
 ];
 
-const Options: React.FC = () => {
+const App: React.FC = () => {
   const [host, setHost] = useState<string>(AVAILABLE_HOSTS[0]);
   const [status, setStatus] = useState<{ message: string; type: string } | null>(null);
   const [activePage, setActivePage] = useState<string>('Account');
@@ -42,21 +43,8 @@ const Options: React.FC = () => {
         return (
           <>
             <h2>Account Settings</h2>
-            <div className="form-group">
-              <label htmlFor="host-select">API Host:</label>
-              <select
-                id="host-select"
-                value={host}
-                onChange={(e) => setHost(e.target.value)}
-              >
-                {AVAILABLE_HOSTS.map((hostOption) => (
-                  <option key={hostOption} value={hostOption}>
-                    {hostOption}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button onClick={saveOptions}>Save Settings</button>
+            <p>Manage your account settings here.</p>
+            <button onClick={saveOptions}>Save</button>
           </>
         );
       case 'About':
@@ -73,6 +61,20 @@ const Options: React.FC = () => {
           <>
             <h2>Developer Settings</h2>
             <div className="form-group">
+              <label htmlFor="host-select">API Host:</label>
+              <select
+                id="host-select"
+                value={host}
+                onChange={(e) => setHost(e.target.value)}
+              >
+                {AVAILABLE_HOSTS.map((hostOption) => (
+                  <option key={hostOption} value={hostOption}>
+                    {hostOption}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
               <label htmlFor="debug-mode">Debug Mode:</label>
               <input type="checkbox" id="debug-mode" />
             </div>
@@ -85,7 +87,7 @@ const Options: React.FC = () => {
                 <option value="debug">Debug</option>
               </select>
             </div>
-            <button>Save Developer Settings</button>
+            <button onClick={saveOptions}>Save</button>
           </>
         );
       default:
@@ -98,7 +100,7 @@ const Options: React.FC = () => {
       <div className="sidebar">
         <h1>Tearline</h1>
         <ul className="nav-menu">
-          {['Account', 'About', 'Developer settings'].map((page) => (
+          {['Account', 'Developer settings', 'About'].map((page) => (
             <li
               key={page}
               className={activePage === page ? 'active' : ''}
@@ -125,5 +127,7 @@ const Options: React.FC = () => {
 const container = document.getElementById('app');
 if (container) {
   const root = createRoot(container);
-  root.render(<Options />);
+  root.render(<App />);
 }
+
+export default App;
