@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import "./App.css"
 import React from "react"
+import { DEFAULT_SETTINGS } from "../common/settings"
 import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
 
 type Mode = "agent" | "chat"
@@ -111,6 +112,46 @@ function App() {
   /** 控制是否显示任务ID信息 */
   const [showTaskId, setShowTaskId] = useState(false)
 
+  /** apiHost from settings */
+  const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
+
+  /** Whether @ syntax is enabled from settings */
+  const [atSyntaxEnabled, setAtSyntaxEnabled] = useState<boolean>(
+    DEFAULT_SETTINGS.enableAtSyntax
+  )
+
+  // Load saved settings on component mount
+  useEffect(() => {
+    // Load initial settings
+    chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
+      setApiHost(items.apiHost)
+      setAtSyntaxEnabled(items.enableAtSyntax)
+    })
+
+    // Add listener for settings changes
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      area: string
+    ) => {
+      if (area !== "sync") return
+
+      if (changes.apiHost) {
+        setApiHost(changes.apiHost.newValue)
+      }
+
+      if (changes.enableAtSyntax !== undefined) {
+        setAtSyntaxEnabled(changes.enableAtSyntax.newValue)
+      }
+    }
+
+    chrome.storage.onChanged.addListener(handleStorageChange)
+
+    // Clean up listener on unmount
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange)
+    }
+  }, [])
+
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -199,11 +240,18 @@ function App() {
     }
   }
 
+  // Check if @ syntax is enabled before showing suggestions
   const handleTextInputAndSuggestions = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const value = e.target.value
     const cursorPos = e.target.selectionStart
+
+    // Don't show suggestions if @ syntax is disabled
+    if (!atSyntaxEnabled) {
+      setInput(value)
+      return
+    }
 
     const lastAtSymbolPosition = value.lastIndexOf("@", cursorPos)
     if (lastAtSymbolPosition > 0 && value[lastAtSymbolPosition - 1] !== " ") {
@@ -422,7 +470,7 @@ function App() {
         taskId: undefined, // 初始未知ID
       })
 
-      const response = await fetch("https://auto.test.tearline.io/tasks", {
+      const response = await fetch(`${apiHost}/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -440,9 +488,9 @@ function App() {
       const data = await response.json()
       const taskId = data.id
       await connectToPlaywrightServer(
-        `http://127.0.0.1:8000/ws/playwright?task_id=${taskId}`
+        `${apiHost}/ws/playwright?task_id=${taskId}`
       )
-      console.log("Successfully connected to Playwright server")
+
       // 更新任务ID
       setTaskState((prev) => ({
         ...prev,
@@ -552,9 +600,7 @@ function App() {
               filteredMenuItems.map((item, index) => (
                 <div
                   key={item.id}
-                  className={`suggestion-item ${
-                    index === selectedIndex ? "selected" : ""
-                  }`}
+                  className={`suggestion-item ${index === selectedIndex ? "selected" : ""}`}
                   onClick={() => handleMenuItemSelection(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
@@ -591,9 +637,7 @@ function App() {
             {taskState.showControls ? (
               <>
                 <button
-                  className={`pause-resume-button ${
-                    taskState.running ? "running" : "paused"
-                  }`}
+                  className={`pause-resume-button ${taskState.running ? "running" : "paused"}`}
                   onClick={toggleTaskPauseState}
                 >
                   {taskState.running ? "Pause" : "Resume"}
