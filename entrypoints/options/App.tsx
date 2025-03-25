@@ -1,19 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './App.css';
-
-// Available hosts for the extension
-const AVAILABLE_HOSTS = [
-  'http://localhost:8000',
-  'http://172.31.16.11:8004',
-  'https://auto.test.tearline.io',
-];
-
-// Default settings
-const DEFAULT_SETTINGS = {
-  apiHost: AVAILABLE_HOSTS[0],
-  enableAtSyntax: false
-};
+import { AVAILABLE_HOSTS, DEFAULT_SETTINGS } from '../common/settings';
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
