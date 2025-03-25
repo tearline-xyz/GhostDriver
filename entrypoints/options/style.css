@@ -26,13 +26,16 @@ a:hover {
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   color: #333;
   height: 100vh;
   min-width: 320px;
 }
 
-h1, h2 {
+h1,
+h2 {
   color: #2c3e50;
 }
 
@@ -54,7 +57,7 @@ button {
   font-size: 16px;
   font-weight: 500;
   font-family: inherit;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   cursor: pointer;
   transition: background-color 0.25s;
@@ -73,7 +76,8 @@ label {
   font-weight: 500;
 }
 
-select, input {
+select,
+input {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
