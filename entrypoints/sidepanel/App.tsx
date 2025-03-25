@@ -3,6 +3,7 @@ import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS } from "../common/settings"
 import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
+import { BULLET_SYMBOL, BACK_SYMBOL, FORWARD_SYMBOL } from "../common/symbols"
 
 type Mode = "agent" | "chat"
 
@@ -492,9 +493,21 @@ function App() {
       }))
     } catch (error) {
       console.error("Error:", error)
+
+      // Check for connection refused errors
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const isConnectionRefused =
+        errorMessage.toLowerCase().includes("err_connection_refused") ||
+        errorMessage.toLowerCase().includes("failed to fetch") ||
+        errorMessage.toLowerCase().includes("networkerror") ||
+        errorMessage.toLowerCase().includes("network error");
+
       setNotification({
-        message:
-          error instanceof Error ? error.message : "An unknown error occurred",
+        message: isConnectionRefused
+          ? `Unable to connect to server ${apiHost}. Please:
+            ${BULLET_SYMBOL} Check the network connection.
+            ${BULLET_SYMBOL} Config the accessible server in the options page.`
+          : errorMessage,
         type: "error",
         visible: true,
       })
@@ -558,7 +571,7 @@ function App() {
                   className="menu-back"
                   onClick={handleMenuNavigationBack}
                 >
-                  ← Back
+                  {BACK_SYMBOL} Back
                 </button>
                 <span className="menu-path">
                   {buildMenuPathString(selectedPath)}
@@ -587,7 +600,7 @@ function App() {
                 >
                   {item.label}
                   {item.children && (
-                    <span className="submenu-indicator">→</span>
+                    <span className="submenu-indicator">{FORWARD_SYMBOL}</span>
                   )}
                 </div>
               ))
