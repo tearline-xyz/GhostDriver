@@ -454,12 +454,6 @@ function App() {
 
   const handleTaskSubmission = async () => {
     try {
-      setNotification({
-        message: "Sending your request...",
-        type: "info",
-        visible: true,
-      })
-
       // 禁用输入框
       setInputDisabled(true)
 
@@ -496,19 +490,6 @@ function App() {
         ...prev,
         taskId: data.id || "unknown",
       }))
-
-      setNotification({
-        message: "Your request was sent successfully!",
-        type: "success",
-        visible: true,
-      })
-
-      // 关闭通知
-      setTimeout(() => {
-        setNotification((prev) => ({ ...prev, visible: false }))
-        // Show task ID after notification closes
-        setShowTaskId(true)
-      }, 2000)
     } catch (error) {
       console.error("Error:", error)
       setNotification({
