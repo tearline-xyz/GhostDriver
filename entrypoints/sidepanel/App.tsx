@@ -98,6 +98,9 @@ function App() {
     showControls: false
   });
 
+  /** 控制是否显示任务ID信息 */
+  const [showTaskId, setShowTaskId] = useState(false);
+
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter(item =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -419,6 +422,8 @@ function App() {
       // 关闭通知
       setTimeout(() => {
         setNotification(prev => ({...prev, visible: false}));
+        // Show task ID after notification closes
+        setShowTaskId(true);
       }, 2000);
 
     } catch (error) {
@@ -578,6 +583,13 @@ function App() {
               ×
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Display task ID when notification is closed and we have a task running */}
+      {showTaskId && taskState.taskId && !notification.visible && (
+        <div className="task-id-display">
+          <small>Task ID: {taskState.taskId}</small>
         </div>
       )}
     </div>
