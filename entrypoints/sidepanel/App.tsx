@@ -5,6 +5,14 @@ import { DEFAULT_SETTINGS } from "../common/settings"
 import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
 import { BULLET_SYMBOL, BACK_SYMBOL, FORWARD_SYMBOL, PAUSE_SYMBOL, RESUME_SYMBOL, STOP_SYMBOL } from "../common/symbols"
 
+// Define event type for task events
+interface TaskEvent {
+  id: string;
+  type: string;
+  content: string;
+  timestamp: string;
+}
+
 type Mode = "agent" | "chat"
 
 interface MenuItem {
@@ -120,6 +128,15 @@ function App() {
   const [atSyntaxEnabled, setAtSyntaxEnabled] = useState<boolean>(
     DEFAULT_SETTINGS.enableAtSyntax
   )
+
+  /** Events received from the server */
+  const [events, setEvents] = useState<TaskEvent[]>([]);
+
+  /** Reference to the event stream area for auto-scrolling */
+  const eventStreamRef = useRef<HTMLDivElement>(null);
+
+  /** Reference to the event source connection */
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   // Load saved settings on component mount
   useEffect(() => {
@@ -467,18 +484,71 @@ function App() {
     }
   }
 
+  /**
+   * Sets up an EventSource connection to stream task events
+   * @param taskId - The ID of the current task
+   */
+  const connectToEventStream = (taskId: string) => {
+    // Close any existing connection
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    // Clear previous events when starting a new task
+    setEvents([]);
+
+    // Create a new EventSource connection
+    const eventSource = new EventSource(`${apiHost}/tasks/${taskId}/events/stream`);
+
+    // Handle incoming events
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setEvents(prev => [...prev, data]);
+      } catch (error) {
+        console.error("Error parsing event data:", error);
+      }
+    };
+
+    // Handle connection errors
+    eventSource.onerror = (error) => {
+      console.error("EventSource error:", error);
+      eventSource.close();
+    };
+
+    // Store reference for cleanup
+    eventSourceRef.current = eventSource;
+  };
+
+  // Auto-scroll event area when new events arrive
+  useEffect(() => {
+    if (eventStreamRef.current && events.length > 0) {
+      const { scrollHeight, clientHeight } = eventStreamRef.current;
+      eventStreamRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  }, [events]);
+
+  // Cleanup event source on component unmount
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+    };
+  }, []);
+
   const handleTaskSubmission = async () => {
     hideNotification(); // Hide notification on task submission
     try {
       // 禁用输入框
-      setInputDisabled(true)
+      setInputDisabled(true);
 
       // 开始任务，默认为运行状态，并显示控制按钮
       setTaskState({
         running: true,
         showControls: true,
         taskId: undefined, // 初始未知ID
-      })
+      });
 
       const response = await fetch(`${apiHost}/tasks`, {
         method: "POST",
@@ -489,24 +559,25 @@ function App() {
           content: input,
           crx_mode: true,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Request failed with status: ${response.status}`)
+        throw new Error(`Request failed with status: ${response.status}`);
       }
 
-      const data = await response.json()
-      const taskId = data.id
-      await connectToPlaywrightServer(
-        `${apiHost}/ws/playwright?task_id=${taskId}`
-      )
+      const data = await response.json();
+      const taskId = data.id;
+
+      // Connect to both Playwright and event stream
+      await connectToPlaywrightServer(`${apiHost}/ws/playwright?task_id=${taskId}`);
+      connectToEventStream(taskId);
 
       // 更新任务ID，并开启显示taskId
       setTaskState((prev) => ({
         ...prev,
         taskId: data.id || "unknown",
-      }))
-      setShowTaskId(true) // Enable task ID display when we have a valid ID
+      }));
+      setShowTaskId(true); // Enable task ID display when we have a valid ID
     } catch (error) {
       console.error("Error:", error)
 
@@ -591,6 +662,12 @@ function App() {
         }
 
         console.log(`Task stopped: ${taskState.taskId}`);
+
+        // Close the event stream connection
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+        }
 
         // Reset all states only after successful API call
         setTaskState({
@@ -745,6 +822,23 @@ function App() {
           <small>Task ID: {taskState.taskId}</small>
         </div>
       )}
+
+      {/* Event Stream Area */}
+      <div
+        ref={eventStreamRef}
+        className="event-stream-area"
+      >
+        {events.map((event, index) => (
+          <div key={event.id || index} className={`event-item event-${event.type}`}>
+            <div className="event-timestamp">
+              {new Date(event.timestamp).toLocaleTimeString()}
+            </div>
+            <div className="event-content">
+              {event.content}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
