@@ -12,12 +12,26 @@ import {
   STOP_SYMBOL,
 } from "../common/symbols"
 
+// Define event types and payload structures
+enum TaskEventType {
+  LOG = "log",
+  ACTION = "action"
+}
+
+interface LogPayload {
+  message: string;
+  level: string;
+  logger: string;
+  source: string;
+}
+
 // Define event type for task events
 interface TaskEvent {
-  id: string
-  type: string
-  content: string
-  timestamp: string
+  task_id: string;
+  type: TaskEventType;
+  payload: LogPayload | Record<string, any>;
+  id: string;
+  timestamp: string;
 }
 
 type Mode = "agent" | "chat"
@@ -537,17 +551,24 @@ function App() {
     setEvents([])
 
     // Create a new EventSource connection
+    // `${apiHost}/tasks/${taskId}/events/stream`
     const eventSource = new EventSource(
-      `${apiHost}/tasks/${taskId}/events/stream`
+      "http://localhost:9000/events/stream"
     )
 
     // Handle incoming events
     eventSource.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data)
-        setEvents((prev) => [...prev, data])
+        const data = JSON.parse(event.data);
+
+        // Log non-LOG type events to console but still add them to the events array
+        if (data.type !== TaskEventType.LOG) {
+          console.log('Received non-log event:', data);
+        }
+
+        setEvents((prev) => [...prev, data]);
       } catch (error) {
-        console.error("Error parsing event data:", error)
+        console.error("Error parsing event data:", error);
       }
     }
 
@@ -610,9 +631,9 @@ function App() {
       const taskId = data.id
 
       // Connect to both Playwright and event stream
-      await connectToPlaywrightServer(
-        `${apiHost}/ws/playwright?task_id=${taskId}`
-      )
+      // await connectToPlaywrightServer(
+      //   `${apiHost}/ws/playwright?task_id=${taskId}`
+      // )
       connectToEventStream(taskId)
 
       // 更新任务ID，并开启显示taskId
@@ -945,17 +966,34 @@ function App() {
 
       {/* Event Stream Area */}
       <div ref={eventStreamRef} className="event-stream-area">
-        {events.map((event, index) => (
-          <div
-            key={event.id || index}
-            className={`event-item event-${event.type}`}
-          >
-            <div className="event-timestamp">
-              {new Date(event.timestamp).toLocaleTimeString()}
+        {events.map((event, index) => {
+          // Determine content based on event type
+          let content = '';
+          let eventClassName = `event-item`;
+
+          if (event.type === TaskEventType.LOG) {
+            content = event.payload.message;
+            eventClassName += ` event-log event-log-${event.payload.level.toLowerCase()}`;
+          } else if (event.type === TaskEventType.ACTION) {
+            content = JSON.stringify(event.payload);
+            eventClassName += ` event-action`;
+          } else {
+            content = JSON.stringify(event.payload);
+            eventClassName += ` event-unknown`;
+          }
+
+          return (
+            <div
+              key={event.id || index}
+              className={eventClassName}
+            >
+              <div className="event-timestamp">
+                {new Date(event.timestamp).toLocaleTimeString()}
+              </div>
+              <div className="event-content">{content}</div>
             </div>
-            <div className="event-content">{event.content}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   )

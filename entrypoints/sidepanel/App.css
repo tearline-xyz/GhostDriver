@@ -405,16 +405,28 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.event-thinking {
-  border-left-color: #3498db;
-}
-
 .event-action {
   border-left-color: #2ecc71;
 }
 
-.event-error {
-  border-left-color: #e74c3c;
+.event-log {
+  border-left-color: #888888; /* Default color for log events */
+}
+
+.event-log-info, .event-log-debug {
+  border-left-color: #3498db; /* Blue for info/debug logs */
+}
+
+.event-log-warning {
+  border-left-color: #f39c12; /* Orange for warning logs */
+}
+
+.event-log-error, .event-log-critical {
+  border-left-color: #e74c3c; /* Red for error/critical logs */
+}
+
+.event-unknown {
+  border-left-color: #9b59b6; /* Purple for unknown event types */
 }
 
 .event-timestamp {
