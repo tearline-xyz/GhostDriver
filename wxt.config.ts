@@ -31,5 +31,11 @@ export default defineConfig({
     action: {
       default_title: "Click to open panel",
     },
+    web_accessible_resources: [
+      {
+        resources: ["injectScript.js"],
+        matches: ["*://www1.test.tearline.io/*"],
+      },
+    ],
   },
 })

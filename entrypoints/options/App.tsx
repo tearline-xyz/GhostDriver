@@ -22,6 +22,10 @@ const App: React.FC = () => {
     DEFAULT_SETTINGS.modeConfig
   )
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  // 记录登录状态
+  const [authStatus, setAuthStatus] = useState<"none" | "pending" | "success">(
+    "none"
+  )
 
   // Load saved settings from chrome.storage.sync
   useEffect(() => {
@@ -32,6 +36,27 @@ const App: React.FC = () => {
       setEnableLlmSelect(items.enableLlmSelect)
       setModeConfig(items.modeConfig)
       setIsLoading(false)
+    })
+    if (window.localStorage.getItem("AUTHINFO")) {
+      setAuthStatus("success")
+    } else {
+      chrome.runtime.sendMessage({
+        type: "INIT_LOGIN",
+      })
+    }
+
+    // 监听来自 background 当页面localStorage改变产生的消息
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === "LOGIN") {
+        if (authStatus !== "success") {
+          setAuthStatus("success")
+          window.localStorage.setItem("AUTHINFO", message.data)
+        }
+      }
+      if (message.type === "LOGOUT") {
+        setAuthStatus("none")
+        window.localStorage.removeItem("AUTHINFO")
+      }
     })
   }, [])
 
@@ -75,30 +100,27 @@ const App: React.FC = () => {
 
     switch (activePage) {
       case "Account":
+        // 登录按钮点击事件处理函数
+        const handleLogin = async () => {
+          // 检查插件的 localStorage
+          const authInfo = localStorage.getItem("AUTHINFO")
+          if (!authInfo) {
+            setAuthStatus("pending")
+            // 打开登录页面
+            const url = "https://www1.test.tearline.io/#"
+            await chrome.tabs.create({ url })
+          }
+        }
+
         return (
           <>
             <h2>Account Settings</h2>
-            <div className="account-container">
-              <div className="profile-section">
-                <div className="avatar-container">
-                  {/* Default profile avatar */}
-                  <div className="profile-avatar">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      width="48"
-                      height="48"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="profile-info">
-                  <p>Not logged in</p>
-                  <button className="login-button">Login</button>
-                </div>
-              </div>
+            <div>
+              {authStatus === "none" && (
+                <button onClick={handleLogin}>登录</button>
+              )}
+              {authStatus === "pending" && <p>请在打开的页面完成登录</p>}
+              {authStatus === "success" && <p>登录成功</p>}
             </div>
           </>
         )
