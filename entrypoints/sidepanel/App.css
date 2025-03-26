@@ -552,9 +552,10 @@
 }
 
 .scroll-to-bottom-button {
-  position: fixed; /* Changed from absolute to fixed */
+  position: fixed;
   bottom: 20px;
-  right: 20px;
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Adjust for exact centering */
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -573,9 +574,9 @@
 
 .scroll-to-bottom-button:hover {
   background-color: #505866;
-  transform: translateY(-2px);
+  transform: translateX(-50%) translateY(-2px); /* Keep horizontal centering while moving up */
 }
 
 .scroll-to-bottom-button:active {
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0); /* Keep horizontal centering while returning to normal */
 }
