@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react"
 import "./App.css"
 import React from "react"
-import { DEFAULT_SETTINGS } from "../common/settings"
+import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
 import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
 import {
   BULLET_SYMBOL,
@@ -141,6 +141,11 @@ function App() {
     DEFAULT_SETTINGS.enableLlmSelect
   )
 
+  /** Mode configuration from settings */
+  const [modeConfig, setModeConfig] = useState<ModeConfig>(
+    DEFAULT_SETTINGS.modeConfig
+  )
+
   /** Events received from the server */
   const [events, setEvents] = useState<TaskEvent[]>([])
 
@@ -157,6 +162,13 @@ function App() {
       setApiHost(items.apiHost)
       setAtSyntaxEnabled(items.enableAtSyntax)
       setLlmSelectEnabled(items.enableLlmSelect)
+      setModeConfig(items.modeConfig)
+
+      // If current mode is not available in the new config, set it to the first available mode
+      if ((items.modeConfig === "agent_only" && mode === "chat") ||
+          (items.modeConfig === "chat_only" && mode === "agent")) {
+        setMode(items.modeConfig === "agent_only" ? "agent" : "chat")
+      }
     })
 
     // Add listener for settings changes
@@ -177,6 +189,16 @@ function App() {
       if (changes.enableLlmSelect !== undefined) {
         setLlmSelectEnabled(changes.enableLlmSelect.newValue)
       }
+
+      if (changes.modeConfig !== undefined) {
+        setModeConfig(changes.modeConfig.newValue)
+
+        // If current mode is not available in the new config, set it to the first available mode
+        if ((changes.modeConfig.newValue === "agent_only" && mode === "chat") ||
+            (changes.modeConfig.newValue === "chat_only" && mode === "agent")) {
+          setMode(changes.modeConfig.newValue === "agent_only" ? "agent" : "chat")
+        }
+      }
     }
 
     chrome.storage.onChanged.addListener(handleStorageChange)
@@ -185,7 +207,7 @@ function App() {
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange)
     }
-  }, [])
+  }, [mode])
 
   /** Filtered menu items based on current search term */
   const filteredMenuItems = currentMenuItems.filter((item) =>
@@ -749,6 +771,32 @@ function App() {
     }
   };
 
+  // Helper function to render mode selector based on configuration
+  const renderModeSelector = () => {
+    if (modeConfig === "both") {
+      return (
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value as Mode)}
+          className="mode-select"
+          disabled={inputDisabled}
+        >
+          <option value="agent">Agent</option>
+          <option value="chat">Chat</option>
+        </select>
+      )
+    } else if (modeConfig === "agent_only" || modeConfig === "chat_only") {
+      // For single mode configs, use a disabled button showing the current mode
+      const displayMode = modeConfig === "agent_only" ? "Agent" : "Chat"
+      return (
+        <div className="mode-display">
+          {displayMode}
+        </div>
+      )
+    }
+    return null
+  }
+
   return (
     <div className="app-container">
       {/* Toolbar container that can hold multiple buttons */}
@@ -834,15 +882,7 @@ function App() {
 
         <div className="input-controls">
           <div className="left-controls">
-            <select
-              value={mode}
-              onChange={(e) => setMode(e.target.value as Mode)}
-              className="mode-select"
-              disabled={inputDisabled}
-            >
-              <option value="agent">Agent</option>
-              <option value="chat">Chat</option>
-            </select>
+            {renderModeSelector()}
             {llmSelectEnabled && (
               <select className="llm-select" disabled={inputDisabled}>
                 <option value="gpt4">GPT-4o</option>

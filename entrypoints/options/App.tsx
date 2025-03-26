@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 import "./App.css"
-import { AVAILABLE_HOSTS, DEFAULT_SETTINGS } from "../common/settings"
+import { AVAILABLE_HOSTS, DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -17,6 +17,10 @@ const App: React.FC = () => {
   const [enableLlmSelect, setEnableLlmSelect] = useState<boolean>(
     DEFAULT_SETTINGS.enableLlmSelect
   )
+  // Add state for mode configuration
+  const [modeConfig, setModeConfig] = useState<ModeConfig>(
+    DEFAULT_SETTINGS.modeConfig
+  )
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Load saved settings from chrome.storage.sync
@@ -26,6 +30,7 @@ const App: React.FC = () => {
       setApiHost(items.apiHost)
       setEnableAtSyntax(items.enableAtSyntax)
       setEnableLlmSelect(items.enableLlmSelect)
+      setModeConfig(items.modeConfig)
       setIsLoading(false)
     })
   }, [])
@@ -36,6 +41,7 @@ const App: React.FC = () => {
       apiHost,
       enableAtSyntax,
       enableLlmSelect,
+      modeConfig,
     }
 
     chrome.storage.sync.set(settings, () => {
@@ -49,6 +55,16 @@ const App: React.FC = () => {
   // Display status message
   const showStatus = (message: string, type: string) => {
     setStatus({ message, type })
+  }
+
+  // Helper function to get display name for mode config
+  const getModeConfigDisplayName = (config: ModeConfig): string => {
+    switch (config) {
+      case "agent_only": return "Agent only";
+      case "chat_only": return "Chat only";
+      case "both": return "Both Agent and Chat";
+      default: return config;
+    }
   }
 
   // Render different content based on active page
@@ -115,6 +131,22 @@ const App: React.FC = () => {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="mode-config-select">Mode Configuration:</label>
+              <select
+                id="mode-config-select"
+                value={modeConfig}
+                onChange={(e) => setModeConfig(e.target.value as ModeConfig)}
+                className="mode-config-select"
+              >
+                <option value="agent_only">Agent only</option>
+                <option value="chat_only">Chat only</option>
+                <option value="both">Both Agent and Chat</option>
+              </select>
+              <div className="setting-description">
+                Configure which mode options are available in the sidepanel
+              </div>
             </div>
             <div className="form-group">
               <label>Feature Toggles:</label>

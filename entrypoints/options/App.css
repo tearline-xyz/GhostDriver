@@ -160,3 +160,15 @@
   margin: 0;
   line-height: 1;
 }
+
+/* Add styles for the mode configuration select and setting description */
+.mode-config-select {
+  margin-bottom: 8px;
+}
+
+.setting-description {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
