@@ -136,6 +136,11 @@ function App() {
     DEFAULT_SETTINGS.enableAtSyntax
   )
 
+  /** Whether LLM selection is enabled from settings */
+  const [llmSelectEnabled, setLlmSelectEnabled] = useState<boolean>(
+    DEFAULT_SETTINGS.enableLlmSelect
+  )
+
   /** Events received from the server */
   const [events, setEvents] = useState<TaskEvent[]>([])
 
@@ -151,6 +156,7 @@ function App() {
     chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
       setApiHost(items.apiHost)
       setAtSyntaxEnabled(items.enableAtSyntax)
+      setLlmSelectEnabled(items.enableLlmSelect)
     })
 
     // Add listener for settings changes
@@ -166,6 +172,10 @@ function App() {
 
       if (changes.enableAtSyntax !== undefined) {
         setAtSyntaxEnabled(changes.enableAtSyntax.newValue)
+      }
+
+      if (changes.enableLlmSelect !== undefined) {
+        setLlmSelectEnabled(changes.enableLlmSelect.newValue)
       }
     }
 
@@ -833,15 +843,17 @@ function App() {
               <option value="agent">Agent</option>
               <option value="chat">Chat</option>
             </select>
-            <select className="llm-select" disabled={inputDisabled}>
-              <option value="gpt4">GPT-4o</option>
-              <option value="claude">Claude 3.5 Sonnet (Preview)</option>
-              <option value="claude">Claude 3.7 Sonnet (Preview)</option>
-              <option value="claude">
-                Claude 3.7 Sonnet Thinking (Preview)
-              </option>
-              <option value="claude">Gemini 2.0 Flash (Preview)</option>
-            </select>
+            {llmSelectEnabled && (
+              <select className="llm-select" disabled={inputDisabled}>
+                <option value="gpt4">GPT-4o</option>
+                <option value="claude">Claude 3.5 Sonnet (Preview)</option>
+                <option value="claude">Claude 3.7 Sonnet (Preview)</option>
+                <option value="claude">
+                  Claude 3.7 Sonnet Thinking (Preview)
+                </option>
+                <option value="claude">Gemini 2.0 Flash (Preview)</option>
+              </select>
+            )}
           </div>
 
           <div className="right-controls">

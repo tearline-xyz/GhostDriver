@@ -13,6 +13,10 @@ const App: React.FC = () => {
   const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(
     DEFAULT_SETTINGS.enableAtSyntax
   )
+  // Add state for LLM selection toggle
+  const [enableLlmSelect, setEnableLlmSelect] = useState<boolean>(
+    DEFAULT_SETTINGS.enableLlmSelect
+  )
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Load saved settings from chrome.storage.sync
@@ -21,6 +25,7 @@ const App: React.FC = () => {
     chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
       setApiHost(items.apiHost)
       setEnableAtSyntax(items.enableAtSyntax)
+      setEnableLlmSelect(items.enableLlmSelect)
       setIsLoading(false)
     })
   }, [])
@@ -30,6 +35,7 @@ const App: React.FC = () => {
     const settings = {
       apiHost,
       enableAtSyntax,
+      enableLlmSelect,
     }
 
     chrome.storage.sync.set(settings, () => {
@@ -121,6 +127,15 @@ const App: React.FC = () => {
                     onChange={(e) => setEnableAtSyntax(e.target.checked)}
                   />
                   <label htmlFor="enable-at-syntax">Enable @ syntax</label>
+                </div>
+                <div className="toggle-item">
+                  <input
+                    type="checkbox"
+                    id="enable-llm-select"
+                    checked={enableLlmSelect}
+                    onChange={(e) => setEnableLlmSelect(e.target.checked)}
+                  />
+                  <label htmlFor="enable-llm-select">Enable LLM selection</label>
                 </div>
               </div>
             </div>

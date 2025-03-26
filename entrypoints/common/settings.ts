@@ -9,4 +9,5 @@ export const AVAILABLE_HOSTS = [
 export const DEFAULT_SETTINGS = {
   apiHost: AVAILABLE_HOSTS[0],
   enableAtSyntax: false,
+  enableLlmSelect: false, // Added new setting, default to false
 }
