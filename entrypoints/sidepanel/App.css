@@ -22,7 +22,7 @@
   width: calc(100% - 24px);
   background-color: #2d2d2d;
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 12px 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   margin: 0 auto;
   flex-shrink: 0;
