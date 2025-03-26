@@ -418,32 +418,32 @@
 .event-item {
   padding: 5px;
   background-color: #2d2d2d;
-  border-left: 3px solid #3d3d3d;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
 
 .event-action {
-  border-left-color: #3498db;
+  background-color: rgba(52, 152, 219, 0.2);
 }
 
 .event-log {
-  border-left-color: #888888; /* Default color for log events */
+  background-color: rgba(136, 136, 136, 0.2); /* Default color for log events */
 }
 
 .event-log-info, .event-log-debug {
-  border-left-color: #2ecc71; /* Blue for info/debug logs */
+  background-color: rgba(46, 204, 113, 0.2); /* Green for info/debug logs */
 }
 
 .event-log-warning {
-  border-left-color: #f39c12; /* Orange for warning logs */
+  background-color: rgba(243, 156, 18, 0.2); /* Orange for warning logs */
 }
 
 .event-log-error, .event-log-critical {
-  border-left-color: #e74c3c; /* Red for error/critical logs */
+  background-color: rgba(231, 76, 60, 0.2); /* Red for error/critical logs */
 }
 
 .event-unknown {
-  border-left-color: #9b59b6; /* Purple for unknown event types */
+  background-color: rgba(155, 89, 182, 0.2); /* Purple for unknown event types */
 }
 
 .event-timestamp {
