@@ -82,6 +82,9 @@
 .left-controls {
   display: flex;
   gap: 8px;
+  flex: 1;
+  min-width: 0; /* Allow the container to shrink below its content size */
+  overflow: hidden; /* Hide overflow content */
 }
 
 .right-controls {
@@ -104,6 +107,20 @@
   box-sizing: border-box;
 }
 
+.llm-select {
+  width: auto;
+  min-width: 60px;
+  max-width: 100px;
+  text-overflow: ellipsis;
+}
+
+.llm-select option {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .mode-select:hover,
 .llm-select:hover {
   background-color: #4d4d4d;
@@ -119,19 +136,24 @@
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   height: 28px;
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
 .send-button:disabled {
-  background-color: #666;
+  background-color: #6c757d;
   cursor: not-allowed;
   opacity: 0.7;
+  box-shadow: none;
 }
 
 .send-button:hover {
-  background-color: #3889f0;
+  background-color: #1659b7; /* Darker blue for send button hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .suggestions-dropdown {
@@ -283,27 +305,39 @@
   font-size: 12px;
   cursor: pointer;
   font-weight: 500;
-  background-color: #ffc107; /* 黄色背景 */
+  background-color: #f0ad4e; /* More professional amber/gold color */
   color: #212529;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   height: 28px;
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .pause-resume-button:hover {
-  opacity: 0.9;
+  background-color: #e09111; /* Darker amber/gold for hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .pause-resume-button.running {
-  background-color: #ffc107; /* 运行状态为黄色 */
+  background-color: #f0ad4e;
+}
+
+.pause-resume-button.running:hover {
+  background-color: #e09111; /* Darker amber/gold for running hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .pause-resume-button.paused {
-  background-color: #28a745; /* 暂停状态为绿色 */
+  background-color: #5cb85c; /* More professional green */
+}
+
+.pause-resume-button.paused:hover {
+  background-color: #449d44; /* Darker green for paused hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .stop-button {
-  background-color: #dc3545; /* 红色背景 */
+  background-color: #d9534f; /* More professional red */
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -312,14 +346,17 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: the4px;
+  justify-content: center;
   font-weight: 500;
   height: 28px;
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
 .stop-button:hover {
-  background-color: #c82333;
+  background-color: #c12e2a; /* Darker red for hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .task-control-buttons {
@@ -329,7 +366,7 @@
 }
 
 .pause-resume-button, .stop-button, .send-button {
-  min-width: 80px; /* Set a consistent minimum width for all buttons */
+  min-width: 60px; /* Set a consistent minimum width for all buttons */
   justify-content: center; /* Center text/content in buttons */
 }
 

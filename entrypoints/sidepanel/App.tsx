@@ -621,8 +621,10 @@ function App() {
             </select>
             <select className="llm-select" disabled={inputDisabled}>
               <option value="gpt4">GPT-4o</option>
-              <option value="claude">Claude 3.5</option>
-              <option value="claude">DeepSeek</option>
+              <option value="claude">Claude 3.5 Sonnet (Preview)</option>
+              <option value="claude">Claude 3.7 Sonnet (Preview)</option>
+              <option value="claude">Claude 3.7 Sonnet Thinking (Preview)</option>
+              <option value="claude">Gemini 2.0 Flash (Preview)</option>
             </select>
           </div>
 
