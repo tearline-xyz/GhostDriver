@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 import "./App.css"
-import { AVAILABLE_HOSTS, DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
+import {
+  AVAILABLE_HOSTS,
+  DEFAULT_SETTINGS,
+  ModeConfig,
+} from "../common/settings"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -85,10 +89,14 @@ const App: React.FC = () => {
   // Helper function to get display name for mode config
   const getModeConfigDisplayName = (config: ModeConfig): string => {
     switch (config) {
-      case "agent_only": return "Agent only";
-      case "chat_only": return "Chat only";
-      case "both": return "Both Agent and Chat";
-      default: return config;
+      case "agent_only":
+        return "Agent only"
+      case "chat_only":
+        return "Chat only"
+      case "both":
+        return "Both Agent and Chat"
+      default:
+        return config
     }
   }
 
@@ -188,7 +196,9 @@ const App: React.FC = () => {
                     checked={enableLlmSelect}
                     onChange={(e) => setEnableLlmSelect(e.target.checked)}
                   />
-                  <label htmlFor="enable-llm-select">Enable LLM selection</label>
+                  <label htmlFor="enable-llm-select">
+                    Enable LLM selection
+                  </label>
                 </div>
               </div>
             </div>

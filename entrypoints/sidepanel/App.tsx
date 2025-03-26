@@ -174,7 +174,10 @@ function App() {
   const [autoScroll, setAutoScroll] = useState(true)
 
   /** Store the button position based on event stream area */
-  const [buttonPosition, setButtonPosition] = useState({ bottom: 20, right: 20 });
+  const [buttonPosition, setButtonPosition] = useState({
+    bottom: 20,
+    right: 20,
+  })
 
   // Load saved settings on component mount
   useEffect(() => {
@@ -597,66 +600,66 @@ function App() {
   useEffect(() => {
     const handleScroll = () => {
       if (eventStreamRef.current) {
-        const { scrollTop, scrollHeight, clientHeight } = eventStreamRef.current;
+        const { scrollTop, scrollHeight, clientHeight } = eventStreamRef.current
         // Check if user is at the bottom (with a small tolerance)
-        const isAtBottom = scrollTop >= scrollHeight - clientHeight - 10;
-        setAutoScroll(isAtBottom);
+        const isAtBottom = scrollTop >= scrollHeight - clientHeight - 10
+        setAutoScroll(isAtBottom)
       }
-    };
+    }
 
-    const eventStreamElement = eventStreamRef.current;
+    const eventStreamElement = eventStreamRef.current
     if (eventStreamElement) {
-      eventStreamElement.addEventListener('scroll', handleScroll);
+      eventStreamElement.addEventListener("scroll", handleScroll)
     }
 
     return () => {
       if (eventStreamElement) {
-        eventStreamElement.removeEventListener('scroll', handleScroll);
+        eventStreamElement.removeEventListener("scroll", handleScroll)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Modified auto-scroll behavior to respect autoScroll state
   useEffect(() => {
     if (eventStreamRef.current && events.length > 0 && autoScroll) {
-      const { scrollHeight, clientHeight } = eventStreamRef.current;
-      eventStreamRef.current.scrollTop = scrollHeight - clientHeight;
+      const { scrollHeight, clientHeight } = eventStreamRef.current
+      eventStreamRef.current.scrollTop = scrollHeight - clientHeight
     }
-  }, [events, autoScroll]);
+  }, [events, autoScroll])
 
   // Function to scroll to bottom and re-enable auto-scroll
   const scrollToBottom = () => {
     if (eventStreamRef.current) {
-      const { scrollHeight, clientHeight } = eventStreamRef.current;
+      const { scrollHeight, clientHeight } = eventStreamRef.current
       eventStreamRef.current.scrollTo({
         top: scrollHeight - clientHeight,
-        behavior: 'smooth'
-      });
-      setAutoScroll(true);
+        behavior: "smooth",
+      })
+      setAutoScroll(true)
     }
-  };
+  }
 
   // Calculate button position based on event stream area
   useEffect(() => {
     const updateButtonPosition = () => {
       if (eventStreamRef.current) {
-        const rect = eventStreamRef.current.getBoundingClientRect();
+        const rect = eventStreamRef.current.getBoundingClientRect()
         setButtonPosition({
           bottom: window.innerHeight - rect.bottom + 20,
-          right: 20
-        });
+          right: 20,
+        })
       }
-    };
+    }
 
-    updateButtonPosition();
+    updateButtonPosition()
 
     // Update position on window resize
-    window.addEventListener('resize', updateButtonPosition);
+    window.addEventListener("resize", updateButtonPosition)
 
     return () => {
-      window.removeEventListener('resize', updateButtonPosition);
-    };
-  }, []);
+      window.removeEventListener("resize", updateButtonPosition)
+    }
+  }, [])
 
   // Cleanup event source on component unmount
   useEffect(() => {
@@ -1061,9 +1064,7 @@ function App() {
 
         {/* Working indicator - only shown when task is running */}
         {taskState.running && (
-          <div className="working-indicator">
-            Working...
-          </div>
+          <div className="working-indicator">Working...</div>
         )}
       </div>
 
@@ -1075,10 +1076,10 @@ function App() {
           title="Scroll to newest messages"
           style={{
             bottom: `${buttonPosition.bottom}px`,
-            right: `${buttonPosition.right}px`
+            right: `${buttonPosition.right}px`,
           }}
         >
-          {DOWN_ARROW_SYMBOL || '↓'}
+          {DOWN_ARROW_SYMBOL || "↓"}
         </button>
       )}
     </div>
@@ -1091,18 +1092,18 @@ function App() {
  * @returns Formatted time string in format HH:MM:SS.μμμμμμ
  */
 function formatTimestampWith24HourAndMicros(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestamp * 1000)
 
   // Get hours, minutes, seconds with leading zeros
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, "0")
+  const minutes = date.getMinutes().toString().padStart(2, "0")
+  const seconds = date.getSeconds().toString().padStart(2, "0")
 
   // Get microseconds (convert fractional part of seconds to microseconds)
   // Note: JavaScript only has millisecond precision, so last 3 digits will be zeros
-  const microsStr = (timestamp % 1).toFixed(3).substring(2);
+  const microsStr = (timestamp % 1).toFixed(3).substring(2)
 
-  return `${hours}:${minutes}:${seconds}.${microsStr}`;
+  return `${hours}:${minutes}:${seconds}.${microsStr}`
 }
 
 /**

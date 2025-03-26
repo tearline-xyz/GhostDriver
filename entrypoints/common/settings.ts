@@ -6,7 +6,7 @@ export const AVAILABLE_HOSTS = [
 ]
 
 // Mode configurations
-export type ModeConfig = "agent_only" | "chat_only" | "both";
+export type ModeConfig = "agent_only" | "chat_only" | "both"
 
 // Default settings for the extension
 export const DEFAULT_SETTINGS = {
