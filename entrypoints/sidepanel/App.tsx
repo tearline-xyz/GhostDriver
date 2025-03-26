@@ -15,23 +15,23 @@ import {
 // Define event types and payload structures
 enum TaskEventType {
   LOG = "log",
-  ACTION = "action"
+  ACTION = "action",
 }
 
 interface LogPayload {
-  message: string;
-  level: string;
-  logger: string;
-  source: string;
+  message: string
+  level: string
+  logger: string
+  source: string
 }
 
 // Define event type for task events
 interface TaskEvent {
-  task_id: string;
-  type: TaskEventType;
-  payload: LogPayload | Record<string, any>;
-  id: string;
-  timestamp: string;
+  task_id: string
+  type: TaskEventType
+  payload: LogPayload | Record<string, any>
+  id: string
+  timestamp: string
 }
 
 type Mode = "agent" | "chat"
@@ -179,8 +179,10 @@ function App() {
       setModeConfig(items.modeConfig)
 
       // If current mode is not available in the new config, set it to the first available mode
-      if ((items.modeConfig === "agent_only" && mode === "chat") ||
-          (items.modeConfig === "chat_only" && mode === "agent")) {
+      if (
+        (items.modeConfig === "agent_only" && mode === "chat") ||
+        (items.modeConfig === "chat_only" && mode === "agent")
+      ) {
         setMode(items.modeConfig === "agent_only" ? "agent" : "chat")
       }
     })
@@ -208,9 +210,13 @@ function App() {
         setModeConfig(changes.modeConfig.newValue)
 
         // If current mode is not available in the new config, set it to the first available mode
-        if ((changes.modeConfig.newValue === "agent_only" && mode === "chat") ||
-            (changes.modeConfig.newValue === "chat_only" && mode === "agent")) {
-          setMode(changes.modeConfig.newValue === "agent_only" ? "agent" : "chat")
+        if (
+          (changes.modeConfig.newValue === "agent_only" && mode === "chat") ||
+          (changes.modeConfig.newValue === "chat_only" && mode === "agent")
+        ) {
+          setMode(
+            changes.modeConfig.newValue === "agent_only" ? "agent" : "chat"
+          )
         }
       }
     }
@@ -552,23 +558,21 @@ function App() {
 
     // Create a new EventSource connection
     // `${apiHost}/tasks/${taskId}/events/stream`
-    const eventSource = new EventSource(
-      "http://localhost:9000/events/stream"
-    )
+    const eventSource = new EventSource("http://localhost:9000/events/stream")
 
     // Handle incoming events
     eventSource.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data)
 
         // Log non-LOG type events to console but still add them to the events array
         if (data.type !== TaskEventType.LOG) {
-          console.log('Received non-log event:', data);
+          console.log("Received non-log event:", data)
         }
 
-        setEvents((prev) => [...prev, data]);
+        setEvents((prev) => [...prev, data])
       } catch (error) {
-        console.error("Error parsing event data:", error);
+        console.error("Error parsing event data:", error)
       }
     }
 
@@ -761,36 +765,36 @@ function App() {
   // 新增: 重置为新任务状态
   const resetToNewTask = () => {
     // Hide any existing notification
-    hideNotification();
+    hideNotification()
 
     // Close event source connection if exists
     if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
+      eventSourceRef.current.close()
+      eventSourceRef.current = null
     }
 
     // Clear input and events
-    setInput("");
-    setEvents([]);
+    setInput("")
+    setEvents([])
 
     // Reset task state and controls
     setTaskState({
       running: false,
       taskId: undefined,
       showControls: false,
-    });
+    })
 
     // Enable input field
-    setInputDisabled(false);
+    setInputDisabled(false)
 
     // Hide task ID display
-    setShowTaskId(false);
+    setShowTaskId(false)
 
     // Focus on the textarea
     if (textareaRef.current) {
-      textareaRef.current.focus();
+      textareaRef.current.focus()
     }
-  };
+  }
 
   // Helper function to render mode selector based on configuration
   const renderModeSelector = () => {
@@ -809,11 +813,7 @@ function App() {
     } else if (modeConfig === "agent_only" || modeConfig === "chat_only") {
       // For single mode configs, use a disabled button showing the current mode
       const displayMode = modeConfig === "agent_only" ? "Agent" : "Chat"
-      return (
-        <div className="mode-display">
-          {displayMode}
-        </div>
-      )
+      return <div className="mode-display">{displayMode}</div>
     }
     return null
   }
@@ -823,10 +823,7 @@ function App() {
       {/* Toolbar container that can hold multiple buttons */}
       <div className="toolbar-container">
         <div className="toolbar-left">
-          <button
-            className="new-task-button"
-            onClick={resetToNewTask}
-          >
+          <button className="new-task-button" onClick={resetToNewTask}>
             New Task
           </button>
           {/* Future buttons can be added here */}
@@ -968,31 +965,34 @@ function App() {
       <div ref={eventStreamRef} className="event-stream-area">
         {events.map((event, index) => {
           // Determine content based on event type
-          let content = '';
-          let eventClassName = `event-item`;
+          let content = ""
+          const eventItemClassNameList = ["event-item"]
 
           if (event.type === TaskEventType.LOG) {
-            content = event.payload.message;
-            eventClassName += ` event-log event-log-${event.payload.level.toLowerCase()}`;
+            content = event.payload.message
+            eventItemClassNameList.push(
+              "event-log",
+              `event-log-${event.payload.level.toLowerCase()}`
+            )
           } else if (event.type === TaskEventType.ACTION) {
-            content = JSON.stringify(event.payload);
-            eventClassName += ` event-action`;
+            content = JSON.stringify(event.payload)
+            eventItemClassNameList.push("event-action")
           } else {
-            content = JSON.stringify(event.payload);
-            eventClassName += ` event-unknown`;
+            content = JSON.stringify(event.payload)
+            eventItemClassNameList.push("event-unknown")
           }
 
           return (
             <div
               key={event.id || index}
-              className={eventClassName}
+              className={eventItemClassNameList.join(" ")}
             >
               <div className="event-timestamp">
                 {new Date(event.timestamp).toLocaleTimeString()}
               </div>
               <div className="event-content">{content}</div>
             </div>
-          );
+          )
         })}
       </div>
     </div>
