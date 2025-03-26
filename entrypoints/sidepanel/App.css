@@ -634,12 +634,12 @@
   align-items: center;
   cursor: pointer;
   flex-shrink: 0;
-  color: #666;
+  color: #ffffff;
   padding: 5px 0;
 }
 
 .collapse-toggle:hover {
-  color: #000;
+  color: #cdcdcd90;
 }
 
 .event-content-wrapper {
@@ -649,12 +649,11 @@
 }
 
 .event-level-1 {
-  border-top: 1px solid #eee;
-  background-color: #fafafa;
+  background-color: rgba(52, 152, 219, 0.2);
 }
 
 .event-level-2 {
-  padding-left: 20px;
+  margin-left: 20px;
 }
 
 /* Ensure the event timestamp and content layout still works */
