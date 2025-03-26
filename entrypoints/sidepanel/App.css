@@ -438,3 +438,38 @@
     transform: translateY(0);
   }
 }
+
+.new-task-button-container {
+  width: calc(100% - 24px);
+  margin: 0 auto 12px;
+  text-align: left;
+}
+
+.new-task-button {
+  background-color: #2b7eef;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.new-task-button:hover {
+  background-color: #1659b7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.new-task-button:before {
+  content: "+";
+  font-size: 16px;
+  font-weight: bold;
+}

@@ -705,8 +705,52 @@ function App() {
     }
   }
 
+  // 新增: 重置为新任务状态
+  const resetToNewTask = () => {
+    // Hide any existing notification
+    hideNotification();
+
+    // Close event source connection if exists
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+
+    // Clear input and events
+    setInput("");
+    setEvents([]);
+
+    // Reset task state and controls
+    setTaskState({
+      running: false,
+      taskId: undefined,
+      showControls: false,
+    });
+
+    // Enable input field
+    setInputDisabled(false);
+
+    // Hide task ID display
+    setShowTaskId(false);
+
+    // Focus on the textarea
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   return (
     <div className="app-container">
+      {/* New Task Button */}
+      <div className="new-task-button-container">
+        <button
+          className="new-task-button"
+          onClick={resetToNewTask}
+        >
+          New Task
+        </button>
+      </div>
+
       <div className="input-container">
         <div className="input-wrapper">
           <textarea
