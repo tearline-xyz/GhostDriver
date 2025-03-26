@@ -486,11 +486,12 @@ function App() {
         `${apiHost}/ws/playwright?task_id=${taskId}`
       )
 
-      // 更新任务ID
+      // 更新任务ID，并开启显示taskId
       setTaskState((prev) => ({
         ...prev,
         taskId: data.id || "unknown",
       }))
+      setShowTaskId(true) // Enable task ID display when we have a valid ID
     } catch (error) {
       console.error("Error:", error)
 
@@ -590,6 +591,7 @@ function App() {
       showControls: false,
     });
     setInputDisabled(false);
+    setShowTaskId(false); // Hide task ID when task is stopped
   }
 
   return (
