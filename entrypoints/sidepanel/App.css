@@ -35,7 +35,7 @@
 
 .main-input {
   width: 100%;
-  min-height: 15vh;
+  min-height: 10vh;
   max-height: 40vh; /* Limiting to 40% of viewport height */
   background-color: transparent;
   border: none;
