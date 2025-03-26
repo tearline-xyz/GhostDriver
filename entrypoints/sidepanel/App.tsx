@@ -627,9 +627,8 @@ function App() {
           </div>
 
           <div className="right-controls">
-            {/* Pause/Resume 和 Stop 按钮 */}
             {taskState.showControls ? (
-              <>
+              <div className="task-control-buttons">
                 <button
                   className={`pause-resume-button ${taskState.running ? "running" : "paused"}`}
                   onClick={toggleTaskPauseState}
@@ -639,7 +638,7 @@ function App() {
                 <button className="stop-button" onClick={stopAndResetTask}>
                   {STOP_SYMBOL}
                 </button>
-              </>
+              </div>
             ) : (
               <button
                 className="send-button"
