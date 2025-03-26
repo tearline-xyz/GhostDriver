@@ -514,3 +514,17 @@
   opacity: 0.8;
   user-select: none;
 }
+
+/* Add this to your existing CSS */
+
+.working-indicator {
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  padding: 5px;
+  margin-top: 5px;
+  font-style: italic;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: transparent;
+}

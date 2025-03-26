@@ -31,7 +31,7 @@ interface TaskEvent {
   type: TaskEventType
   payload: LogPayload | Record<string, any>
   id: string
-  timestamp: string
+  timestamp: number
 }
 
 type Mode = "agent" | "chat"
@@ -988,12 +988,19 @@ function App() {
               className={eventItemClassNameList.join(" ")}
             >
               <div className="event-timestamp">
-                {new Date(event.timestamp).toLocaleTimeString()}
+                {new Date(event.timestamp * 1000).toLocaleTimeString()}
               </div>
               <div className="event-content">{content}</div>
             </div>
           )
         })}
+
+        {/* Working indicator - only shown when task is running */}
+        {taskState.running && (
+          <div className="working-indicator">
+            Working...
+          </div>
+        )}
       </div>
     </div>
   )
