@@ -3,7 +3,7 @@ import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS } from "../common/settings"
 import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
-import { BULLET_SYMBOL, BACK_SYMBOL, FORWARD_SYMBOL } from "../common/symbols"
+import { BULLET_SYMBOL, BACK_SYMBOL, FORWARD_SYMBOL, PAUSE_SYMBOL, RESUME_SYMBOL, STOP_SYMBOL } from "../common/symbols"
 
 type Mode = "agent" | "chat"
 
@@ -634,10 +634,10 @@ function App() {
                   className={`pause-resume-button ${taskState.running ? "running" : "paused"}`}
                   onClick={toggleTaskPauseState}
                 >
-                  {taskState.running ? "Pause" : "Resume"}
+                  {taskState.running ? PAUSE_SYMBOL : RESUME_SYMBOL}
                 </button>
                 <button className="stop-button" onClick={stopAndResetTask}>
-                  Stop
+                  {STOP_SYMBOL}
                 </button>
               </>
             ) : (
