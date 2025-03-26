@@ -591,6 +591,15 @@ function App() {
         }
 
         console.log(`Task stopped: ${taskState.taskId}`);
+
+        // Reset all states only after successful API call
+        setTaskState({
+          running: false,
+          taskId: undefined,
+          showControls: false,
+        });
+        setInputDisabled(false);
+        setShowTaskId(false); // Hide task ID when task is stopped
       } catch (error) {
         console.error("Error stopping task:", error);
         setNotification({
@@ -598,17 +607,9 @@ function App() {
           type: "error",
           visible: true,
         });
+        // Do not reset task state on error - keep showing task controls
       }
     }
-
-    // Reset all states regardless of API call result to ensure UI is responsive
-    setTaskState({
-      running: false,
-      taskId: undefined,
-      showControls: false,
-    });
-    setInputDisabled(false);
-    setShowTaskId(false); // Hide task ID when task is stopped
   }
 
   return (
