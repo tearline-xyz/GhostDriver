@@ -519,12 +519,39 @@ function App() {
   }
 
   // 切换暂停/恢复状态
-  const toggleTaskPauseState = () => {
-    setTaskState((prev) => ({ ...prev, running: !prev.running }))
-    // 这里可以添加实际的API调用
-    console.log(
-      `Task ${taskState.running ? "paused" : "resumed"}: ${taskState.taskId}`
-    )
+  const toggleTaskPauseState = async () => {
+    if (taskState.taskId) {
+      try {
+        // Determine the target state based on current running state
+        const targetState = taskState.running ? "paused" : "running";
+
+        const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            target_state: targetState
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to ${taskState.running ? 'pause' : 'resume'} task: ${response.status}`);
+        }
+
+        console.log(`Task ${taskState.running ? 'paused' : 'resumed'}: ${taskState.taskId}`);
+
+        // Update task state after successful API call
+        setTaskState((prev) => ({ ...prev, running: !prev.running }));
+      } catch (error) {
+        console.error("Error toggling task state:", error);
+        setNotification({
+          message: `Failed to ${taskState.running ? 'pause' : 'resume'} task: ${error instanceof Error ? error.message : "Unknown error"}`,
+          type: "error",
+          visible: true,
+        });
+      }
+    }
   }
 
   // 停止任务
