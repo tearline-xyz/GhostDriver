@@ -494,7 +494,7 @@
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: auto;
   font-size: 12px;
   height: 28px;
   line-height: 28px;
@@ -503,10 +503,4 @@
   text-align: center;
   opacity: 0.8;
   user-select: none;
-}
-
-/* Style for when mode select is the only child */
-.left-controls .mode-select:only-child,
-.left-controls .mode-display:only-child {
-  min-width: 100px; /* Give it a bit more width when it's alone */
 }
