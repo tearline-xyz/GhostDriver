@@ -741,14 +741,20 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* New Task Button */}
-      <div className="new-task-button-container">
-        <button
-          className="new-task-button"
-          onClick={resetToNewTask}
-        >
-          New Task
-        </button>
+      {/* Toolbar container that can hold multiple buttons */}
+      <div className="toolbar-container">
+        <div className="toolbar-left">
+          <button
+            className="new-task-button"
+            onClick={resetToNewTask}
+          >
+            New Task
+          </button>
+          {/* Future buttons can be added here */}
+        </div>
+        <div className="toolbar-right">
+          {/* Space for right-aligned buttons */}
+        </div>
       </div>
 
       <div className="input-container">

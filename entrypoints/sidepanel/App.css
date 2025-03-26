@@ -439,14 +439,28 @@
   }
 }
 
-.new-task-button-container {
+.toolbar-container {
   width: calc(100% - 24px);
-  margin: 0 auto 12px;
-  text-align: left;
+  margin: 0 0 5px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .new-task-button {
-  background-color: #2b7eef;
+  background-color: transparent;
   color: #ffffff;
   border: none;
   border-radius: 4px;
@@ -456,7 +470,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 32px;
+  width: auto;
+  height: 20px;
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
