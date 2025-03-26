@@ -628,7 +628,7 @@
 }
 
 .collapse-toggle {
-  width: 20px;
+  width: 22px; /* Slightly wider */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -645,10 +645,19 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  /* Make it more noticeable */
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  background-color: rgba(70, 70, 70, 0.2);
+  border-radius: 3px;
+  transition: all 0.15s ease;
 }
 
 .collapse-toggle:hover {
-  color: #cdcdcd90;
+  color: #ffffff;
+  background-color: rgba(70, 70, 70, 0.5);
+  transform: scale(1.1);
 }
 
 .event-content-wrapper {
