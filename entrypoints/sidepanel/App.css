@@ -430,13 +430,13 @@
   background-color: rgba(136, 136, 136, 0.2); /* Default color for log events */
 }
 
-.event-log-info,
 .event-log-debug {
-  background-color: rgba(46, 204, 113, 0.2); /* Green for info/debug logs */
+  background-color: rgba(243, 156, 18, 0.2); /* Orange */
 }
 
+.event-log-info,
 .event-log-warning {
-  background-color: rgba(243, 156, 18, 0.2); /* Orange for warning logs */
+  background-color: rgba(136, 136, 136, 0.2); /* Default color for log events */
 }
 
 .event-log-error,
@@ -611,4 +611,10 @@
 
 .scroll-to-bottom-button:active {
   transform: translateX(-50%) translateY(0); /* Keep horizontal centering while returning to normal */
+}
+
+.task-id-display small {
+  font-size: 12px; /* Adjust the font size as needed */
+  color: #666; /* Optional: Change the color */
+  font-style: italic; /* Optional: Make it italic */
 }
