@@ -396,6 +396,25 @@
   position: relative;
 }
 
+/* Custom scrollbar for event-stream-area */
+.event-stream-area::-webkit-scrollbar {
+  width: 8px; /* Narrower scrollbar */
+}
+
+.event-stream-area::-webkit-scrollbar-track {
+  background-color: #1e1e1e; /* Dark background to match app theme */
+  border-radius: 4px; /* Rounded corners for the track */
+}
+
+.event-stream-area::-webkit-scrollbar-thumb {
+  background-color: #3d3d3d; /* Dark gray for the scrollbar thumb */
+  border-radius: 4px; /* Rounded corners for the thumb */
+}
+
+.event-stream-area::-webkit-scrollbar-thumb:hover {
+  background-color: #4d4d4d; /* Slightly lighter on hover */
+}
+
 .event-item {
   padding: 5px;
   background-color: #2d2d2d;
