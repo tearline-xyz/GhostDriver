@@ -519,12 +519,33 @@
 
 .working-indicator {
   display: flex;
-  align-items: left;
-  justify-content: left;
-  padding: 5px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 8px 8px 20px; /* Increased left padding to make room for the spinner */
   margin-top: 5px;
   font-style: italic;
-  font-weight: bold;
   color: #ffffff;
   background-color: transparent;
+  position: relative; /* Required for absolute positioning of the spinner */
+}
+
+/* Add spinner animation */
+.working-indicator::before {
+  content: "";
+  position: absolute;
+  left: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  animation: spin 1s linear infinite;
+}
+
+/* Add keyframes for spinner rotation */
+@keyframes spin {
+  0% { transform: translateY(-50%) rotate(0deg); }
+  100% { transform: translateY(-50%) rotate(360deg); }
 }
