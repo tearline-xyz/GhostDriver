@@ -393,6 +393,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
 }
 
 .event-item {
@@ -548,4 +549,33 @@
 @keyframes spin {
   0% { transform: translateY(-50%) rotate(0deg); }
   100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+.scroll-to-bottom-button {
+  position: fixed; /* Changed from absolute to fixed */
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #3d4451;
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.scroll-to-bottom-button:hover {
+  background-color: #505866;
+  transform: translateY(-2px);
+}
+
+.scroll-to-bottom-button:active {
+  transform: translateY(0);
 }

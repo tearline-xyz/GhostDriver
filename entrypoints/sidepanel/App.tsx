@@ -10,6 +10,7 @@ import {
   PAUSE_SYMBOL,
   RESUME_SYMBOL,
   STOP_SYMBOL,
+  DOWN_ARROW_SYMBOL,
 } from "../common/symbols"
 
 // Define event types and payload structures
@@ -168,6 +169,12 @@ function App() {
 
   /** Reference to the event source connection */
   const eventSourceRef = useRef<EventSource | null>(null)
+
+  /** Whether to auto-scroll to bottom when new events arrive */
+  const [autoScroll, setAutoScroll] = useState(true)
+
+  /** Store the button position based on event stream area */
+  const [buttonPosition, setButtonPosition] = useState({ bottom: 20, right: 20 });
 
   // Load saved settings on component mount
   useEffect(() => {
@@ -586,13 +593,70 @@ function App() {
     eventSourceRef.current = eventSource
   }
 
-  // Auto-scroll event area when new events arrive
+  // Add scroll event listener to detect when user scrolls away from bottom
   useEffect(() => {
-    if (eventStreamRef.current && events.length > 0) {
-      const { scrollHeight, clientHeight } = eventStreamRef.current
-      eventStreamRef.current.scrollTop = scrollHeight - clientHeight
+    const handleScroll = () => {
+      if (eventStreamRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = eventStreamRef.current;
+        // Check if user is at the bottom (with a small tolerance)
+        const isAtBottom = scrollTop >= scrollHeight - clientHeight - 10;
+        setAutoScroll(isAtBottom);
+      }
+    };
+
+    const eventStreamElement = eventStreamRef.current;
+    if (eventStreamElement) {
+      eventStreamElement.addEventListener('scroll', handleScroll);
     }
-  }, [events])
+
+    return () => {
+      if (eventStreamElement) {
+        eventStreamElement.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
+
+  // Modified auto-scroll behavior to respect autoScroll state
+  useEffect(() => {
+    if (eventStreamRef.current && events.length > 0 && autoScroll) {
+      const { scrollHeight, clientHeight } = eventStreamRef.current;
+      eventStreamRef.current.scrollTop = scrollHeight - clientHeight;
+    }
+  }, [events, autoScroll]);
+
+  // Function to scroll to bottom and re-enable auto-scroll
+  const scrollToBottom = () => {
+    if (eventStreamRef.current) {
+      const { scrollHeight, clientHeight } = eventStreamRef.current;
+      eventStreamRef.current.scrollTo({
+        top: scrollHeight - clientHeight,
+        behavior: 'smooth'
+      });
+      setAutoScroll(true);
+    }
+  };
+
+  // Calculate button position based on event stream area
+  useEffect(() => {
+    const updateButtonPosition = () => {
+      if (eventStreamRef.current) {
+        const rect = eventStreamRef.current.getBoundingClientRect();
+        setButtonPosition({
+          bottom: window.innerHeight - rect.bottom + 20,
+          right: 20
+        });
+      }
+    };
+
+    updateButtonPosition();
+
+    // Update position on window resize
+    window.addEventListener('resize', updateButtonPosition);
+
+    return () => {
+      window.removeEventListener('resize', updateButtonPosition);
+    };
+  }, []);
 
   // Cleanup event source on component unmount
   useEffect(() => {
@@ -1002,6 +1066,21 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* Moved scroll button outside of the scrollable area */}
+      {!autoScroll && events.length > 0 && (
+        <button
+          className="scroll-to-bottom-button"
+          onClick={scrollToBottom}
+          title="Scroll to newest messages"
+          style={{
+            bottom: `${buttonPosition.bottom}px`,
+            right: `${buttonPosition.right}px`
+          }}
+        >
+          {DOWN_ARROW_SYMBOL || '↓'}
+        </button>
+      )}
     </div>
   )
 }
