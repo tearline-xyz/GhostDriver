@@ -310,6 +310,15 @@ function App() {
   }
 
   /**
+   * Helper function to hide notifications
+   */
+  const hideNotification = () => {
+    if (notification.visible) {
+      setNotification((prev) => ({ ...prev, visible: false }));
+    }
+  };
+
+  /**
    * Handles the selection of an item from the suggestion menu dropdown
    *
    * This function processes two main scenarios:
@@ -333,6 +342,7 @@ function App() {
    * // Clicking on 'Ask me' (without children) will insert '[Action/Ask me]()'
    */
   const handleMenuItemSelection = (item: MenuItem) => {
+    hideNotification(); // Hide notification on button press
     if (item.children) {
       setCurrentMenuItems(item.children)
       setSelectedPath([...selectedPath, item.id])
@@ -398,6 +408,7 @@ function App() {
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Enter" && userInputValue.trim()) {
+      hideNotification(); // Hide notification on input submit
       e.preventDefault()
       const fullPath = [...selectedPath]
       const menuPath = buildMenuPathString(fullPath)
@@ -421,12 +432,14 @@ function App() {
         textareaRef.current.setSelectionRange(newPosition, newPosition)
       }
     } else if (e.key === "Escape") {
+      hideNotification(); // Hide notification on escape
       setIsUserInput(false)
       setUserInputValue("")
     }
   }
 
   const handleMenuNavigationBack = () => {
+    hideNotification(); // Hide notification on button press
     if (selectedPath.length > 0) {
       const newPath = selectedPath.slice(0, -1)
       setSelectedPath(newPath)
@@ -449,11 +462,13 @@ function App() {
   ) => {
     if (e.key === "Enter" && !e.shiftKey && !showSuggestions) {
       e.preventDefault()
+      hideNotification(); // Hide notification on Enter key
       handleTaskSubmission()
     }
   }
 
   const handleTaskSubmission = async () => {
+    hideNotification(); // Hide notification on task submission
     try {
       // 禁用输入框
       setInputDisabled(true)
@@ -521,6 +536,7 @@ function App() {
 
   // 切换暂停/恢复状态
   const toggleTaskPauseState = async () => {
+    hideNotification(); // Hide notification on pause/resume
     if (taskState.taskId) {
       try {
         // Determine the target state based on current running state
@@ -557,6 +573,7 @@ function App() {
 
   // 停止任务
   const stopAndResetTask = async () => {
+    hideNotification(); // Hide notification on stop
     if (taskState.taskId) {
       try {
         const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
@@ -713,9 +730,7 @@ function App() {
             <span>{notification.message}</span>
             <button
               className="notification-close"
-              onClick={() =>
-                setNotification((prev) => ({ ...prev, visible: false }))
-              }
+              onClick={hideNotification} // Updated to use the helper function
             >
               ×
             </button>
