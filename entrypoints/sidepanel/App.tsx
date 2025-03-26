@@ -528,17 +528,41 @@ function App() {
   }
 
   // 停止任务
-  const stopAndResetTask = () => {
-    // 这里可以添加实际的API调用
-    console.log(`Task stopped: ${taskState.taskId}`)
+  const stopAndResetTask = async () => {
+    if (taskState.taskId) {
+      try {
+        const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            target_state: "stopped"
+          })
+        });
 
-    // 重置所有状态
+        if (!response.ok) {
+          throw new Error(`Failed to stop task: ${response.status}`);
+        }
+
+        console.log(`Task stopped: ${taskState.taskId}`);
+      } catch (error) {
+        console.error("Error stopping task:", error);
+        setNotification({
+          message: `Failed to stop task: ${error instanceof Error ? error.message : "Unknown error"}`,
+          type: "error",
+          visible: true,
+        });
+      }
+    }
+
+    // Reset all states regardless of API call result to ensure UI is responsive
     setTaskState({
       running: false,
       taskId: undefined,
       showControls: false,
-    })
-    setInputDisabled(false)
+    });
+    setInputDisabled(false);
   }
 
   return (
