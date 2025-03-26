@@ -403,7 +403,7 @@
 }
 
 .event-action {
-  border-left-color: #2ecc71;
+  border-left-color: #3498db;
 }
 
 .event-log {
@@ -411,7 +411,7 @@
 }
 
 .event-log-info, .event-log-debug {
-  border-left-color: #3498db; /* Blue for info/debug logs */
+  border-left-color: #2ecc71; /* Blue for info/debug logs */
 }
 
 .event-log-warning {
