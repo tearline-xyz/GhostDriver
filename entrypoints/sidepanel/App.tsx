@@ -3,14 +3,21 @@ import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS } from "../common/settings"
 import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
-import { BULLET_SYMBOL, BACK_SYMBOL, FORWARD_SYMBOL, PAUSE_SYMBOL, RESUME_SYMBOL, STOP_SYMBOL } from "../common/symbols"
+import {
+  BULLET_SYMBOL,
+  BACK_SYMBOL,
+  FORWARD_SYMBOL,
+  PAUSE_SYMBOL,
+  RESUME_SYMBOL,
+  STOP_SYMBOL,
+} from "../common/symbols"
 
 // Define event type for task events
 interface TaskEvent {
-  id: string;
-  type: string;
-  content: string;
-  timestamp: string;
+  id: string
+  type: string
+  content: string
+  timestamp: string
 }
 
 type Mode = "agent" | "chat"
@@ -130,13 +137,13 @@ function App() {
   )
 
   /** Events received from the server */
-  const [events, setEvents] = useState<TaskEvent[]>([]);
+  const [events, setEvents] = useState<TaskEvent[]>([])
 
   /** Reference to the event stream area for auto-scrolling */
-  const eventStreamRef = useRef<HTMLDivElement>(null);
+  const eventStreamRef = useRef<HTMLDivElement>(null)
 
   /** Reference to the event source connection */
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null)
 
   // Load saved settings on component mount
   useEffect(() => {
@@ -331,9 +338,9 @@ function App() {
    */
   const hideNotification = () => {
     if (notification.visible) {
-      setNotification((prev) => ({ ...prev, visible: false }));
+      setNotification((prev) => ({ ...prev, visible: false }))
     }
-  };
+  }
 
   /**
    * Handles the selection of an item from the suggestion menu dropdown
@@ -359,7 +366,7 @@ function App() {
    * // Clicking on 'Ask me' (without children) will insert '[Action/Ask me]()'
    */
   const handleMenuItemSelection = (item: MenuItem) => {
-    hideNotification(); // Hide notification on button press
+    hideNotification() // Hide notification on button press
     if (item.children) {
       setCurrentMenuItems(item.children)
       setSelectedPath([...selectedPath, item.id])
@@ -425,7 +432,7 @@ function App() {
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Enter" && userInputValue.trim()) {
-      hideNotification(); // Hide notification on input submit
+      hideNotification() // Hide notification on input submit
       e.preventDefault()
       const fullPath = [...selectedPath]
       const menuPath = buildMenuPathString(fullPath)
@@ -449,14 +456,14 @@ function App() {
         textareaRef.current.setSelectionRange(newPosition, newPosition)
       }
     } else if (e.key === "Escape") {
-      hideNotification(); // Hide notification on escape
+      hideNotification() // Hide notification on escape
       setIsUserInput(false)
       setUserInputValue("")
     }
   }
 
   const handleMenuNavigationBack = () => {
-    hideNotification(); // Hide notification on button press
+    hideNotification() // Hide notification on button press
     if (selectedPath.length > 0) {
       const newPath = selectedPath.slice(0, -1)
       setSelectedPath(newPath)
@@ -479,7 +486,7 @@ function App() {
   ) => {
     if (e.key === "Enter" && !e.shiftKey && !showSuggestions) {
       e.preventDefault()
-      hideNotification(); // Hide notification on Enter key
+      hideNotification() // Hide notification on Enter key
       handleTaskSubmission()
     }
   }
@@ -491,64 +498,66 @@ function App() {
   const connectToEventStream = (taskId: string) => {
     // Close any existing connection
     if (eventSourceRef.current) {
-      eventSourceRef.current.close();
+      eventSourceRef.current.close()
     }
 
     // Clear previous events when starting a new task
-    setEvents([]);
+    setEvents([])
 
     // Create a new EventSource connection
-    const eventSource = new EventSource(`${apiHost}/tasks/${taskId}/events/stream`);
+    const eventSource = new EventSource(
+      `${apiHost}/tasks/${taskId}/events/stream`
+    )
 
     // Handle incoming events
     eventSource.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        setEvents(prev => [...prev, data]);
+        const data = JSON.parse(event.data)
+        setEvents((prev) => [...prev, data])
       } catch (error) {
-        console.error("Error parsing event data:", error);
+        console.error("Error parsing event data:", error)
       }
-    };
+    }
 
     // Handle connection errors
     eventSource.onerror = (error) => {
-      console.error("EventSource error:", error);
-      eventSource.close();
-    };
+      console.error("EventSource error:", error)
+      eventSource.close()
+    }
 
     // Store reference for cleanup
-    eventSourceRef.current = eventSource;
-  };
+    eventSourceRef.current = eventSource
+  }
 
   // Auto-scroll event area when new events arrive
   useEffect(() => {
     if (eventStreamRef.current && events.length > 0) {
-      const { scrollHeight, clientHeight } = eventStreamRef.current;
-      eventStreamRef.current.scrollTop = scrollHeight - clientHeight;
+      const { scrollHeight, clientHeight } = eventStreamRef.current
+      eventStreamRef.current.scrollTop = scrollHeight - clientHeight
     }
-  }, [events]);
+  }, [events])
 
   // Cleanup event source on component unmount
   useEffect(() => {
     return () => {
       if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+        eventSourceRef.current.close()
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const handleTaskSubmission = async () => {
-    hideNotification(); // Hide notification on task submission
+    hideNotification() // Hide notification on task submission
     try {
       // 禁用输入框
-      setInputDisabled(true);
+      setInputDisabled(true)
 
       // 开始任务，默认为运行状态，并显示控制按钮
       setTaskState({
         running: true,
         showControls: true,
         taskId: undefined, // 初始未知ID
-      });
+      })
 
       const response = await fetch(`${apiHost}/tasks`, {
         method: "POST",
@@ -559,35 +568,38 @@ function App() {
           content: input,
           crx_mode: true,
         }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Request failed with status: ${response.status}`);
+        throw new Error(`Request failed with status: ${response.status}`)
       }
 
-      const data = await response.json();
-      const taskId = data.id;
+      const data = await response.json()
+      const taskId = data.id
 
       // Connect to both Playwright and event stream
-      await connectToPlaywrightServer(`${apiHost}/ws/playwright?task_id=${taskId}`);
-      connectToEventStream(taskId);
+      await connectToPlaywrightServer(
+        `${apiHost}/ws/playwright?task_id=${taskId}`
+      )
+      connectToEventStream(taskId)
 
       // 更新任务ID，并开启显示taskId
       setTaskState((prev) => ({
         ...prev,
         taskId: data.id || "unknown",
-      }));
-      setShowTaskId(true); // Enable task ID display when we have a valid ID
+      }))
+      setShowTaskId(true) // Enable task ID display when we have a valid ID
     } catch (error) {
       console.error("Error:", error)
 
       // Check for connection refused errors
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred"
       const isConnectionRefused =
         errorMessage.toLowerCase().includes("err_connection_refused") ||
         errorMessage.toLowerCase().includes("failed to fetch") ||
         errorMessage.toLowerCase().includes("networkerror") ||
-        errorMessage.toLowerCase().includes("network error");
+        errorMessage.toLowerCase().includes("network error")
 
       setNotification({
         message: isConnectionRefused
@@ -607,66 +619,70 @@ function App() {
 
   // 切换暂停/恢复状态
   const toggleTaskPauseState = async () => {
-    hideNotification(); // Hide notification on pause/resume
+    hideNotification() // Hide notification on pause/resume
     if (taskState.taskId) {
       try {
         // Determine the target state based on current running state
-        const targetState = taskState.running ? "paused" : "running";
+        const targetState = taskState.running ? "paused" : "running"
 
         const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            target_state: targetState
-          })
-        });
+            target_state: targetState,
+          }),
+        })
 
         if (!response.ok) {
-          throw new Error(`Failed to ${taskState.running ? 'pause' : 'resume'} task: ${response.status}`);
+          throw new Error(
+            `Failed to ${taskState.running ? "pause" : "resume"} task: ${response.status}`
+          )
         }
 
-        console.log(`Task ${taskState.running ? 'paused' : 'resumed'}: ${taskState.taskId}`);
+        console.log(
+          `Task ${taskState.running ? "paused" : "resumed"}: ${taskState.taskId}`
+        )
 
         // Update task state after successful API call
-        setTaskState((prev) => ({ ...prev, running: !prev.running }));
+        setTaskState((prev) => ({ ...prev, running: !prev.running }))
       } catch (error) {
-        console.error("Error toggling task state:", error);
+        console.error("Error toggling task state:", error)
         setNotification({
-          message: `Failed to ${taskState.running ? 'pause' : 'resume'} task: ${error instanceof Error ? error.message : "Unknown error"}`,
+          message: `Failed to ${taskState.running ? "pause" : "resume"} task: ${error instanceof Error ? error.message : "Unknown error"}`,
           type: "error",
           visible: true,
-        });
+        })
       }
     }
   }
 
   // 停止任务
   const stopAndResetTask = async () => {
-    hideNotification(); // Hide notification on stop
+    hideNotification() // Hide notification on stop
     if (taskState.taskId) {
       try {
         const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            target_state: "stopped"
-          })
-        });
+            target_state: "stopped",
+          }),
+        })
 
         if (!response.ok) {
-          throw new Error(`Failed to stop task: ${response.status}`);
+          throw new Error(`Failed to stop task: ${response.status}`)
         }
 
-        console.log(`Task stopped: ${taskState.taskId}`);
+        console.log(`Task stopped: ${taskState.taskId}`)
 
         // Close the event stream connection
         if (eventSourceRef.current) {
-          eventSourceRef.current.close();
-          eventSourceRef.current = null;
+          eventSourceRef.current.close()
+          eventSourceRef.current = null
         }
 
         // Reset all states only after successful API call
@@ -674,16 +690,16 @@ function App() {
           running: false,
           taskId: undefined,
           showControls: false,
-        });
-        setInputDisabled(false);
-        setShowTaskId(false); // Hide task ID when task is stopped
+        })
+        setInputDisabled(false)
+        setShowTaskId(false) // Hide task ID when task is stopped
       } catch (error) {
-        console.error("Error stopping task:", error);
+        console.error("Error stopping task:", error)
         setNotification({
           message: `Failed to stop task: ${error instanceof Error ? error.message : "Unknown error"}`,
           type: "error",
           visible: true,
-        });
+        })
         // Do not reset task state on error - keep showing task controls
       }
     }
@@ -771,7 +787,9 @@ function App() {
               <option value="gpt4">GPT-4o</option>
               <option value="claude">Claude 3.5 Sonnet (Preview)</option>
               <option value="claude">Claude 3.7 Sonnet (Preview)</option>
-              <option value="claude">Claude 3.7 Sonnet Thinking (Preview)</option>
+              <option value="claude">
+                Claude 3.7 Sonnet Thinking (Preview)
+              </option>
               <option value="claude">Gemini 2.0 Flash (Preview)</option>
             </select>
           </div>
@@ -824,18 +842,16 @@ function App() {
       )}
 
       {/* Event Stream Area */}
-      <div
-        ref={eventStreamRef}
-        className="event-stream-area"
-      >
+      <div ref={eventStreamRef} className="event-stream-area">
         {events.map((event, index) => (
-          <div key={event.id || index} className={`event-item event-${event.type}`}>
+          <div
+            key={event.id || index}
+            className={`event-item event-${event.type}`}
+          >
             <div className="event-timestamp">
               {new Date(event.timestamp).toLocaleTimeString()}
             </div>
-            <div className="event-content">
-              {event.content}
-            </div>
+            <div className="event-content">{event.content}</div>
           </div>
         ))}
       </div>

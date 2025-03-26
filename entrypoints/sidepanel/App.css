@@ -367,12 +367,15 @@
   width: 100%; /* Use full width of container */
 }
 
-.pause-resume-button, .stop-button, .send-button {
+.pause-resume-button,
+.stop-button,
+.send-button {
   min-width: 60px; /* Set a consistent minimum width for all buttons */
   justify-content: center; /* Center text/content in buttons */
 }
 
-.pause-resume-button, .stop-button {
+.pause-resume-button,
+.stop-button {
   flex: 1; /* Make both buttons equal width when side by side */
   text-align: center;
   display: flex;
