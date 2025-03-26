@@ -618,3 +618,52 @@
   color: #666; /* Optional: Change the color */
   font-style: italic; /* Optional: Make it italic */
 }
+
+/* Add these styles to your App.css file */
+
+.event-item-container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.collapse-toggle {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: #666;
+  padding: 5px 0;
+}
+
+.collapse-toggle:hover {
+  color: #000;
+}
+
+.event-content-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-level-1 {
+  border-top: 1px solid #eee;
+  background-color: #fafafa;
+}
+
+.event-level-2 {
+  padding-left: 20px;
+}
+
+/* Ensure the event timestamp and content layout still works */
+.event-timestamp {
+  font-size: 0.8em;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.event-content {
+  word-break: break-word;
+}

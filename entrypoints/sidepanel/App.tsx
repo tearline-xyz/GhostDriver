@@ -179,6 +179,9 @@ function App() {
     right: 20,
   })
 
+  /** Track which event groups are collapsed */
+  const [collapsedGroups, setCollapsedGroups] = useState<{[key: string]: boolean}>({});
+
   // Load saved settings on component mount
   useEffect(() => {
     // Load initial settings
@@ -885,6 +888,21 @@ function App() {
     return null
   }
 
+  /** Determine if an event is a parent (level 1) */
+  const isParentEvent = (event: TaskEvent) => {
+    if (event.type !== TaskEventType.LOG) return false;
+    const content = event.payload.message;
+    return content.includes("📍 Step") || content.includes("🚀 Starting");
+  };
+
+  /** Toggle collapse state for a group */
+  const toggleGroupCollapse = (groupId: string) => {
+    setCollapsedGroups(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
+
   return (
     <div className="app-container">
       {/* Toolbar container that can hold multiple buttons */}
@@ -1032,21 +1050,45 @@ function App() {
       <div ref={eventStreamRef} className="event-stream-area">
         {events.map((event, index) => {
           // Determine content based on event type
-          let content = ""
-          const eventItemClassNameList = ["event-item"]
+          let content = "";
+          const eventItemClassNameList = ["event-item"];
+          const isParent = isParentEvent(event);
+
+          // Add class based on hierarchy level
+          if (isParent) {
+            eventItemClassNameList.push("event-level-1");
+          } else {
+            eventItemClassNameList.push("event-level-2");
+          }
 
           if (event.type === TaskEventType.LOG) {
-            content = event.payload.message
+            content = event.payload.message;
             eventItemClassNameList.push(
               "event-log",
               `event-log-${event.payload.level.toLowerCase()}`
-            )
+            );
           } else if (event.type === TaskEventType.ACTION) {
-            content = JSON.stringify(event.payload)
-            eventItemClassNameList.push("event-action")
+            content = JSON.stringify(event.payload);
+            eventItemClassNameList.push("event-action");
           } else {
-            content = JSON.stringify(event.payload)
-            eventItemClassNameList.push("event-unknown")
+            content = JSON.stringify(event.payload);
+            eventItemClassNameList.push("event-unknown");
+          }
+
+          // Find parent for this event
+          let parentIndex = -1;
+          if (!isParent) {
+            for (let i = index - 1; i >= 0; i--) {
+              if (isParentEvent(events[i])) {
+                parentIndex = i;
+                break;
+              }
+            }
+          }
+
+          // Skip child items if their parent is collapsed
+          if (parentIndex !== -1 && collapsedGroups[events[parentIndex].id]) {
+            return null;
           }
 
           return (
@@ -1054,12 +1096,24 @@ function App() {
               key={event.id || index}
               className={eventItemClassNameList.join(" ")}
             >
-              <div className="event-timestamp">
-                {formatTimestampWith24HourAndMicros(event.timestamp)}
+              <div className="event-item-container">
+                {isParent && (
+                  <div
+                    className="collapse-toggle"
+                    onClick={() => toggleGroupCollapse(event.id)}
+                  >
+                    {collapsedGroups[event.id] ? '▶' : '▼'}
+                  </div>
+                )}
+                <div className="event-content-wrapper">
+                  <div className="event-timestamp">
+                    {formatTimestampWith24HourAndMicros(event.timestamp)}
+                  </div>
+                  <div className="event-content">{content}</div>
+                </div>
               </div>
-              <div className="event-content">{content}</div>
             </div>
-          )
+          );
         })}
 
         {/* Working indicator - only shown when task is running */}
