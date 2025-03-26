@@ -11,6 +11,8 @@ import {
   RESUME_SYMBOL,
   STOP_SYMBOL,
   DOWN_ARROW_SYMBOL,
+  TO_EXPAND_SYMBOL,
+  TO_COLLAPSE_SYMBOL,
 } from "../common/symbols"
 
 // Define event types and payload structures
@@ -1102,7 +1104,7 @@ function App() {
                     className="collapse-toggle"
                     onClick={() => toggleGroupCollapse(event.id)}
                   >
-                    {collapsedGroups[event.id] ? '▶' : '▼'}
+                    {collapsedGroups[event.id] ? TO_EXPAND_SYMBOL : TO_COLLAPSE_SYMBOL}
                   </div>
                 )}
                 <div className="event-content-wrapper">
