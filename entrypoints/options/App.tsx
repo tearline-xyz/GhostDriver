@@ -109,8 +109,7 @@ const App: React.FC = () => {
             <p>Tearline Auto Browser Extension</p>
             <p>Version: 1.0.0</p>
             <p>
-              This extension allows automated browsing and testing for Tearline
-              services.
+              This extension empowers AI to work alongside you in the browser.
             </p>
           </>
         )
