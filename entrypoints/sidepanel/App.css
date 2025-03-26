@@ -636,6 +636,15 @@
   flex-shrink: 0;
   color: #ffffff;
   padding: 5px 0;
+  /* Add these properties to center it vertically */
+  align-self: center;
+  height: 100%;
+  margin-top: 2px; /* Slight adjustment to visually center with content */
+  /* Add these properties to prevent text selection */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .collapse-toggle:hover {
