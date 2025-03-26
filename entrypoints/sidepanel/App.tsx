@@ -1052,7 +1052,7 @@ function App() {
               className={eventItemClassNameList.join(" ")}
             >
               <div className="event-timestamp">
-                {new Date(event.timestamp * 1000).toLocaleTimeString()}
+                {formatTimestampWith24HourAndMicros(event.timestamp)}
               </div>
               <div className="event-content">{content}</div>
             </div>
@@ -1083,6 +1083,26 @@ function App() {
       )}
     </div>
   )
+}
+
+/**
+ * Formats a timestamp to display in 24-hour format with microseconds
+ * @param timestamp - Timestamp in seconds
+ * @returns Formatted time string in format HH:MM:SS.μμμμμμ
+ */
+function formatTimestampWith24HourAndMicros(timestamp: number): string {
+  const date = new Date(timestamp * 1000);
+
+  // Get hours, minutes, seconds with leading zeros
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+
+  // Get microseconds (convert fractional part of seconds to microseconds)
+  // Note: JavaScript only has millisecond precision, so last 3 digits will be zeros
+  const microsStr = (timestamp % 1).toFixed(3).substring(2);
+
+  return `${hours}:${minutes}:${seconds}.${microsStr}`;
 }
 
 /**
