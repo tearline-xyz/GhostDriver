@@ -182,7 +182,9 @@ function App() {
   })
 
   /** Track which event groups are collapsed */
-  const [collapsedGroups, setCollapsedGroups] = useState<{[key: string]: boolean}>({});
+  const [collapsedGroups, setCollapsedGroups] = useState<{
+    [key: string]: boolean
+  }>({})
 
   // Load saved settings on component mount
   useEffect(() => {
@@ -892,18 +894,24 @@ function App() {
 
   /** Determine if an event is a parent (level 1) */
   const isParentEvent = (event: TaskEvent) => {
-    if (event.type !== TaskEventType.LOG) return false;
-    const content = event.payload.message;
-    return content.includes("📍 Step") || content.includes("🚀 Starting");
-  };
+    if (event.type !== TaskEventType.LOG) return false
+    const content = event.payload.message
+    return (
+      content.includes("📍 Step") ||
+      content.includes("🚀 Starting") ||
+      content.include("✅ Task completed") ||
+      content.inlcude("✅ Successfully") ||
+      content.include("❌ Unfinished")
+    )
+  }
 
   /** Toggle collapse state for a group */
   const toggleGroupCollapse = (groupId: string) => {
-    setCollapsedGroups(prev => ({
+    setCollapsedGroups((prev) => ({
       ...prev,
-      [groupId]: !prev[groupId]
-    }));
-  };
+      [groupId]: !prev[groupId],
+    }))
+  }
 
   return (
     <div className="app-container">
@@ -1052,45 +1060,45 @@ function App() {
       <div ref={eventStreamRef} className="event-stream-area">
         {events.map((event, index) => {
           // Determine content based on event type
-          let content = "";
-          const eventItemClassNameList = ["event-item"];
-          const isParent = isParentEvent(event);
+          let content = ""
+          const eventItemClassNameList = ["event-item"]
+          const isParent = isParentEvent(event)
 
           // Add class based on hierarchy level
           if (isParent) {
-            eventItemClassNameList.push("event-level-1");
+            eventItemClassNameList.push("event-level-1")
           } else {
-            eventItemClassNameList.push("event-level-2");
+            eventItemClassNameList.push("event-level-2")
           }
 
           if (event.type === TaskEventType.LOG) {
-            content = event.payload.message;
+            content = event.payload.message
             eventItemClassNameList.push(
               "event-log",
               `event-log-${event.payload.level.toLowerCase()}`
-            );
+            )
           } else if (event.type === TaskEventType.ACTION) {
-            content = JSON.stringify(event.payload);
-            eventItemClassNameList.push("event-action");
+            content = JSON.stringify(event.payload)
+            eventItemClassNameList.push("event-action")
           } else {
-            content = JSON.stringify(event.payload);
-            eventItemClassNameList.push("event-unknown");
+            content = JSON.stringify(event.payload)
+            eventItemClassNameList.push("event-unknown")
           }
 
           // Find parent for this event
-          let parentIndex = -1;
+          let parentIndex = -1
           if (!isParent) {
             for (let i = index - 1; i >= 0; i--) {
               if (isParentEvent(events[i])) {
-                parentIndex = i;
-                break;
+                parentIndex = i
+                break
               }
             }
           }
 
           // Skip child items if their parent is collapsed
           if (parentIndex !== -1 && collapsedGroups[events[parentIndex].id]) {
-            return null;
+            return null
           }
 
           return (
@@ -1104,7 +1112,9 @@ function App() {
                     className="collapse-toggle"
                     onClick={() => toggleGroupCollapse(event.id)}
                   >
-                    {collapsedGroups[event.id] ? TO_EXPAND_SYMBOL : TO_COLLAPSE_SYMBOL}
+                    {collapsedGroups[event.id]
+                      ? TO_EXPAND_SYMBOL
+                      : TO_COLLAPSE_SYMBOL}
                   </div>
                 )}
                 <div className="event-content-wrapper">
@@ -1115,7 +1125,7 @@ function App() {
                 </div>
               </div>
             </div>
-          );
+          )
         })}
 
         {/* Working indicator - only shown when task is running */}
