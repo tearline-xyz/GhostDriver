@@ -91,6 +91,13 @@
   max-width: 500px;
 }
 
+.avatar-button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .avatar-container {
   display: flex;
   justify-content: center;
@@ -113,6 +120,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  justify-content: center; /* Add this to center content vertically */
+  min-height: 80px; /* Add minimum height to ensure vertical space alignment with avatar */
 }
 
 .profile-info p {
@@ -212,6 +221,6 @@
 /* Auth button container and styling */
 .auth-button-container {
   display: flex;
-  justify-content: flex-start;
-  margin-top: 10px;
+  justify-content: center;
+  width: 100%;
 }
