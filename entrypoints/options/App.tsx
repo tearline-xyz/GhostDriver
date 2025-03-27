@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import { createRoot } from "react-dom/client"
 import "./App.css"
 import {
@@ -6,6 +6,7 @@ import {
   DEFAULT_SETTINGS,
   ModeConfig,
 } from "../common/settings"
+import { authService } from "../../services/authService"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -17,23 +18,43 @@ const App: React.FC = () => {
   const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(
     DEFAULT_SETTINGS.enableAtSyntax
   )
-  // Add state for LLM selection toggle
   const [enableLlmSelect, setEnableLlmSelect] = useState<boolean>(
     DEFAULT_SETTINGS.enableLlmSelect
   )
-  // Add state for mode configuration
   const [modeConfig, setModeConfig] = useState<ModeConfig>(
     DEFAULT_SETTINGS.modeConfig
   )
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  // Track login status
-  const [authStatus, setAuthStatus] = useState<"none" | "pending" | "success">(
-    "none"
-  )
+  // Track login status with timeout handling
+  const [authStatus, setAuthStatus] = useState<"none" | "pending" | "success" | "error">("none")
+  // Track login timeout
+  const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null)
+  // User info
+  const [userInfo, setUserInfo] = useState<{name?: string, email?: string} | null>(null)
+
+  // Load auth status from secure storage (chrome.storage.local)
+  const loadAuthStatus = useCallback(async () => {
+    try {
+      const isLoggedIn = await authService.isLoggedIn()
+      if (isLoggedIn) {
+        const authInfo = await authService.getAuthInfo()
+        setAuthStatus("success")
+        setUserInfo(authInfo?.user || null)
+      } else {
+        setAuthStatus("none")
+        setUserInfo(null)
+      }
+    } catch (error) {
+      console.error("Error checking auth status:", error)
+      setAuthStatus("error")
+    }
+  }, [])
 
   // Load saved settings from chrome.storage.sync
   useEffect(() => {
     setIsLoading(true)
+
+    // Load settings
     chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
       setApiHost(items.apiHost)
       setEnableAtSyntax(items.enableAtSyntax)
@@ -41,31 +62,52 @@ const App: React.FC = () => {
       setModeConfig(items.modeConfig)
       setIsLoading(false)
     })
-    if (window.localStorage.getItem("AUTHINFO")) {
-      setAuthStatus("success")
-    } else {
-      chrome.runtime.sendMessage({
-        type: "INIT_LOGIN",
-      })
-    }
 
-    // Listen for messages from background when localStorage changes
-    chrome.runtime.onMessage.addListener((message) => {
-      if (message.type === "LOGIN") {
-        if (authStatus !== "success") {
-          setAuthStatus("success")
-          window.localStorage.setItem("AUTHINFO", message.data)
-        }
-      }
-      if (message.type === "LOGOUT") {
-        setAuthStatus("none")
-        window.localStorage.removeItem("AUTHINFO")
+    // Load auth status
+    loadAuthStatus()
+
+    // Initialize login check
+    chrome.runtime.sendMessage({
+      type: "INIT_LOGIN",
+    }, (response) => {
+      // If response indicates already logged in, update state
+      if (response && response.isLoggedIn) {
+        loadAuthStatus()
       }
     })
-  }, [])
+
+    // Listen for auth state changes
+    const messageListener = (message) => {
+      if (message.type === "LOGIN_STATE_CHANGED") {
+        // Clear any pending login timeout
+        if (loginTimeoutId) {
+          window.clearTimeout(loginTimeoutId)
+          setLoginTimeoutId(null)
+        }
+
+        loadAuthStatus()
+      }
+
+      if (message.type === "LOGOUT_STATE_CHANGED") {
+        setAuthStatus("none")
+        setUserInfo(null)
+      }
+    }
+
+    chrome.runtime.onMessage.addListener(messageListener)
+
+    // Clean up listener on unmount
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener)
+      // Clear any pending timeout
+      if (loginTimeoutId) {
+        window.clearTimeout(loginTimeoutId)
+      }
+    }
+  }, [loadAuthStatus, loginTimeoutId])
 
   // Save settings to chrome.storage.sync
-  const saveOptions = () => {
+  const saveOptions = useCallback(() => {
     const settings = {
       apiHost,
       enableAtSyntax,
@@ -79,15 +121,15 @@ const App: React.FC = () => {
         setStatus(null)
       }, 2000)
     })
-  }
+  }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig])
 
   // Display status message
-  const showStatus = (message: string, type: string) => {
+  const showStatus = useCallback((message: string, type: string) => {
     setStatus({ message, type })
-  }
+  }, [])
 
   // Helper function to get display name for mode config
-  const getModeConfigDisplayName = (config: ModeConfig): string => {
+  const getModeConfigDisplayName = useCallback((config: ModeConfig): string => {
     switch (config) {
       case "agent_only":
         return "Agent only"
@@ -98,7 +140,53 @@ const App: React.FC = () => {
       default:
         return config
     }
-  }
+  }, [])
+
+  // Handle login button click - extracted outside render
+  const handleLogin = useCallback(async () => {
+    try {
+      // Check current auth status first
+      const isLoggedIn = await authService.isLoggedIn()
+      if (isLoggedIn) {
+        setAuthStatus("success")
+        loadAuthStatus()
+        return
+      }
+
+      // Set pending state and open login page
+      setAuthStatus("pending")
+
+      // Set a timeout to revert to "none" if login doesn't complete
+      const timeoutId = window.setTimeout(() => {
+        setAuthStatus("error")
+        showStatus("Login timed out. Please try again.", "error")
+      }, 120000) // 2 minutes timeout
+
+      setLoginTimeoutId(timeoutId)
+
+      // Open the login page
+      const url = "https://www1.test.tearline.io/#"
+      await chrome.tabs.create({ url })
+    } catch (error) {
+      console.error("Login error:", error)
+      setAuthStatus("error")
+      showStatus("Login failed. Please try again.", "error")
+    }
+  }, [loadAuthStatus, showStatus])
+
+  // Handle logout
+  const handleLogout = useCallback(async () => {
+    try {
+      await authService.clearAuthInfo()
+      await authService.broadcastLoginState(false)
+      setAuthStatus("none")
+      setUserInfo(null)
+      showStatus("Successfully logged out", "success")
+    } catch (error) {
+      console.error("Logout error:", error)
+      showStatus("Logout failed. Please try again.", "error")
+    }
+  }, [showStatus])
 
   // Render different content based on active page
   const renderContent = () => {
@@ -108,18 +196,6 @@ const App: React.FC = () => {
 
     switch (activePage) {
       case "Account":
-        // Login button click event handler
-        const handleLogin = async () => {
-          // Check the extension's localStorage
-          const authInfo = localStorage.getItem("AUTHINFO")
-          if (!authInfo) {
-            setAuthStatus("pending")
-            // Open the login page
-            const url = "https://www1.test.tearline.io/#"
-            await chrome.tabs.create({ url })
-          }
-        }
-
         return (
           <>
             <h2>Account Settings</h2>
@@ -146,8 +222,21 @@ const App: React.FC = () => {
                       <button className="login-button" onClick={handleLogin}>Login</button>
                     </>
                   )}
-                  {authStatus === "pending" && <p>Please complete login in the opened page</p>}
-                  {authStatus === "success" && <p>Login successful</p>}
+                  {authStatus === "pending" && (
+                    <p>Please complete login in the opened page...</p>
+                  )}
+                  {authStatus === "error" && (
+                    <>
+                      <p>Login failed or timed out</p>
+                      <button className="login-button" onClick={handleLogin}>Try Again</button>
+                    </>
+                  )}
+                  {authStatus === "success" && (
+                    <>
+                      <p>{userInfo?.name || userInfo?.email || "Logged in successfully"}</p>
+                      <button className="logout-button" onClick={handleLogout}>Logout</button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
