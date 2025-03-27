@@ -13,6 +13,7 @@ import {
   DOWN_ARROW_SYMBOL,
   TO_EXPAND_SYMBOL,
   TO_COLLAPSE_SYMBOL,
+  PARENT_EVENT_PATTERNS,
 } from "../common/symbols"
 
 // Define event types and payload structures
@@ -895,13 +896,9 @@ function App() {
   /** Determine if an event is a parent (level 1) */
   const isParentEvent = (event: TaskEvent) => {
     if (event.type !== TaskEventType.LOG) return false
-    const content = event.payload.message
-    return (
-      content.includes("📍 Step") ||
-      content.includes("🚀 Starting") ||
-      content.include("✅ Task completed") ||
-      content.inlcude("✅ Successfully") ||
-      content.include("❌ Unfinished")
+    const content = event.payload.message.toLowerCase()
+    return PARENT_EVENT_PATTERNS.some((pattern) =>
+      content.includes(pattern.toLowerCase())
     )
   }
 
