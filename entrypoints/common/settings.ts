@@ -2,8 +2,8 @@
 export const TEARLINE_HOST = "www1.test.tearline.io"
 
 export const AVAILABLE_HOSTS = [
-  "https://auto.test.tearline.io",
   "http://localhost:8000",
+  "https://auto.test.tearline.io",
   "http://172.31.16.11:8004",
 ]
 
