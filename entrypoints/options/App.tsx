@@ -26,7 +26,7 @@ const App: React.FC = () => {
     DEFAULT_SETTINGS.modeConfig
   )
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  // 记录登录状态
+  // Track login status
   const [authStatus, setAuthStatus] = useState<"none" | "pending" | "success">(
     "none"
   )
@@ -49,7 +49,7 @@ const App: React.FC = () => {
       })
     }
 
-    // 监听来自 background 当页面localStorage改变产生的消息
+    // Listen for messages from background when localStorage changes
     chrome.runtime.onMessage.addListener((message) => {
       if (message.type === "LOGIN") {
         if (authStatus !== "success") {
@@ -108,13 +108,13 @@ const App: React.FC = () => {
 
     switch (activePage) {
       case "Account":
-        // 登录按钮点击事件处理函数
+        // Login button click event handler
         const handleLogin = async () => {
-          // 检查插件的 localStorage
+          // Check the extension's localStorage
           const authInfo = localStorage.getItem("AUTHINFO")
           if (!authInfo) {
             setAuthStatus("pending")
-            // 打开登录页面
+            // Open the login page
             const url = "https://www1.test.tearline.io/#"
             await chrome.tabs.create({ url })
           }
@@ -123,12 +123,33 @@ const App: React.FC = () => {
         return (
           <>
             <h2>Account Settings</h2>
-            <div>
-              {authStatus === "none" && (
-                <button onClick={handleLogin}>登录</button>
-              )}
-              {authStatus === "pending" && <p>请在打开的页面完成登录</p>}
-              {authStatus === "success" && <p>登录成功</p>}
+            <div className="account-container">
+              <div className="profile-section">
+                <div className="avatar-container">
+                  {/* Default profile avatar */}
+                  <div className="profile-avatar">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      width="48"
+                      height="48"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="profile-info">
+                  {authStatus === "none" && (
+                    <>
+                      <p>Not logged in</p>
+                      <button className="login-button" onClick={handleLogin}>Login</button>
+                    </>
+                  )}
+                  {authStatus === "pending" && <p>Please complete login in the opened page</p>}
+                  {authStatus === "success" && <p>Login successful</p>}
+                </div>
+              </div>
             </div>
           </>
         )
@@ -202,7 +223,7 @@ const App: React.FC = () => {
                 </div>
               </div>
             </div>
-            <button onClick={saveOptions}>Save</button>
+            <button className="save-button" onClick={saveOptions}>Save</button>
           </>
         )
       default:

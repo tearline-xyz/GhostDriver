@@ -119,7 +119,8 @@
   color: #555;
 }
 
-.login-button {
+.login-button,
+.save-button {
   background-color: #4285f4;
   color: white;
   border: none;
@@ -130,7 +131,8 @@
   transition: background-color 0.2s;
 }
 
-.login-button:hover {
+.login-button:hover,
+.save-button:hover {
   background-color: #3367d6;
 }
 
