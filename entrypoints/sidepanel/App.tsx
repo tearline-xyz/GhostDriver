@@ -684,13 +684,6 @@ function App() {
       // 禁用输入框
       setInputDisabled(true)
 
-      // 开始任务，默认为运行状态，并显示控制按钮
-      setTaskState({
-        running: true,
-        showControls: true,
-        taskId: undefined, // 初始未知ID
-      })
-
       const response = await fetch(`${apiHost}/tasks`, {
         method: "POST",
         headers: {
@@ -705,6 +698,13 @@ function App() {
       if (!response.ok) {
         throw new Error(`Request failed with status: ${response.status}`)
       }
+
+      // 开始任务，默认为运行状态，并显示控制按钮
+      setTaskState({
+        running: true,
+        showControls: true,
+        taskId: undefined, // 初始未知ID
+      })
 
       const data = await response.json()
       const taskId = data.id
