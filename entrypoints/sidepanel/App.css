@@ -641,14 +641,14 @@
 }
 
 .collapse-toggle {
-  width: 22px; /* Slightly wider */
+  width: 20px; /* Slightly smaller, was 22px */
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   flex-shrink: 0;
   color: #ffffff;
-  padding: 5px 0;
+  padding: 3px 0; /* Reduced from 5px */
   /* Add these properties to center it vertically */
   align-self: center;
   height: 100%;
@@ -659,7 +659,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   /* Make it more noticeable */
-  font-size: 14px;
+  font-size: 12px; /* Reduced from 14px */
   font-weight: bold;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   background-color: rgba(70, 70, 70, 0.2);
