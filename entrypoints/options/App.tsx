@@ -27,11 +27,17 @@ const App: React.FC = () => {
   )
   const [isLoading, setIsLoading] = useState<boolean>(true)
   // Track login status with timeout handling
-  const [authStatus, setAuthStatus] = useState<"none" | "pending" | "success" | "error">("none")
+  const [authStatus, setAuthStatus] = useState<
+    "none" | "pending" | "success" | "error"
+  >("none")
   // Track login timeout
   const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null)
   // User info
-  const [userInfo, setUserInfo] = useState<{name?: string, email?: string} | null>(null)
+  const [userInfo, setUserInfo] = useState<{
+    name?: string
+    email?: string
+    userId?: string
+  } | null>(null)
 
   // Load auth status from secure storage (chrome.storage.local)
   const loadAuthStatus = useCallback(async () => {
@@ -39,8 +45,33 @@ const App: React.FC = () => {
       const isLoggedIn = await authService.isLoggedIn()
       if (isLoggedIn) {
         const authInfo = await authService.getAuthInfo()
+
+        // Extract user information from the nested JSON token
+        let parsedUserInfo: {
+          email?: string
+          name?: string
+          userId?: string
+        } | null = null
+        if (authInfo?.token) {
+          try {
+            // Parse the token which is a JSON string
+            const parsedToken = JSON.parse(authInfo.token)
+
+            // Extract user data from the nested structure
+            if (parsedToken.data) {
+              parsedUserInfo = {
+                email: parsedToken.data.email,
+                name: parsedToken.data.name,
+                userId: parsedToken.data.user_id,
+              }
+            }
+          } catch (err) {
+            console.error("Error parsing token data:", err)
+          }
+        }
+
         setAuthStatus("success")
-        setUserInfo(authInfo?.user || null)
+        setUserInfo(parsedUserInfo || authInfo?.user || null)
       } else {
         setAuthStatus("none")
         setUserInfo(null)
@@ -68,14 +99,17 @@ const App: React.FC = () => {
     loadAuthStatus()
 
     // Initialize login check
-    chrome.runtime.sendMessage({
-      type: "INIT_LOGIN",
-    }, (response) => {
-      // If response indicates already logged in, update state
-      if (response && response.isLoggedIn) {
-        loadAuthStatus()
+    chrome.runtime.sendMessage(
+      {
+        type: "INIT_LOGIN",
+      },
+      (response) => {
+        // If response indicates already logged in, update state
+        if (response && response.isLoggedIn) {
+          loadAuthStatus()
+        }
       }
-    })
+    )
 
     // Listen for auth state changes
     const messageListener = (message) => {
@@ -189,6 +223,63 @@ const App: React.FC = () => {
     }
   }, [showStatus])
 
+  // Copy text to clipboard
+  const copyToClipboard = useCallback(
+    (text: string) => {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          showStatus("Copied to clipboard!", "success")
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err)
+          showStatus("Failed to copy!", "error")
+        })
+    },
+    [showStatus]
+  )
+
+  // Format user display information
+  const formatUserDisplay = useCallback(() => {
+    if (!userInfo) return null
+
+    const name = userInfo.name?.trim()
+    const email = userInfo.email?.trim()
+    const userId = userInfo.userId?.trim()
+
+    return (
+      <>
+        {name && <p className="user-name">{name}</p>}
+        {email && <p className="user-email">{email}</p>}
+        {userId && (
+          <div className="user-id-container">
+            <p className="user-id">{userId}</p>
+            <button
+              className="copy-button"
+              onClick={() => copyToClipboard(userId)}
+              title="Copy User ID"
+            >
+              {/* 替换PNG图片为SVG图标 */}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" fill="#000" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#000" strokeWidth="2" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {!name && !email && !userId && (
+          <p className="user-unknown">Account connected</p>
+        )}
+      </>
+    )
+  }, [userInfo, copyToClipboard])
+
   // Render different content based on active page
   const renderContent = () => {
     if (isLoading) {
@@ -220,7 +311,9 @@ const App: React.FC = () => {
                   {authStatus === "none" && (
                     <>
                       <p>Not logged in</p>
-                      <button className="login-button" onClick={handleLogin}>Login</button>
+                      <button className="login-button" onClick={handleLogin}>
+                        Login
+                      </button>
                     </>
                   )}
                   {authStatus === "pending" && (
@@ -229,13 +322,17 @@ const App: React.FC = () => {
                   {authStatus === "error" && (
                     <>
                       <p>Login failed or timed out</p>
-                      <button className="login-button" onClick={handleLogin}>Try Again</button>
+                      <button className="login-button" onClick={handleLogin}>
+                        Try Again
+                      </button>
                     </>
                   )}
                   {authStatus === "success" && (
                     <>
-                      <p>{userInfo?.name || userInfo?.email || "Logged in successfully"}</p>
-                      <button className="logout-button" onClick={handleLogout}>Logout</button>
+                      {formatUserDisplay()}
+                      <button className="logout-button" onClick={handleLogout}>
+                        Logout
+                      </button>
                     </>
                   )}
                 </div>
@@ -313,7 +410,9 @@ const App: React.FC = () => {
                 </div>
               </div>
             </div>
-            <button className="save-button" onClick={saveOptions}>Save</button>
+            <button className="save-button" onClick={saveOptions}>
+              Save
+            </button>
           </>
         )
       default:

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
@@ -910,6 +910,31 @@ function App() {
     }))
   }
 
+  // Copy text to clipboard
+  const copyToClipboard = useCallback((text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setNotification({
+          message: "Copied to clipboard!",
+          type: "success",
+          visible: true
+        })
+
+        // Auto-hide notification after 2 seconds
+        setTimeout(() => {
+          setNotification(prev => ({...prev, visible: false}))
+        }, 2000)
+      })
+      .catch(err => {
+        console.error("Failed to copy:", err)
+        setNotification({
+          message: "Failed to copy to clipboard",
+          type: "error",
+          visible: true
+        })
+      })
+  }, [])
+
   return (
     <div className="app-container">
       {/* Toolbar container that can hold multiple buttons */}
@@ -1049,7 +1074,25 @@ function App() {
       {/* Display task ID when notification is closed and we have a task running */}
       {showTaskId && taskState.taskId && !notification.visible && (
         <div className="task-id-display">
-          <small>Task ID: {taskState.taskId}</small>
+          <small>
+            Task ID: {taskState.taskId}
+            <button
+              className="copy-task-id-button"
+              onClick={() => copyToClipboard(taskState.taskId || "")}
+              title="Copy Task ID"
+            >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="#888" strokeWidth="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#888" strokeWidth="2" />
+              </svg>
+            </button>
+          </small>
         </div>
       )}
 

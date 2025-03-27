@@ -626,10 +626,43 @@
   transform: translateX(-50%) translateY(0); /* Keep horizontal centering while returning to normal */
 }
 
+.task-id-display {
+  font-size: 12px;
+  color: #666;
+  margin: 5px 0;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: center;
+}
+
 .task-id-display small {
-  font-size: 12px; /* Adjust the font size as needed */
-  color: #666; /* Optional: Change the color */
-  font-style: italic; /* Optional: Make it italic */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copy-task-id-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.copy-task-id-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.copy-task-id-button svg {
+  opacity: 0.7;
+}
+
+.copy-task-id-button:hover svg {
+  opacity: 1;
 }
 
 /* Add these styles to your App.css file */

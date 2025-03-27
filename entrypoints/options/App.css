@@ -122,7 +122,6 @@
 .login-button,
 .logout-button,
 .save-button {
-  background-color: #4285f4;
   color: white;
   border: none;
   border-radius: 4px;
@@ -130,12 +129,6 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: background-color 0.2s;
-}
-
-.login-button:hover,
-.logout-button:hover,
-.save-button:hover {
-  background-color: #3367d6;
 }
 
 /* Feature toggle styling */
@@ -175,4 +168,41 @@
   color: #666;
   margin-top: 4px;
   margin-bottom: 12px;
+}
+
+/* User profile info styling */
+.user-id-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-id {
+  margin: 0;
+  color: #666;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.user-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.user-email {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
 }
