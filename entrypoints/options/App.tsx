@@ -142,14 +142,17 @@ const App: React.FC = () => {
   }, [loadAuthStatus, loginTimeoutId])
 
   // Display status message with auto-clear functionality
-  const showStatus = useCallback((message: string, type: string, duration: number = 3000) => {
-    setStatus({ message, type })
+  const showStatus = useCallback(
+    (message: string, type: string, duration: number = 3000) => {
+      setStatus({ message, type })
 
-    // Automatically clear the status after the specified duration
-    setTimeout(() => {
-      setStatus(null)
-    }, duration)
-  }, [])
+      // Automatically clear the status after the specified duration
+      setTimeout(() => {
+        setStatus(null)
+      }, duration)
+    },
+    []
+  )
 
   // Save settings to chrome.storage.sync
   const saveOptions = useCallback(() => {
@@ -268,8 +271,20 @@ const App: React.FC = () => {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" fill="#888" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#888" strokeWidth="2" />
+                <rect
+                  x="9"
+                  y="9"
+                  width="13"
+                  height="13"
+                  rx="2"
+                  ry="2"
+                  fill="#888"
+                />
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                  stroke="#888"
+                  strokeWidth="2"
+                />
               </svg>
             </button>
           </div>
@@ -311,32 +326,37 @@ const App: React.FC = () => {
                   </div>
                   <div className="auth-button-container">
                     {authStatus === "none" && (
-                      <button className="auth-button login-button" onClick={handleLogin}>
+                      <button
+                        className="auth-button login-button"
+                        onClick={handleLogin}
+                      >
                         Login
                       </button>
                     )}
                     {authStatus === "error" && (
-                      <button className="auth-button login-button" onClick={handleLogin}>
+                      <button
+                        className="auth-button login-button"
+                        onClick={handleLogin}
+                      >
                         Try Again
                       </button>
                     )}
                     {authStatus === "success" && (
-                      <button className="auth-button logout-button" onClick={handleLogout}>
+                      <button
+                        className="auth-button logout-button"
+                        onClick={handleLogout}
+                      >
                         Logout
                       </button>
                     )}
                   </div>
                 </div>
                 <div className="profile-info">
-                  {authStatus === "none" && (
-                    <p>Not logged in</p>
-                  )}
+                  {authStatus === "none" && <p>Not logged in</p>}
                   {authStatus === "pending" && (
                     <p>Please complete login in the opened page...</p>
                   )}
-                  {authStatus === "error" && (
-                    <p>Login failed or timed out</p>
-                  )}
+                  {authStatus === "error" && <p>Login failed or timed out</p>}
                   {authStatus === "success" && formatUserDisplay()}
                 </div>
               </div>

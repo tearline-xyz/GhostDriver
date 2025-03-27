@@ -912,25 +912,26 @@ function App() {
 
   // Copy text to clipboard
   const copyToClipboard = useCallback((text: string) => {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard
+      .writeText(text)
       .then(() => {
         setNotification({
           message: "Copied to clipboard!",
           type: "success",
-          visible: true
+          visible: true,
         })
 
         // Auto-hide notification after 2 seconds
         setTimeout(() => {
-          setNotification(prev => ({...prev, visible: false}))
+          setNotification((prev) => ({ ...prev, visible: false }))
         }, 2000)
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to copy:", err)
         setNotification({
           message: "Failed to copy to clipboard",
           type: "error",
-          visible: true
+          visible: true,
         })
       })
   }, [])
@@ -1088,8 +1089,21 @@ function App() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="#888" strokeWidth="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="#888" strokeWidth="2" />
+                <rect
+                  x="9"
+                  y="9"
+                  width="13"
+                  height="13"
+                  rx="2"
+                  ry="2"
+                  stroke="#888"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                  stroke="#888"
+                  strokeWidth="2"
+                />
               </svg>
             </button>
           </small>

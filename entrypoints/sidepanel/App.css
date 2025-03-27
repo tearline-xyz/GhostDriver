@@ -395,11 +395,15 @@
   gap: 8px;
   position: relative;
   box-shadow:
-    inset 0 15px 12px -10px rgba(0, 0, 0, 0.7),  /* Stronger top inset shadow */
-    inset 0 1px 4px rgba(0, 0, 0, 0.6);          /* Additional fine shadow for depth */
+    inset 0 15px 12px -10px rgba(0, 0, 0, 0.7),
+    /* Stronger top inset shadow */ inset 0 1px 4px rgba(0, 0, 0, 0.6); /* Additional fine shadow for depth */
   border-top: 1px solid rgba(255, 255, 255, 0.08); /* Slightly more visible top border */
   padding-top: 16px; /* Increased padding to enhance shadow visibility */
-  background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, transparent 15px); /* Gradient overlay for added depth */
+  background-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 15px
+  ); /* Gradient overlay for added depth */
 }
 
 /* Custom scrollbar for event-stream-area */
