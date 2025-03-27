@@ -1,6 +1,7 @@
 import { defineBackground } from 'wxt/sandbox';
 import { authService } from '../services/authService';
 import { browser } from 'wxt/browser';
+import { TEARLINE_HOST } from "./common/settings"
 
 export default defineBackground(() => {
   // Check auth status on startup
@@ -16,7 +17,7 @@ export default defineBackground(() => {
     // Handle INIT_LOGIN from options or sidepanel
     if (message.type === "INIT_LOGIN") {
       // Forward to all matching Tearline tabs
-      chrome.tabs.query({ url: "*://www1.test.tearline.io/*" }, (tabs) => {
+      chrome.tabs.query({ url: `*://${TEARLINE_HOST}/*` }, (tabs) => {
         tabs.forEach((tab) => {
           if (tab.id) {
             chrome.tabs.sendMessage(tab.id, { type: "INIT_LOGIN" });

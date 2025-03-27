@@ -5,6 +5,7 @@ import {
   AVAILABLE_HOSTS,
   DEFAULT_SETTINGS,
   ModeConfig,
+  TEARLINE_HOST,
 } from "../common/settings"
 import { authService } from "../../services/authService"
 
@@ -165,7 +166,7 @@ const App: React.FC = () => {
       setLoginTimeoutId(timeoutId)
 
       // Open the login page
-      const url = "https://www1.test.tearline.io/#"
+      const url = `https://${TEARLINE_HOST}/#`
       await chrome.tabs.create({ url })
     } catch (error) {
       console.error("Login error:", error)

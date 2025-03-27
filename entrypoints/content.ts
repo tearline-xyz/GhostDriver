@@ -1,7 +1,8 @@
 import { defineContentScript } from "wxt/sandbox";
+import { TEARLINE_HOST } from "./common/settings"
 
 export default defineContentScript({
-  matches: ["*://www1.test.tearline.io/*"],
+  matches: [`*://${TEARLINE_HOST}/*`],
   main() {
     // Securely post login message to background
     const postLoginMessage = (authData) => {
@@ -63,8 +64,8 @@ export default defineContentScript({
     // Listen for messages from page with secure origin validation
     window.addEventListener("message", (event) => {
       // Verify message origin for security
-      if (event.origin !== "https://www1.test.tearline.io" &&
-          event.origin !== "http://www1.test.tearline.io") {
+      if (event.origin !== `https://${TEARLINE_HOST}` &&
+          event.origin !== `http://${TEARLINE_HOST}`) {
         console.warn(`Ignored message from untrusted origin: ${event.origin}`);
         return;
       }

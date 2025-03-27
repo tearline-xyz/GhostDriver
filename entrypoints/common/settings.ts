@@ -1,4 +1,6 @@
 // Available hosts for the extension
+export const TEARLINE_HOST = "www1.test.tearline.io"
+
 export const AVAILABLE_HOSTS = [
   "https://auto.test.tearline.io",
   "http://localhost:8000",
