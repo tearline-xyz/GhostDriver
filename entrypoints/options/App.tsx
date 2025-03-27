@@ -141,6 +141,16 @@ const App: React.FC = () => {
     }
   }, [loadAuthStatus, loginTimeoutId])
 
+  // Display status message with auto-clear functionality
+  const showStatus = useCallback((message: string, type: string, duration: number = 3000) => {
+    setStatus({ message, type })
+
+    // Automatically clear the status after the specified duration
+    setTimeout(() => {
+      setStatus(null)
+    }, duration)
+  }, [])
+
   // Save settings to chrome.storage.sync
   const saveOptions = useCallback(() => {
     const settings = {
@@ -151,17 +161,9 @@ const App: React.FC = () => {
     }
 
     chrome.storage.sync.set(settings, () => {
-      showStatus("Settings saved successfully!", "success")
-      setTimeout(() => {
-        setStatus(null)
-      }, 2000)
+      showStatus("Settings saved!", "success")
     })
-  }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig])
-
-  // Display status message
-  const showStatus = useCallback((message: string, type: string) => {
-    setStatus({ message, type })
-  }, [])
+  }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig, showStatus])
 
   // Helper function to get display name for mode config
   const getModeConfigDisplayName = useCallback((config: ModeConfig): string => {
@@ -216,7 +218,6 @@ const App: React.FC = () => {
       await authService.broadcastLoginState(false)
       setAuthStatus("none")
       setUserInfo(null)
-      showStatus("Successfully logged out", "success")
     } catch (error) {
       console.error("Logout error:", error)
       showStatus("Logout failed. Please try again.", "error")

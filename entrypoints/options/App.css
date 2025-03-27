@@ -191,6 +191,8 @@
 .user-id {
   margin: 0;
   color: #666;
+  font-style: italic;
+  font-size: 0.9rem; /* Match the font size of user-email */
 }
 
 .copy-button {
