@@ -13,5 +13,6 @@ export const PARENT_EVENT_PATTERNS = [
   "✅ Task completed",
   "✅ Successfully",
   "❌ Unfinished",
+  "❌ Failed to complete task",
   "📄 Result",
 ]
