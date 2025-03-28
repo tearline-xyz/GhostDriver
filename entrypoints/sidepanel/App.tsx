@@ -187,6 +187,9 @@ function App() {
     [key: string]: boolean
   }>({})
 
+  /** Track if user is currently in IME composition */
+  const [isComposing, setIsComposing] = useState(false)
+
   // Load saved settings on component mount
   useEffect(() => {
     // Load initial settings
@@ -554,6 +557,11 @@ function App() {
   const handleTextareaEnterKey = (
     e: React.KeyboardEvent<HTMLTextAreaElement>
   ) => {
+    // Don't handle Enter key during IME composition
+    if (isComposing) {
+      return;
+    }
+
     if (e.key === "Enter" && !e.shiftKey && !showSuggestions) {
       e.preventDefault()
       hideNotification() // Hide notification on Enter key
@@ -958,6 +966,8 @@ function App() {
             value={input}
             onChange={handleTextInputAndSuggestions}
             onKeyDown={handleTextareaEnterKey}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={() => setIsComposing(false)}
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
