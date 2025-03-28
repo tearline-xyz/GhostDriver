@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
-import { connectToPlaywrightServer } from "../playwright-crx/index.mjs"
+import { connectToPlaywrightServer } from '../../playwright-crx/lib/index.mjs';
 import {
   BULLET_SYMBOL,
   BACK_SYMBOL,

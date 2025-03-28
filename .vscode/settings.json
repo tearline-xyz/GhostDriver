@@ -1,0 +1,20 @@
+{
+  "files.readonlyInclude": {
+    "node_modules/**": false,
+  },
+  "editor.detectIndentation": true,
+  "[javascript]": {
+    "editor.insertSpaces": true
+  },
+  "[typescript]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "files.exclude": {
+    "**/.git": true,
+  },
+}
