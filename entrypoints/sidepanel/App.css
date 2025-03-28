@@ -106,7 +106,7 @@
   font-size: 12px;
   cursor: pointer;
   outline: none;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
 }
 
@@ -134,14 +134,14 @@
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 2px 12px; /* Reduced vertical padding from 4px to 2px */
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
@@ -304,14 +304,14 @@
 .pause-resume-button {
   border: none;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 2px 8px; /* Reduced vertical padding from 4px to 2px */
   font-size: 12px;
   cursor: pointer;
   font-weight: 500;
   background-color: #f0ad4e; /* More professional amber/gold color */
   color: #212529;
   transition: all 0.2s;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
@@ -344,14 +344,14 @@
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 2px 12px; /* Reduced vertical padding from 4px to 2px */
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
@@ -560,8 +560,8 @@
   border-radius: 4px;
   padding: auto;
   font-size: 12px;
-  height: 28px;
-  line-height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
+  line-height: 24px; /* Adjusted to match new height */
   box-sizing: border-box;
   min-width: 60px;
   text-align: center;

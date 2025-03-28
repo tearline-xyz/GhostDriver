@@ -39,7 +39,7 @@ h1 {
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  padding: 0.4em 1.2em; /* Reduced vertical padding from 0.6em to 0.4em */
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
