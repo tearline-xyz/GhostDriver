@@ -1,15 +1,16 @@
-import { G as browserExports } from "./index-CuiLantA.mjs";
-import { a1, a0, X, Y, _, Z, U, $ } from "./index-CuiLantA.mjs";
+import { G as browserExports } from "./index-CJuWxnPQ.mjs";
+import { a2, a1, Y, Z, $, X, _, U, a0 } from "./index-CJuWxnPQ.mjs";
 const debug = browserExports.debug;
 export {
   debug as _debug,
-  a1 as _isUnderTest,
-  a0 as _setUnderTest,
-  X as connectToPlaywrightServer,
-  Y as crx,
-  _ as default_api,
-  Z as errors,
+  a2 as _isUnderTest,
+  a1 as _setUnderTest,
+  Y as connectToPlaywrightServer,
+  Z as crx,
+  $ as default_api,
+  X as disconnectFromPlaywrightServer,
+  _ as errors,
   U as selectors,
-  $ as setWebSocketMode
+  a0 as setWebSocketMode
 };
 //# sourceMappingURL=index.mjs.map

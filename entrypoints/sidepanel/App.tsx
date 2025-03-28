@@ -575,8 +575,9 @@ function App() {
     setEvents([])
 
     // Create a new EventSource connection
-    // `${apiHost}/tasks/${taskId}/events/stream`
-    const eventSource = new EventSource("http://localhost:9000/events/stream")
+    const eventSource = new EventSource(
+      `${apiHost}/tasks/${taskId}/events/stream`
+    )
 
     // Handle incoming events
     eventSource.onmessage = (event) => {
@@ -709,10 +710,9 @@ function App() {
       const data = await response.json()
       const taskId = data.id
 
-      // Connect to both Playwright and event stream
-      // await connectToPlaywrightServer(
-      //   `${apiHost}/ws/playwright?task_id=${taskId}`
-      // )
+      await connectToPlaywrightServer(
+        `${apiHost}/ws/playwright?task_id=${taskId}`
+      )
       connectToEventStream(taskId)
 
       // 更新任务ID，并开启显示taskId
