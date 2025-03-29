@@ -1,4 +1,5 @@
-// Available hosts for the extension
+export const VERSION = "1.0.0-alpha.1"
+
 export const TEARLINE_HOST = "www1.test.tearline.io"
 
 export const AVAILABLE_HOSTS = [

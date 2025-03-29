@@ -6,6 +6,7 @@ import {
   DEFAULT_SETTINGS,
   ModeConfig,
   TEARLINE_HOST,
+  VERSION,
 } from "../common/settings"
 import { authService } from "../../services/authService"
 
@@ -296,6 +297,11 @@ const App: React.FC = () => {
     )
   }, [userInfo, copyToClipboard])
 
+  // Helper function to check if current version is alpha
+  const isAlphaVersion = useCallback(() => {
+    return VERSION.toLowerCase().includes("alpha")
+  }, [])
+
   // Render different content based on active page
   const renderContent = () => {
     if (isLoading) {
@@ -368,7 +374,7 @@ const App: React.FC = () => {
           <>
             <h2>About</h2>
             <p>Tearline Auto Browser Extension</p>
-            <p>Version: 1.0.0</p>
+            <p>Version: {VERSION}</p>
             <p>
               This extension empowers AI to work alongside you in the browser.
             </p>
@@ -448,7 +454,7 @@ const App: React.FC = () => {
       <div className="sidebar">
         <h1>Tearline</h1>
         <ul className="nav-menu">
-          {["Account", "Developer settings", "About"].map((page) => (
+          {["Account", ...(isAlphaVersion() ? ["Developer settings"] : []), "About"].map((page) => (
             <li
               key={page}
               className={activePage === page ? "active" : ""}
