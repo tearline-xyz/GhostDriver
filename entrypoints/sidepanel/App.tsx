@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
-import { connectToPlaywrightServer } from '../../playwright-crx/lib/index.mjs';
+import { connectToPlaywrightServer } from "../../playwright-crx/lib/index.mjs"
 import {
   BULLET_SYMBOL,
   BACK_SYMBOL,
@@ -20,6 +20,7 @@ import {
 enum TaskEventType {
   LOG = "log",
   ACTION = "action",
+  SYSTEM = "system",
 }
 
 interface LogPayload {
@@ -559,7 +560,7 @@ function App() {
   ) => {
     // Don't handle Enter key during IME composition
     if (isComposing) {
-      return;
+      return
     }
 
     if (e.key === "Enter" && !e.shiftKey && !showSuggestions) {
@@ -587,10 +588,28 @@ function App() {
       `${apiHost}/tasks/${taskId}/events/stream`
     )
 
+    // Handle connection open
+    eventSource.onopen = () => {
+      console.log(`EventSource connection established for task: ${taskId}`)
+    }
+
     // Handle incoming events
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
+
+        // Check for completion message from server
+        if (
+          data.type === TaskEventType.SYSTEM &&
+          data.payload.status?.toLowerCase() === "event_stream_end"
+        ) {
+          console.log("Server indicated event stream end")
+
+          // Clean up event source connection
+          eventSource.close()
+          eventSourceRef.current = null
+          return
+        }
 
         // Log non-LOG type events to console but still add them to the events array
         if (data.type !== TaskEventType.LOG) {
@@ -603,9 +622,29 @@ function App() {
       }
     }
 
-    // Handle connection errors
+    // Handle connection errors or server-initiated closures
     eventSource.onerror = (error) => {
-      console.error("EventSource error:", error)
+      console.log("EventSource connection closed or error occurred", error)
+
+      // Check if connection was closed normally (readyState === 2)
+      if (eventSource.readyState === 2) {
+        console.log("EventSource connection closed")
+
+        // Only update UI if this is still the current connection
+        if (eventSourceRef.current === eventSource) {
+          eventSourceRef.current = null
+        }
+      } else {
+        console.warn("EventSource error:", error)
+        // This is a real error, not a normal close
+        setNotification({
+          message:
+            "Connection to event stream lost. Task may still be running.",
+          type: "error",
+          visible: true,
+        })
+      }
+
       eventSource.close()
     }
 
