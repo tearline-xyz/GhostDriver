@@ -314,58 +314,145 @@ const App: React.FC = () => {
           <>
             <h2>Account Settings</h2>
             <div className="account-container">
-              <div className="profile-section">
-                <div className="avatar-button-container">
-                  <div className="avatar-container">
-                    {/* Default profile avatar */}
-                    <div className="profile-avatar">
+              {authStatus === "none" && (
+                <div className="profile-card not-logged-in">
+                  <div className="profile-avatar">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      width="64"
+                      height="64"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                    </svg>
+                  </div>
+                  <div className="profile-status">Not logged in</div>
+                  <p className="profile-message">Sign in to access Tearline services</p>
+                  <button
+                    className="auth-button login-button"
+                    onClick={handleLogin}
+                  >
+                    Login with Tearline
+                  </button>
+                </div>
+              )}
+
+              {authStatus === "pending" && (
+                <div className="profile-card pending">
+                  <div className="loader"></div>
+                  <div className="profile-status">Login in progress</div>
+                  <p className="profile-message">Please complete login in the opened page...</p>
+                </div>
+              )}
+
+              {authStatus === "error" && (
+                <div className="profile-card error">
+                  <div className="profile-avatar error">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      width="64"
+                      height="64"
+                    >
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                    </svg>
+                  </div>
+                  <div className="profile-status">Login failed or timed out</div>
+                  <button
+                    className="auth-button login-button"
+                    onClick={handleLogin}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+
+              {authStatus === "success" && (
+                <div className="profile-card logged-in">
+                  <div className="profile-header">
+                    <div className="profile-avatar success">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="currentColor"
-                        width="48"
-                        height="48"
+                        width="64"
+                        height="64"
                       >
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
                       </svg>
                     </div>
+                    <div className="profile-status success">Connected</div>
                   </div>
-                  <div className="auth-button-container">
-                    {authStatus === "none" && (
-                      <button
-                        className="auth-button login-button"
-                        onClick={handleLogin}
-                      >
-                        Login
-                      </button>
+
+                  <div className="profile-info-container">
+                    {userInfo?.name && (
+                      <div className="profile-detail">
+                        <span className="detail-label">Name</span>
+                        <span className="detail-value">{userInfo.name}</span>
+                      </div>
                     )}
-                    {authStatus === "error" && (
-                      <button
-                        className="auth-button login-button"
-                        onClick={handleLogin}
-                      >
-                        Try Again
-                      </button>
+
+                    {userInfo?.email && (
+                      <div className="profile-detail">
+                        <span className="detail-label">Email</span>
+                        <span className="detail-value">{userInfo.email}</span>
+                      </div>
                     )}
-                    {authStatus === "success" && (
-                      <button
-                        className="auth-button logout-button"
-                        onClick={handleLogout}
-                      >
-                        Logout
-                      </button>
+
+                    {userInfo?.userId && (
+                      <div className="profile-detail">
+                        <span className="detail-label">User ID</span>
+                        <div className="detail-value-with-action">
+                          <span className="detail-value user-id">{userInfo.userId}</span>
+                          <button
+                            className="copy-button"
+                            onClick={() => userInfo.userId && copyToClipboard(userInfo.userId)}
+                            title="Copy User ID"
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                x="9"
+                                y="9"
+                                width="13"
+                                height="13"
+                                rx="2"
+                                ry="2"
+                                fill="#888"
+                              />
+                              <path
+                                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                                stroke="#888"
+                                strokeWidth="2"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {!userInfo?.name && !userInfo?.email && !userInfo?.userId && (
+                      <div className="profile-detail">
+                        <span className="detail-value">Account connected successfully</span>
+                      </div>
                     )}
                   </div>
+
+                  <button
+                    className="auth-button logout-button"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
                 </div>
-                <div className="profile-info">
-                  {authStatus === "none" && <p>Not logged in</p>}
-                  {authStatus === "pending" && (
-                    <p>Please complete login in the opened page...</p>
-                  )}
-                  {authStatus === "error" && <p>Login failed or timed out</p>}
-                  {authStatus === "success" && formatUserDisplay()}
-                </div>
-              </div>
+              )}
             </div>
           </>
         )
@@ -399,7 +486,7 @@ const App: React.FC = () => {
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor="mode-config-select">Mode Configuration:</label>
+              <label htmlFor="mode-config-select">Available modes:</label>
               <select
                 id="mode-config-select"
                 value={modeConfig}
@@ -440,7 +527,7 @@ const App: React.FC = () => {
               </div>
             </div>
             <button className="save-button" onClick={saveOptions}>
-              Save
+              Save Settings
             </button>
           </>
         )
