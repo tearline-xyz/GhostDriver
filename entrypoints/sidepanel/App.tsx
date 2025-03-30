@@ -1277,11 +1277,11 @@ function App() {
 
         {/* Working indicator - only shown when task is running */}
         {taskState.running && (
-          <div className="working-indicator">
+          <div className={`working-indicator ${taskState.status || 'working'}`}>
             {taskState.status === "completed" ? "Completed" :
              taskState.status === "failed" ? "Failed" :
              taskState.status === "stopped" ? "Stopped" :
-             "Working..."}
+             "Working"}
           </div>
         )}
       </div>
