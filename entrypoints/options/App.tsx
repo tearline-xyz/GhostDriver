@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<{
     message: string
     type: string
+    visible: boolean
   } | null>(null)
   const [activePage, setActivePage] = useState<string>("Account")
   const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(
@@ -145,11 +146,18 @@ const App: React.FC = () => {
   // Display status message with auto-clear functionality
   const showStatus = useCallback(
     (message: string, type: string, duration: number = 3000) => {
-      setStatus({ message, type })
+      // First set the status with visible: true
+      setStatus({ message, type, visible: true })
 
       // Automatically clear the status after the specified duration
       setTimeout(() => {
-        setStatus(null)
+        // First set visible to false to trigger the slide-out animation
+        setStatus(prev => prev ? { ...prev, visible: false } : null)
+
+        // Then completely remove it after the animation completes
+        setTimeout(() => {
+          setStatus(null)
+        }, 300) // Match this with the CSS transition duration
       }, duration)
     },
     []
@@ -383,7 +391,6 @@ const App: React.FC = () => {
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
                       </svg>
                     </div>
-                    <div className="profile-status success">Connected</div>
                   </div>
 
                   <div className="profile-info-container">
@@ -538,6 +545,11 @@ const App: React.FC = () => {
 
   return (
     <div className="options-container">
+      {status && (
+        <div className={`status ${status.type} ${status.visible ? 'visible' : ''}`}>
+          {status.message}
+        </div>
+      )}
       <div className="sidebar">
         <h1>Tearline</h1>
         <ul className="nav-menu">
@@ -554,9 +566,6 @@ const App: React.FC = () => {
       </div>
       <div className="content">
         {renderContent()}
-        {status && (
-          <div className={`status ${status.type}`}>{status.message}</div>
-        )}
       </div>
     </div>
   )
