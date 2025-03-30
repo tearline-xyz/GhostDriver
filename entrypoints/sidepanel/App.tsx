@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import "./App.css"
 import React from "react"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
-import { connectToPlaywrightServer } from "../../playwright-crx/lib/index.mjs"
+import { connectToPlaywrightServer, disconnectFromPlaywrightServer } from "../../playwright-crx/lib/index.mjs"
 import {
   BULLET_SYMBOL,
   BACK_SYMBOL,
@@ -885,36 +885,48 @@ function App() {
   }
 
   // 新增: 重置为新任务状态
-  const resetToNewTask = () => {
+  const resetToNewTask = async () => {
     // Hide any existing notification
     hideNotification()
 
-    // Close event source connection if exists
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
-    }
+    try {
+      // Disconnect from Playwright server
+      await disconnectFromPlaywrightServer()
 
-    // Clear input and events
-    setInput("")
-    setEvents([])
+      // Close event source connection if exists
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
 
-    // Reset task state and controls
-    setTaskState({
-      running: false,
-      taskId: undefined,
-      showControls: false,
-    })
+      // Clear input and events
+      setInput("")
+      setEvents([])
 
-    // Enable input field
-    setInputDisabled(false)
+      // Reset task state and controls
+      setTaskState({
+        running: false,
+        taskId: undefined,
+        showControls: false,
+      })
 
-    // Hide task ID display
-    setShowTaskId(false)
+      // Enable input field
+      setInputDisabled(false)
 
-    // Focus on the textarea
-    if (textareaRef.current) {
-      textareaRef.current.focus()
+      // Hide task ID display
+      setShowTaskId(false)
+
+      // Focus on the textarea
+      if (textareaRef.current) {
+        textareaRef.current.focus()
+      }
+    } catch (error) {
+      console.error("Error disconnecting from Playwright server:", error)
+      setNotification({
+        message: "Failed to disconnect from Playwright server",
+        type: "error",
+        visible: true,
+      })
     }
   }
 
