@@ -30,7 +30,7 @@ git_clone_playwright_crx() {
 
 echo '📍 Git clone playwright-crx if it does not exist'
 if [ -d "playwright-crx" ]; then
-  echo "📣 playwright-crx directory already exists, skipping git clone"
+  echo "⚡ playwright-crx directory already exists, skipping git clone"
 else
   git_clone_playwright_crx
 fi
@@ -50,4 +50,4 @@ npx eslint --fix ${CORE_SOURCE_FILE}
 echo '📍 Build playwright-crx'
 npm run build:crx
 
-echo '🚩 Done'
+echo '👌 Done'

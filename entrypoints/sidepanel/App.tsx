@@ -138,6 +138,7 @@ function App() {
     running: boolean
     taskId?: string
     showControls: boolean
+    status?: string
   }>({
     running: false,
     taskId: undefined,
@@ -758,11 +759,36 @@ function App() {
       const taskId = data.id
 
       await connectToPlaywrightServer(
-        `${apiHost}/ws/playwright?task_id=${taskId}`
+        `${apiHost}/ws/playwright?task_id=${taskId}`,
+        async () => {
+          // WebSocket 连接断开时查询任务状态
+          try {
+            const taskStatusResponse = await fetch(`${apiHost}/tasks/${taskId}`, {
+              method: 'GET',
+              headers: {
+                'accept': 'application/json'
+              }
+            });
+
+            if (!taskStatusResponse.ok) {
+              throw new Error(`Failed to fetch task status: ${taskStatusResponse.status}`);
+            }
+
+            const taskStatus = await taskStatusResponse.json();
+
+            // 更新任务状态
+            setTaskState(prev => ({
+              ...prev,
+              status: taskStatus.state
+            }));
+          } catch (error) {
+            console.error('Error fetching task status:', error);
+          }
+        }
       )
       connectToEventStream(taskId)
 
-      // 更新任务ID，并开启显示taskId
+      // 更新任务状态，并开启显示taskId
       setTaskState((prev) => ({
         ...prev,
         taskId: data.id || "unknown",
@@ -1096,15 +1122,21 @@ function App() {
           <div className="right-controls">
             {taskState.showControls ? (
               <div className="task-control-buttons">
-                <button
-                  className={`pause-resume-button ${taskState.running ? "running" : "paused"}`}
-                  onClick={toggleTaskPauseState}
-                >
-                  {taskState.running ? PAUSE_SYMBOL : RESUME_SYMBOL}
-                </button>
-                <button className="stop-button" onClick={stopAndResetTask}>
-                  {STOP_SYMBOL}
-                </button>
+                {taskState.status !== "completed" &&
+                 taskState.status !== "failed" &&
+                 taskState.status !== "stopped" && (
+                  <>
+                    <button
+                      className={`pause-resume-button ${taskState.running ? "running" : "paused"}`}
+                      onClick={toggleTaskPauseState}
+                    >
+                      {taskState.running ? PAUSE_SYMBOL : RESUME_SYMBOL}
+                    </button>
+                    <button className="stop-button" onClick={stopAndResetTask}>
+                      {STOP_SYMBOL}
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <button
@@ -1245,7 +1277,12 @@ function App() {
 
         {/* Working indicator - only shown when task is running */}
         {taskState.running && (
-          <div className="working-indicator">Working...</div>
+          <div className="working-indicator">
+            {taskState.status === "completed" ? "Completed" :
+             taskState.status === "failed" ? "Failed" :
+             taskState.status === "stopped" ? "Stopped" :
+             "Working..."}
+          </div>
         )}
       </div>
 
