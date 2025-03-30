@@ -41,8 +41,23 @@ const App: React.FC = () => {
     userId?: string
   } | null>(null)
 
+  // 状态更新函数
+  const updateAuthStatus = useCallback((
+    newStatus: "none" | "pending" | "success" | "error",
+    shouldOverridePending: boolean = false
+  ) => {
+    setAuthStatus(currentStatus => {
+      // 如果当前状态是 pending，且没有强制覆盖，则保持 pending 状态
+      if (!shouldOverridePending && currentStatus === "pending") {
+        return "pending"
+      }
+      // 否则更新为新状态
+      return newStatus
+    })
+  }, [])
+
   // Load auth status from secure storage (chrome.storage.local)
-  const loadAuthStatus = useCallback(async () => {
+  const loadAuthStatus = useCallback(async (shouldOverridePending: boolean = false) => {
     try {
       const isLoggedIn = await authService.isLoggedIn()
       if (isLoggedIn) {
@@ -72,17 +87,17 @@ const App: React.FC = () => {
           }
         }
 
-        setAuthStatus("success")
+        updateAuthStatus("success", shouldOverridePending)
         setUserInfo(parsedUserInfo || authInfo?.user || null)
       } else {
-        setAuthStatus("none")
+        updateAuthStatus("none", shouldOverridePending)
         setUserInfo(null)
       }
     } catch (error) {
       console.error("Error checking auth status:", error)
-      setAuthStatus("error")
+      updateAuthStatus("error", shouldOverridePending)
     }
-  }, [])
+  }, [updateAuthStatus])
 
   // Load saved settings from chrome.storage.sync
   useEffect(() => {
@@ -108,7 +123,7 @@ const App: React.FC = () => {
       (response) => {
         // If response indicates already logged in, update state
         if (response && response.isLoggedIn) {
-          loadAuthStatus()
+          loadAuthStatus(true)
         }
       }
     )
@@ -122,11 +137,12 @@ const App: React.FC = () => {
           setLoginTimeoutId(null)
         }
 
-        loadAuthStatus()
+        // 强制更新状态
+        loadAuthStatus(true)
       }
 
       if (message.type === "LOGOUT_STATE_CHANGED") {
-        setAuthStatus("none")
+        updateAuthStatus("none", true)
         setUserInfo(null)
       }
     }
@@ -141,7 +157,7 @@ const App: React.FC = () => {
         window.clearTimeout(loginTimeoutId)
       }
     }
-  }, [loadAuthStatus, loginTimeoutId])
+  }, [loadAuthStatus, loginTimeoutId, updateAuthStatus])
 
   // Display status message with auto-clear functionality
   const showStatus = useCallback(
@@ -197,17 +213,17 @@ const App: React.FC = () => {
       // Check current auth status first
       const isLoggedIn = await authService.isLoggedIn()
       if (isLoggedIn) {
-        setAuthStatus("success")
+        updateAuthStatus("success", true)
         loadAuthStatus()
         return
       }
 
       // Set pending state and open login page
-      setAuthStatus("pending")
+      updateAuthStatus("pending")
 
       // Set a timeout to revert to "none" if login doesn't complete
       const timeoutId = window.setTimeout(() => {
-        setAuthStatus("error")
+        updateAuthStatus("error", true)
         showStatus("Login timed out. Please try again.", "error")
       }, 120000) // 2 minutes timeout
 
@@ -218,23 +234,23 @@ const App: React.FC = () => {
       await chrome.tabs.create({ url })
     } catch (error) {
       console.error("Login error:", error)
-      setAuthStatus("error")
+      updateAuthStatus("error", true)
       showStatus("Login failed. Please try again.", "error")
     }
-  }, [loadAuthStatus, showStatus])
+  }, [showStatus, updateAuthStatus])
 
   // Handle logout
   const handleLogout = useCallback(async () => {
     try {
       await authService.clearAuthInfo()
       await authService.broadcastLoginState(false)
-      setAuthStatus("none")
+      updateAuthStatus("none", true)
       setUserInfo(null)
     } catch (error) {
       console.error("Logout error:", error)
       showStatus("Logout failed. Please try again.", "error")
     }
-  }, [showStatus])
+  }, [showStatus, updateAuthStatus])
 
   // Copy text to clipboard
   const copyToClipboard = useCallback(
