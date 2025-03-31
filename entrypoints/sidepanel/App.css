@@ -612,16 +612,10 @@
   animation: none;
 }
 
-.progress-indicator.completed {
-  color: #00ff00;
-}
-
-.progress-indicator.failed {
-  color: #ff0000;
-}
-
+.progress-indicator.completed,
+.progress-indicator.failed,
 .progress-indicator.stopped {
-  color: #ffa500;
+  color: #ffffff;
 }
 
 .scroll-to-bottom-button {

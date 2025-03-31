@@ -662,21 +662,21 @@ function App() {
 
   const handleTaskSubmission = async () => {
     hideNotification()
-    try {
-      // 更新UI状态
-      setInteractionState(prev => ({
-        ...prev,
-        input: { ...prev.input, enabled: false },
-        taskControls: {
-          ...prev.taskControls,
-          enabled: true,
-          visible: true,
-          pauseButton: { enabled: true, visible: true },
-          stopButton: { enabled: true, visible: true }
-        },
-        sendButton: { enabled: false, visible: false }
-      }))
 
+    setInteractionState(prev => ({
+      ...prev,
+      input: { ...prev.input, enabled: false },
+      taskControls: {
+        ...prev.taskControls,
+        enabled: true,
+        visible: true,
+        pauseButton: { enabled: true, visible: true },
+        stopButton: { enabled: true, visible: true }
+      },
+      sendButton: { enabled: false, visible: false }
+    }))
+
+    try {
       const taskContext = await apiService.createTask(input)
       const taskId = taskContext.id
 
@@ -690,24 +690,28 @@ function App() {
         state: taskContext.state as TaskState
       })
 
-      await connectToPlaywrightServer(
-        apiService.getPlaywrightWebSocketUrl(taskId),
-        async () => {
-          // WebSocket 连接断开时查询任务状态
-          try {
-            const taskContext = await apiService.getTask(taskId)
-
-            // 更新任务状态，确保转换为TaskState类型
-            setTaskContext(prev => ({
-              ...prev,
-              state: taskContext.state as TaskState
-            }))
-          } catch (error) {
-            console.error('Error fetching task status:', error)
+      // 使用 Promise.all 并行处理连接操作
+      await Promise.all([
+        connectToPlaywrightServer(
+          apiService.getPlaywrightWebSocketUrl(taskId),
+          async () => {
+            try {
+              const taskContext = await apiService.getTask(taskId)
+              setTaskContext(prev => ({
+                ...prev,
+                state: taskContext.state as TaskState
+              }))
+            } catch (error) {
+              console.error('Error fetching task status:', error)
+            }
           }
-        }
-      )
-      connectToEventStream(taskId)
+        ),
+        // 创建一个 Promise 来连接事件流
+        new Promise<void>((resolve) => {
+          connectToEventStream(taskId)
+          resolve()
+        })
+      ])
 
       // 更新任务状态为运行中
       setTaskContext((prev) => ({
@@ -734,6 +738,7 @@ function App() {
         visible: true,
       })
 
+      // 发生错误时恢复 UI 状态
       setInteractionState(prev => ({
         ...prev,
         input: { ...prev.input, enabled: true },
