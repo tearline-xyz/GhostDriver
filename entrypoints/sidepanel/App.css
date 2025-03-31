@@ -571,7 +571,7 @@
 
 /* Add this to your existing CSS */
 
-.working-indicator {
+.progress-indicator {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -584,9 +584,17 @@
   margin-left: 0;
 }
 
-.working-indicator.working::after {
-  content: "...";
+.progress-indicator.working {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-indicator.working::after {
+  content: "";
   display: inline-block;
+  width: 12px;
+  text-align: left;
   animation: dots 1.5s infinite;
 }
 
@@ -597,22 +605,22 @@
   100% { content: "."; }
 }
 
-.working-indicator.completed::after,
-.working-indicator.failed::after,
-.working-indicator.stopped::after {
+.progress-indicator.completed::after,
+.progress-indicator.failed::after,
+.progress-indicator.stopped::after {
   content: "";
   animation: none;
 }
 
-.working-indicator.completed {
+.progress-indicator.completed {
   color: #00ff00;
 }
 
-.working-indicator.failed {
+.progress-indicator.failed {
   color: #ff0000;
 }
 
-.working-indicator.stopped {
+.progress-indicator.stopped {
   color: #ffa500;
 }
 

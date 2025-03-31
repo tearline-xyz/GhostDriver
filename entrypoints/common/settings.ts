@@ -13,7 +13,7 @@ export type ModeConfig = "agent_only" | "chat_only" | "both"
 
 // Default settings for the extension
 export const DEFAULT_SETTINGS = {
-  apiHost: AVAILABLE_HOSTS[0],
+  apiHost: AVAILABLE_HOSTS[1],
   enableAtSyntax: false,
   enableLlmSelect: false, // Added new setting, default to false
   modeConfig: "agent_only" as ModeConfig, // Default to agent only

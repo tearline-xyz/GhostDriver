@@ -1,85 +1,34 @@
-import { useState, useRef, useEffect, useCallback } from "react"
-import "./App.css"
-import React from "react"
-import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
+import React, { useCallback, useEffect, useRef, useState } from "react"
 import { connectToPlaywrightServer, disconnectFromPlaywrightServer } from "../../playwright-crx/lib/index.mjs"
+import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
+import "./App.css"
+import { CONNECTION_REFUSED_ERROR_KEYWORDS } from "./model/errors"
 import {
-  BULLET_SYMBOL,
+  ActionPayload,
+  LogPayload,
+  PARENT_EVENT_KEYWORDS,
+  SystemEventStatus,
+  SystemPayload,
+  TaskEvent,
+  TaskEventType
+} from "./model/events"
+import { DEFAULT_INTERACTION_STATE, InteractionState } from "./model/interactionState"
+import { Mode } from "./model/mode"
+import { SuggestionMenuItem, suggestionMenuItems } from "./model/suggestion"
+import {
   BACK_SYMBOL,
+  BULLET_SYMBOL,
+  DOWN_ARROW_SYMBOL,
   FORWARD_SYMBOL,
   PAUSE_SYMBOL,
   RESUME_SYMBOL,
   STOP_SYMBOL,
-  DOWN_ARROW_SYMBOL,
-  TO_EXPAND_SYMBOL,
   TO_COLLAPSE_SYMBOL,
-  PARENT_EVENT_PATTERNS,
-} from "../common/symbols"
-
-// Define event types and payload structures
-enum TaskEventType {
-  LOG = "log",
-  ACTION = "action",
-  SYSTEM = "system",
-}
-
-interface LogPayload {
-  message: string
-  level: string
-  logger: string
-  source: string
-}
-
-// Define event type for task events
-interface TaskEvent {
-  task_id: string
-  type: TaskEventType
-  payload: LogPayload | Record<string, any>
-  id: string
-  timestamp: number
-}
-
-type Mode = "agent" | "chat"
-
-interface MenuItem {
-  id: string
-  label: string
-  children?: MenuItem[]
-  needUserInput?: boolean
-}
-
-const menuItems: MenuItem[] = [
-  {
-    id: "tearline",
-    label: "@Tearline",
-  },
-  {
-    id: "web",
-    label: "@Web",
-    children: [
-      {
-        id: "web-google-search",
-        label: "Google search",
-        needUserInput: true,
-      },
-      {
-        id: "go-to-url",
-        label: "Go to url",
-        needUserInput: true,
-      },
-    ],
-  },
-  {
-    id: "action",
-    label: "@Action",
-    children: [
-      {
-        id: "action-ask-me",
-        label: "Ask me",
-      },
-    ],
-  },
-]
+  TO_EXPAND_SYMBOL,
+} from "./model/symbols"
+import { TASK_ACTIVE_STATES, TaskContext, TaskState, getTaskStateDisplayText } from "./model/task"
+import { NotificationState, DEFAULT_NOTIFICATION_STATE } from "./model/notification"
+import { ApiService } from "./services/api"
 
 function App() {
   /** Main input text content */
@@ -101,8 +50,8 @@ function App() {
   const [selectedPath, setSelectedPath] = useState<string[]>([])
 
   /** Currently displayed menu items in dropdown */
-  const [currentMenuItems, setCurrentMenuItems] =
-    useState<MenuItem[]>(menuItems)
+  const [currentSuggestionMenuItems, setCurrentSuggestionMenuItems] =
+    useState<SuggestionMenuItem[]>(suggestionMenuItems)
 
   /** Index of currently selected suggestion item */
   const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -120,36 +69,20 @@ function App() {
   const [userInputValue, setUserInputValue] = useState("")
 
   /** 操作结果信息 */
-  const [notification, setNotification] = useState<{
-    message: string
-    type: "success" | "error" | "info"
-    visible: boolean
-  }>({
-    message: "",
-    type: "info",
-    visible: false,
-  })
+  const [notification, setNotification] = useState<NotificationState>(DEFAULT_NOTIFICATION_STATE)
 
-  /** 控制输入框是否禁用 */
-  const [inputDisabled, setInputDisabled] = useState(false)
+  /** 控制UI状态 */
+  const [interactionState, setInteractionState] = useState<InteractionState>(DEFAULT_INTERACTION_STATE)
 
   /** 控制任务状态 */
-  const [taskState, setTaskState] = useState<{
-    running: boolean
-    taskId?: string
-    showControls: boolean
-    status?: string
-  }>({
-    running: false,
-    taskId: undefined,
-    showControls: false,
+  const [taskContext, setTaskContext] = useState<TaskContext>({
+    id: undefined,
+    state: undefined
   })
-
-  /** 控制是否显示任务ID信息 */
-  const [showTaskId, setShowTaskId] = useState(false)
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
+  const apiService = new ApiService(apiHost)
 
   /** Whether @ syntax is enabled from settings */
   const [atSyntaxEnabled, setAtSyntaxEnabled] = useState<boolean>(
@@ -197,6 +130,7 @@ function App() {
     // Load initial settings
     chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
       setApiHost(items.apiHost)
+      apiService.setApiHost(items.apiHost)
       setAtSyntaxEnabled(items.enableAtSyntax)
       setLlmSelectEnabled(items.enableLlmSelect)
       setModeConfig(items.modeConfig)
@@ -219,6 +153,7 @@ function App() {
 
       if (changes.apiHost) {
         setApiHost(changes.apiHost.newValue)
+        apiService.setApiHost(changes.apiHost.newValue)
       }
 
       if (changes.enableAtSyntax !== undefined) {
@@ -253,7 +188,7 @@ function App() {
   }, [mode])
 
   /** Filtered menu items based on current search term */
-  const filteredMenuItems = currentMenuItems.filter((item) =>
+  const filteredSuggestionMenuItems = currentSuggestionMenuItems.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
@@ -268,7 +203,7 @@ function App() {
    */
   const buildMenuPathString = (path: string[], userInput?: string): string => {
     let result = "@"
-    let currentItems = menuItems
+    let currentItems = suggestionMenuItems
 
     for (let i = 0; i < path.length; i++) {
       const id = path[i]
@@ -291,7 +226,7 @@ function App() {
         case "ArrowDown":
           e.preventDefault()
           setSelectedIndex((prev) =>
-            prev < filteredMenuItems.length - 1 ? prev + 1 : prev
+            prev < filteredSuggestionMenuItems.length - 1 ? prev + 1 : prev
           )
           break
         case "ArrowUp":
@@ -300,8 +235,8 @@ function App() {
           break
         case "Tab":
           e.preventDefault()
-          if (selectedIndex >= 0 && selectedIndex < filteredMenuItems.length) {
-            handleMenuItemSelection(filteredMenuItems[selectedIndex])
+          if (selectedIndex >= 0 && selectedIndex < filteredSuggestionMenuItems.length) {
+            handleMenuItemSelection(filteredSuggestionMenuItems[selectedIndex])
           }
           break
         case "Enter":
@@ -316,17 +251,17 @@ function App() {
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [showSuggestions, selectedIndex, filteredMenuItems, selectedPath])
+  }, [showSuggestions, selectedIndex, filteredSuggestionMenuItems, selectedPath])
 
   useEffect(() => {
     if (
       showSuggestions &&
       selectedIndex === -1 &&
-      filteredMenuItems.length > 0
+      filteredSuggestionMenuItems.length > 0
     ) {
       setSelectedIndex(0)
     }
-  }, [showSuggestions, filteredMenuItems])
+  }, [showSuggestions, filteredSuggestionMenuItems])
 
   const closeAndResetMenu = () => {
     setShowSuggestions(false)
@@ -371,7 +306,7 @@ function App() {
         top: rect.top + position.top,
         left: rect.left + position.left,
       })
-      setCurrentMenuItems(menuItems)
+      setCurrentSuggestionMenuItems(suggestionMenuItems)
       setSelectedPath([])
       setSelectedIndex(0)
       setSearchTerm("")
@@ -394,8 +329,8 @@ function App() {
     setInput(value)
   }
 
-  const findCurrentMenuItemByPath = (): MenuItem | undefined => {
-    let currentItems = menuItems
+  const findCurrentMenuItemByPath = (): SuggestionMenuItem | undefined => {
+    let currentItems = suggestionMenuItems
     let currentItem
 
     for (const id of selectedPath) {
@@ -440,10 +375,10 @@ function App() {
    * // Clicking on '@Web' (with children) will display Web submenu items
    * // Clicking on 'Ask me' (without children) will insert '[Action/Ask me]()'
    */
-  const handleMenuItemSelection = (item: MenuItem) => {
+  const handleMenuItemSelection = (item: SuggestionMenuItem) => {
     hideNotification() // Hide notification on button press
     if (item.children) {
-      setCurrentMenuItems(item.children)
+      setCurrentSuggestionMenuItems(item.children)
       setSelectedPath([...selectedPath, item.id])
       setSelectedIndex(0)
       setSearchTerm("")
@@ -472,7 +407,7 @@ function App() {
 
       setShowSuggestions(false)
       setSelectedPath([])
-      setCurrentMenuItems(menuItems)
+      setCurrentSuggestionMenuItems(suggestionMenuItems)
       setSelectedIndex(-1)
       setSearchTerm("")
 
@@ -521,7 +456,7 @@ function App() {
       setInput(newInput)
       setShowSuggestions(false)
       setSelectedPath([])
-      setCurrentMenuItems(menuItems)
+      setCurrentSuggestionMenuItems(suggestionMenuItems)
       setIsUserInput(false)
       setUserInputValue("")
 
@@ -545,14 +480,14 @@ function App() {
       setSelectedIndex(-1)
       setSearchTerm("")
 
-      let items = menuItems
+      let items = suggestionMenuItems
       for (const id of newPath) {
         const item = items.find((i) => i.id === id)
         if (item && item.children) {
           items = item.children
         }
       }
-      setCurrentMenuItems(items)
+      setCurrentSuggestionMenuItems(items)
     }
   }
 
@@ -585,9 +520,7 @@ function App() {
     setEvents([])
 
     // Create a new EventSource connection
-    const eventSource = new EventSource(
-      `${apiHost}/tasks/${taskId}/events/stream`
-    )
+    const eventSource = new EventSource(apiService.getEventStreamUrl(taskId))
 
     // Handle connection open
     eventSource.onopen = () => {
@@ -597,12 +530,12 @@ function App() {
     // Handle incoming events
     eventSource.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data)
+        const data = JSON.parse(event.data) as TaskEvent
 
         // Check for completion message from server
         if (
           data.type === TaskEventType.SYSTEM &&
-          data.payload.status?.toLowerCase() === "event_stream_end"
+          (data.payload as SystemPayload).status === SystemEventStatus.EVENT_STREAM_END
         ) {
           console.log("Server indicated event stream end")
 
@@ -728,83 +661,68 @@ function App() {
   }, [])
 
   const handleTaskSubmission = async () => {
-    hideNotification() // Hide notification on task submission
+    hideNotification()
     try {
-      // 禁用输入框
-      setInputDisabled(true)
-
-      const response = await fetch(`${apiHost}/tasks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // 更新UI状态
+      setInteractionState(prev => ({
+        ...prev,
+        input: { ...prev.input, enabled: false },
+        taskControls: {
+          ...prev.taskControls,
+          enabled: true,
+          visible: true,
+          pauseButton: { enabled: true, visible: true },
+          stopButton: { enabled: true, visible: true }
         },
-        body: JSON.stringify({
-          content: input,
-          crx_mode: true,
-        }),
-      })
+        sendButton: { enabled: false, visible: false }
+      }))
 
-      if (!response.ok) {
-        throw new Error(`Request failed with status: ${response.status}`)
+      const taskContext = await apiService.createTask(input)
+      const taskId = taskContext.id
+
+      if (!taskId) {
+        throw new Error("Failed to get task ID from server")
       }
 
-      // 开始任务，默认为运行状态，并显示控制按钮
-      setTaskState({
-        running: true,
-        showControls: true,
-        taskId: undefined, // 初始未知ID
+      // 开始任务，使用从响应中获取的taskId
+      setTaskContext({
+        id: taskId,
+        state: taskContext.state as TaskState
       })
 
-      const data = await response.json()
-      const taskId = data.id
-
       await connectToPlaywrightServer(
-        `${apiHost}/ws/playwright?task_id=${taskId}`,
+        apiService.getPlaywrightWebSocketUrl(taskId),
         async () => {
           // WebSocket 连接断开时查询任务状态
           try {
-            const taskStatusResponse = await fetch(`${apiHost}/tasks/${taskId}`, {
-              method: 'GET',
-              headers: {
-                'accept': 'application/json'
-              }
-            });
+            const taskContext = await apiService.getTask(taskId)
 
-            if (!taskStatusResponse.ok) {
-              throw new Error(`Failed to fetch task status: ${taskStatusResponse.status}`);
-            }
-
-            const taskStatus = await taskStatusResponse.json();
-
-            // 更新任务状态
-            setTaskState(prev => ({
+            // 更新任务状态，确保转换为TaskState类型
+            setTaskContext(prev => ({
               ...prev,
-              status: taskStatus.state
-            }));
+              state: taskContext.state as TaskState
+            }))
           } catch (error) {
-            console.error('Error fetching task status:', error);
+            console.error('Error fetching task status:', error)
           }
         }
       )
       connectToEventStream(taskId)
 
-      // 更新任务状态，并开启显示taskId
-      setTaskState((prev) => ({
+      // 更新任务状态为运行中
+      setTaskContext((prev) => ({
         ...prev,
-        taskId: data.id || "unknown",
+        state: TaskState.RUNNING
       }))
-      setShowTaskId(true) // Enable task ID display when we have a valid ID
     } catch (error) {
       console.error("Error:", error)
 
       // Check for connection refused errors
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred"
-      const isConnectionRefused =
-        errorMessage.toLowerCase().includes("err_connection_refused") ||
-        errorMessage.toLowerCase().includes("failed to fetch") ||
-        errorMessage.toLowerCase().includes("networkerror") ||
-        errorMessage.toLowerCase().includes("network error")
+      const isConnectionRefused = Array.from(CONNECTION_REFUSED_ERROR_KEYWORDS).some(keyword =>
+        errorMessage.toLowerCase().includes(keyword)
+      )
 
       setNotification({
         message: isConnectionRefused
@@ -816,46 +734,44 @@ function App() {
         visible: true,
       })
 
-      // 出错时重新启用输入框并隐藏控制按钮
-      setInputDisabled(false)
-      setTaskState((prev) => ({ ...prev, showControls: false }))
+      setInteractionState(prev => ({
+        ...prev,
+        input: { ...prev.input, enabled: true },
+        taskControls: {
+          ...prev.taskControls,
+          enabled: false,
+          visible: false,
+          pauseButton: { enabled: false, visible: false },
+          stopButton: { enabled: false, visible: false }
+        },
+        sendButton: { enabled: true, visible: true }
+      }))
     }
   }
 
   // 切换暂停/恢复状态
   const toggleTaskPauseState = async () => {
     hideNotification() // Hide notification on pause/resume
-    if (taskState.taskId) {
+    if (taskContext.id) {
       try {
         // Determine the target state based on current running state
-        const targetState = taskState.running ? "paused" : "running"
+        const targetState = taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING
 
-        const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            target_state: targetState,
-          }),
-        })
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to ${taskState.running ? "pause" : "resume"} task: ${response.status}`
-          )
-        }
+        await apiService.updateTaskState(taskContext.id, targetState)
 
         console.log(
-          `Task ${taskState.running ? "paused" : "resumed"}: ${taskState.taskId}`
+          `Task ${taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING}: ${taskContext.id}`
         )
 
         // Update task state after successful API call
-        setTaskState((prev) => ({ ...prev, running: !prev.running }))
+        setTaskContext(prev => ({
+          ...prev,
+          state: targetState
+        }))
       } catch (error) {
         console.error("Error toggling task state:", error)
         setNotification({
-          message: `Failed to ${taskState.running ? "pause" : "resume"} task: ${error instanceof Error ? error.message : "Unknown error"}`,
+          message: `Failed to ${taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING} task: ${error instanceof Error ? error.message : "Unknown error"}`,
           type: "error",
           visible: true,
         })
@@ -864,25 +780,13 @@ function App() {
   }
 
   // 停止任务
-  const stopAndResetTask = async () => {
-    hideNotification() // Hide notification on stop
-    if (taskState.taskId) {
+  const stopTask = async () => {
+    hideNotification()
+    if (taskContext.id) {
       try {
-        const response = await fetch(`${apiHost}/tasks/${taskState.taskId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            target_state: "stopped",
-          }),
-        })
+        await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
 
-        if (!response.ok) {
-          throw new Error(`Failed to stop task: ${response.status}`)
-        }
-
-        console.log(`Task stopped: ${taskState.taskId}`)
+        console.log(`Task stopped: ${taskContext.id}`)
 
         // Close the event stream connection
         if (eventSourceRef.current) {
@@ -890,34 +794,50 @@ function App() {
           eventSourceRef.current = null
         }
 
-        // Reset all states only after successful API call
-        setTaskState({
-          running: false,
-          taskId: undefined,
-          showControls: false,
+        // Reset states but keep taskId
+        setTaskContext({
+          id: taskContext.id,
+          state: TaskState.STOPPED
         })
-        setInputDisabled(false)
-        setShowTaskId(false) // Hide task ID when task is stopped
+        setInteractionState(prev => ({
+          ...prev,
+          input: { ...prev.input, enabled: false },
+          taskControls: {
+            ...prev.taskControls,
+            enabled: false,
+            visible: false,
+            pauseButton: { enabled: false, visible: false },
+            stopButton: { enabled: false, visible: false }
+          },
+          sendButton: { enabled: false, visible: false },
+          taskId: { enabled: true, visible: true }
+        }))
       } catch (error) {
-        console.error("Error stopping task:", error)
+        console.warn("Error stopping task so that the websocket will be closed directly:", error)
+        await disconnectFromPlaywrightServer()
         setNotification({
           message: `Failed to stop task: ${error instanceof Error ? error.message : "Unknown error"}`,
           type: "error",
           visible: true,
         })
-        // Do not reset task state on error - keep showing task controls
       }
     }
   }
 
   // 新增: 重置为新任务状态
   const resetToNewTask = async () => {
-    // Hide any existing notification
     hideNotification()
-
     try {
-      // Disconnect from Playwright server
-      await disconnectFromPlaywrightServer()
+      // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so, and wait the websocket to be closed(TODO)
+      if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
+        try {
+          await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
+          console.log(`Task stopped: ${taskContext.id}`)
+        } catch (error) {
+          console.warn("Error stopping task so that the websocket will be closed directly:", error)
+          await disconnectFromPlaywrightServer()
+        }
+      }
 
       // Close event source connection if exists
       if (eventSourceRef.current) {
@@ -925,22 +845,17 @@ function App() {
         eventSourceRef.current = null
       }
 
+      // Reset task state
+      setTaskContext({
+        id: undefined,
+        state: undefined
+      })
+
       // Clear input and events
       setInput("")
       setEvents([])
-
-      // Reset task state and controls
-      setTaskState({
-        running: false,
-        taskId: undefined,
-        showControls: false,
-      })
-
-      // Enable input field
-      setInputDisabled(false)
-
-      // Hide task ID display
-      setShowTaskId(false)
+      // 重置UI状态
+      setInteractionState(DEFAULT_INTERACTION_STATE)
 
       // Focus on the textarea
       if (textareaRef.current) {
@@ -964,7 +879,7 @@ function App() {
           value={mode}
           onChange={(e) => setMode(e.target.value as Mode)}
           className="mode-select"
-          disabled={inputDisabled}
+          disabled={!interactionState.input.enabled}
         >
           <option value="agent">Agent</option>
           <option value="chat">Chat</option>
@@ -981,9 +896,10 @@ function App() {
   /** Determine if an event is a parent (level 1) */
   const isParentEvent = (event: TaskEvent) => {
     if (event.type !== TaskEventType.LOG) return false
-    const content = event.payload.message.toLowerCase()
-    return PARENT_EVENT_PATTERNS.some((pattern) =>
-      content.includes(pattern.toLowerCase())
+    const payload = event.payload as LogPayload
+    const lowercaseEventMessage = payload.message.toLowerCase()
+    return PARENT_EVENT_KEYWORDS.some((pattern) =>
+      lowercaseEventMessage.includes(pattern.toLowerCase())
     )
   }
 
@@ -1048,7 +964,7 @@ function App() {
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
-            disabled={inputDisabled} // 添加disabled属性
+            disabled={!interactionState.input.enabled}
           />
         </div>
 
@@ -1086,7 +1002,7 @@ function App() {
                 />
               </div>
             ) : (
-              filteredMenuItems.map((item, index) => (
+              filteredSuggestionMenuItems.map((item, index) => (
                 <div
                   key={item.id}
                   className={`suggestion-item ${index === selectedIndex ? "selected" : ""}`}
@@ -1107,7 +1023,7 @@ function App() {
           <div className="left-controls">
             {renderModeSelector()}
             {llmSelectEnabled && (
-              <select className="llm-select" disabled={inputDisabled}>
+              <select className="llm-select" disabled={!interactionState.input.enabled}>
                 <option value="gpt4">GPT-4o</option>
                 <option value="claude">Claude 3.5 Sonnet (Preview)</option>
                 <option value="claude">Claude 3.7 Sonnet (Preview)</option>
@@ -1120,33 +1036,36 @@ function App() {
           </div>
 
           <div className="right-controls">
-            {taskState.showControls ? (
+            {interactionState.taskControls.visible ? (
               <div className="task-control-buttons">
-                {taskState.status !== "completed" &&
-                 taskState.status !== "failed" &&
-                 taskState.status !== "stopped" && (
+                {taskContext.state === TaskState.RUNNING && (
                   <>
                     <button
-                      className={`pause-resume-button ${taskState.running ? "running" : "paused"}`}
+                      className="pause-resume-button running"
                       onClick={toggleTaskPauseState}
+                      disabled={!interactionState.taskControls.pauseButton.enabled}
                     >
-                      {taskState.running ? PAUSE_SYMBOL : RESUME_SYMBOL}
+                      {taskContext.state === TaskState.RUNNING ? PAUSE_SYMBOL : RESUME_SYMBOL}
                     </button>
-                    <button className="stop-button" onClick={stopAndResetTask}>
+                    <button
+                      className="stop-button"
+                      onClick={stopTask}
+                      disabled={!interactionState.taskControls.stopButton.enabled}
+                    >
                       {STOP_SYMBOL}
                     </button>
                   </>
                 )}
               </div>
-            ) : (
+            ) : interactionState.sendButton.visible ? (
               <button
                 className="send-button"
                 onClick={handleTaskSubmission}
-                disabled={inputDisabled}
+                disabled={!interactionState.sendButton.enabled}
               >
                 Send ⏎
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -1166,13 +1085,13 @@ function App() {
       )}
 
       {/* Display task ID when notification is closed and we have a task running */}
-      {showTaskId && taskState.taskId && !notification.visible && (
+      {interactionState.taskId.visible && taskContext.id && !notification.visible && (
         <div className="task-id-display">
           <small>
-            Task ID: {taskState.taskId}
+            Task ID: {taskContext.id}
             <button
               className="copy-task-id-button"
-              onClick={() => copyToClipboard(taskState.taskId || "")}
+              onClick={() => copyToClipboard(taskContext.id || "")}
               title="Copy Task ID"
             >
               <svg
@@ -1207,7 +1126,7 @@ function App() {
       <div ref={eventStreamRef} className="event-stream-area">
         {events.map((event, index) => {
           // Determine content based on event type
-          let content = ""
+          let eventMessage = ""
           const eventItemClassNameList = ["event-item"]
           const isParent = isParentEvent(event)
 
@@ -1219,16 +1138,19 @@ function App() {
           }
 
           if (event.type === TaskEventType.LOG) {
-            content = event.payload.message
+            const payload = event.payload as LogPayload
+            eventMessage = payload.message
             eventItemClassNameList.push(
               "event-log",
-              `event-log-${event.payload.level.toLowerCase()}`
+              `event-log-${payload.level.toLowerCase()}`
             )
           } else if (event.type === TaskEventType.ACTION) {
-            content = JSON.stringify(event.payload)
+            const payload = event.payload as ActionPayload
+            eventMessage = JSON.stringify(payload)
             eventItemClassNameList.push("event-action")
           } else {
-            content = JSON.stringify(event.payload)
+            const payload = event.payload as SystemPayload
+            eventMessage = JSON.stringify(payload)
             eventItemClassNameList.push("event-unknown")
           }
 
@@ -1268,20 +1190,17 @@ function App() {
                   <div className="event-timestamp">
                     {formatTimestampWith24HourAndMicros(event.timestamp)}
                   </div>
-                  <div className="event-content">{content}</div>
+                  <div className="event-content">{eventMessage}</div>
                 </div>
               </div>
             </div>
           )
         })}
 
-        {/* Working indicator - only shown when task is running */}
-        {taskState.running && (
-          <div className={`working-indicator ${taskState.status || 'working'}`}>
-            {taskState.status === "completed" ? "Completed" :
-             taskState.status === "failed" ? "Failed" :
-             taskState.status === "stopped" ? "Stopped" :
-             "Working"}
+        {/* Working indicator - shown when task is running or stopped */}
+        {taskContext.state && (
+          <div className={`progress-indicator ${TASK_ACTIVE_STATES.has(taskContext.state) ? 'working' : taskContext.state}`}>
+            {getTaskStateDisplayText(taskContext.state)}
           </div>
         )}
       </div>

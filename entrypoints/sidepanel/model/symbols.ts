@@ -7,12 +7,3 @@ export const STOP_SYMBOL = "■"
 export const DOWN_ARROW_SYMBOL = "↓"
 export const TO_EXPAND_SYMBOL = "▶"
 export const TO_COLLAPSE_SYMBOL = "▼"
-export const PARENT_EVENT_PATTERNS = [
-  "🚀 Starting",
-  "📍 Step",
-  "✅ Task completed",
-  "✅ Successfully",
-  "❌ Unfinished",
-  "❌ Failed to complete task",
-  "📄 Result",
-]
