@@ -1043,10 +1043,10 @@ function App() {
           <div className="right-controls">
             {interactionState.taskControls.visible ? (
               <div className="task-control-buttons">
-                {taskContext.state === TaskState.RUNNING && (
+                {taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
                   <>
                     <button
-                      className="pause-resume-button running"
+                      className={`pause-resume-button ${taskContext.state}`}
                       onClick={toggleTaskPauseState}
                       disabled={!interactionState.taskControls.pauseButton.enabled}
                     >
