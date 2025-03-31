@@ -784,30 +784,35 @@ function App() {
     }
   }
 
+  const terminateTaskOrConnection = async () => {
+    // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so
+    if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
+      try {
+        // 显示加载中的通知
+        setNotification({
+          message: "Stopping task...",
+          type: "info",
+          visible: true
+        })
+
+        await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
+        console.log(`Task stopped: ${taskContext.id}`)
+
+        // 停止成功后隐藏通知
+        hideNotification()
+      } catch (error) {
+        console.warn("Error stopping task so that the websocket will be closed directly:", error)
+        await disconnectFromPlaywrightServer()
+      }
+    }
+  }
+
   // 停止任务
   const stopTask = async () => {
     hideNotification()
     if (taskContext.id) {
       try {
-        if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
-          try {
-            // 显示加载中的通知
-            setNotification({
-              message: "Stopping task...",
-              type: "info",
-              visible: true
-            })
-
-            await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
-            console.log(`Task stopped: ${taskContext.id}`)
-
-            // 停止成功后隐藏通知
-            hideNotification()
-          } catch (error) {
-            console.warn("Error stopping task so that the websocket will be closed directly:", error)
-            await disconnectFromPlaywrightServer()
-          }
-        }
+        await terminateTaskOrConnection()
 
         // Close the event stream connection
         if (eventSourceRef.current) {
@@ -849,26 +854,7 @@ function App() {
   const resetToNewTask = async () => {
     hideNotification()
     try {
-      // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so, and wait the websocket to be closed(TODO)
-      if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
-        try {
-          // 显示加载中的通知
-          setNotification({
-            message: "Stopping task...",
-            type: "info",
-            visible: true
-          })
-
-          await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
-          console.log(`Task stopped: ${taskContext.id}`)
-
-          // 停止成功后隐藏通知
-          hideNotification()
-        } catch (error) {
-          console.warn("Error stopping task so that the websocket will be closed directly:", error)
-          await disconnectFromPlaywrightServer()
-        }
-      }
+      await terminateTaskOrConnection()
 
       // Close event source connection if exists
       if (eventSourceRef.current) {
