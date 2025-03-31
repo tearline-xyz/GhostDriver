@@ -1204,7 +1204,7 @@ function App() {
 
         {/* Working indicator - shown when task is running or stopped */}
         {taskContext.state && (
-          <div className={`progress-indicator ${TASK_ACTIVE_STATES.has(taskContext.state) ? 'working' : taskContext.state}`}>
+          <div className={`progress-indicator ${taskContext.state === TaskState.RUNNING ? 'working' : taskContext.state}`}>
             {getTaskStateDisplayText(taskContext.state)}
           </div>
         )}

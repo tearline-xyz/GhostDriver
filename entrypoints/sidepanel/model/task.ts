@@ -43,8 +43,9 @@ export function getTaskStateDisplayText(state?: TaskState): string {
     case TaskState.STOPPED:
       return "Stopped"
     case TaskState.RUNNING:
-    case TaskState.PAUSED:
       return "Working"
+    case TaskState.PAUSED:
+      return "Paused"
     case TaskState.CREATED:
       return "Created"
     default:

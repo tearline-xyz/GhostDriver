@@ -605,19 +605,6 @@
   100% { content: "."; }
 }
 
-.progress-indicator.completed::after,
-.progress-indicator.failed::after,
-.progress-indicator.stopped::after {
-  content: "";
-  animation: none;
-}
-
-.progress-indicator.completed,
-.progress-indicator.failed,
-.progress-indicator.stopped {
-  color: #ffffff;
-}
-
 .scroll-to-bottom-button {
   position: fixed;
   bottom: 20px;
