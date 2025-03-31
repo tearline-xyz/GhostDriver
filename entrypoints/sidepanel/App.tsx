@@ -719,7 +719,7 @@ function App() {
         state: TaskState.RUNNING
       }))
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Error creating or starting task:", error)
 
       // Check for connection refused errors
       const errorMessage =
@@ -789,9 +789,25 @@ function App() {
     hideNotification()
     if (taskContext.id) {
       try {
-        await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
+        if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
+          try {
+            // 显示加载中的通知
+            setNotification({
+              message: "Stopping task...",
+              type: "info",
+              visible: true
+            })
 
-        console.log(`Task stopped: ${taskContext.id}`)
+            await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
+            console.log(`Task stopped: ${taskContext.id}`)
+
+            // 停止成功后隐藏通知
+            hideNotification()
+          } catch (error) {
+            console.warn("Error stopping task so that the websocket will be closed directly:", error)
+            await disconnectFromPlaywrightServer()
+          }
+        }
 
         // Close the event stream connection
         if (eventSourceRef.current) {
@@ -836,8 +852,18 @@ function App() {
       // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so, and wait the websocket to be closed(TODO)
       if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
         try {
+          // 显示加载中的通知
+          setNotification({
+            message: "Stopping task...",
+            type: "info",
+            visible: true
+          })
+
           await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
           console.log(`Task stopped: ${taskContext.id}`)
+
+          // 停止成功后隐藏通知
+          hideNotification()
         } catch (error) {
           console.warn("Error stopping task so that the websocket will be closed directly:", error)
           await disconnectFromPlaywrightServer()
@@ -933,7 +959,7 @@ function App() {
         }, 2000)
       })
       .catch((err) => {
-        console.error("Failed to copy:", err)
+        console.warn("Failed to copy:", err)
         setNotification({
           message: "Failed to copy to clipboard",
           type: "error",
@@ -1043,7 +1069,9 @@ function App() {
           <div className="right-controls">
             {interactionState.taskControls.visible ? (
               <div className="task-control-buttons">
-                {taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
+                {
+                // Not show control buttons when task state is created as there is no agent being attached to the task
+                taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
                   <>
                     <button
                       className={`pause-resume-button ${taskContext.state}`}
