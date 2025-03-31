@@ -2,7 +2,7 @@
 
 为了便于用户使用Browser-use，我们需要开发一个浏览器扩展和后端服务，实现让用户通过自然语言描述任务，经由AI分析后控制浏览器自动执行，该项目是前端部分。
 
-## Simplified version release strategy
+## 简化的版本发布策略
 
 - `alpha`
     - 内部测试版本，预期有较多问题。
@@ -31,7 +31,7 @@
 1.0.0            (正式发布版)
 ```
 
-## Development
+## 开发
 
 ### playwright-crx
 
@@ -42,7 +42,15 @@
 ./auto/build-playwright-crx.sh
 ```
 
-## [Publish](https://wxt.dev/guide/essentials/publishing.html)
+另外，如果需要对playwright-crx进行了修改，请确保位于tearline分支，最后不要忘记提交：
+
+```bash
+cd ./playwright-crx
+...
+git push tearline tearline:tearline
+```
+
+## [发布](https://wxt.dev/guide/essentials/publishing.html)
 
 1. 修改package.json中的version字段的值。
-2. 执行`pnpm zip`
+2. 执行`pnpm zip`，在`dist`目录下会生成一个zip文件，命名为`tearline-auto-browser-x.x.x.zip`，其中x.x.x是版本号。
