@@ -41,3 +41,8 @@
 ```bash
 ./auto/build-playwright-crx.sh
 ```
+
+## [Publish](https://wxt.dev/guide/essentials/publishing.html)
+
+1. 修改package.json中的version字段的值。
+2. 执行`pnpm zip`
