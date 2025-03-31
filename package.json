@@ -2,7 +2,7 @@
   "name": "tearline-auto-browser",
   "description": "manifest.json description",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

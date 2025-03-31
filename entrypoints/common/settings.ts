@@ -1,4 +1,6 @@
-export const VERSION = "1.0.0-alpha.1"
+import { version } from "../../package.json"
+
+export const VERSION = version
 
 export const TEARLINE_HOST = "www1.test.tearline.io"
 
