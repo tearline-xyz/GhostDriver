@@ -347,9 +347,7 @@ function App() {
    * Helper function to hide notifications
    */
   const hideNotification = () => {
-    if (notification.visible) {
-      setNotification((prev) => ({ ...prev, visible: false }))
-    }
+    setNotification(prev => ({ ...prev, visible: false }))
   }
 
   /**
@@ -798,8 +796,10 @@ function App() {
         await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
         console.log(`Task stopped: ${taskContext.id}`)
 
-        // 停止成功后隐藏通知
-        hideNotification()
+        // 延迟1秒后隐藏通知
+        setTimeout(() => {
+          hideNotification()
+        }, 1000)
       } catch (error) {
         console.warn("Error stopping task so that the websocket will be closed directly:", error)
         await disconnectFromPlaywrightServer()
@@ -1095,7 +1095,7 @@ function App() {
             <span>{notification.message}</span>
             <button
               className="notification-close"
-              onClick={hideNotification} // Updated to use the helper function
+              onClick={hideNotification}
             >
               ×
             </button>
@@ -1216,7 +1216,7 @@ function App() {
           )
         })}
 
-        {/* Working indicator - shown when task is running or stopped */}
+        {/* progress indicator - shown when task is working, stopped,... */}
         {taskContext.state && (
           <div className={`progress-indicator ${taskContext.state === TaskState.RUNNING ? 'working' : taskContext.state}`}>
             {getTaskStateDisplayText(taskContext.state)}
