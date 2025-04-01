@@ -68,8 +68,8 @@ export const DEFAULT_INTERACTION_STATE: InteractionState = {
     visible: true
   },
   taskId: {
-    enabled: false,
-    visible: false
+    enabled: true,
+    visible: true
   },
   modeSelector: {
     enabled: true,

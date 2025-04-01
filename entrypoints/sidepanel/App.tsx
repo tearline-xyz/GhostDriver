@@ -836,7 +836,6 @@ function App() {
             stopButton: { enabled: false, visible: false }
           },
           sendButton: { enabled: false, visible: false },
-          taskId: { enabled: true, visible: true }
         }))
       } catch (error) {
         console.warn("Error stopping task so that the websocket will be closed directly:", error)
