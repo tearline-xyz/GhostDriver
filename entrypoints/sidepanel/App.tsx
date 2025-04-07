@@ -19,7 +19,7 @@ import {
   DEFAULT_INTERACTION_TOGGLE,
   InteractionToggle,
 } from "./model/interactionToggle"
-import { Mode } from "./model/mode"
+import { Mode } from "../common/model/mode"
 import { SuggestionMenuItem, suggestionMenuItems } from "./model/suggestion"
 import {
   BACK_SYMBOL,
@@ -37,12 +37,12 @@ import {
   TaskContext,
   TaskState,
   getTaskStateDisplayText,
-} from "./model/task"
+} from "../common/model/task"
 import {
   NotificationState,
   DEFAULT_NOTIFICATION_STATE,
 } from "./model/notification"
-import { ApiService } from "./services/api"
+import { ApiService } from "../common/services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
 
 function App() {
