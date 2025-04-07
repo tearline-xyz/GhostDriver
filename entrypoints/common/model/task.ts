@@ -25,6 +25,57 @@ export const TASK_ACTIVE_STATES: Set<TaskState> = new Set([
 export interface TaskContext {
   id?: string
   state?: TaskState
+  content?: string
+  created_at?: string
+  initial_actions?: any
+  chat_model_tag?: string
+  result?: {
+    history: Array<{
+      model_output: {
+        current_state: {
+          evaluation_previous_goal: string
+          memory: string
+          next_goal: string
+        }
+        action: Array<Record<string, any>>
+      }
+      result: Array<{
+        is_done: boolean
+        success: boolean | null
+        extracted_content: string
+        error: string | null
+        include_in_memory: boolean
+      }>
+      state: {
+        url: string
+        title: string
+        tabs: Array<{
+          page_id: number
+          url: string
+          title: string
+        }>
+        interacted_element: Array<any>
+        screenshot: string | null
+      }
+      metadata: {
+        step_start_time: number
+        step_end_time: number
+        input_tokens: number
+        step_number: number
+      }
+    }>
+  }
+}
+
+// 空的 TaskContext 对象，用于初始化
+export const EMPTY_TASK_CONTEXT: TaskContext = {
+  id: undefined,
+  state: undefined,
+  content: undefined,
+  created_at: undefined,
+  initial_actions: undefined,
+  chat_model_tag: undefined,
+  result: undefined
 }
 
 /**

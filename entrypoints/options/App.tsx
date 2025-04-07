@@ -10,6 +10,8 @@ import {
 } from "../common/settings"
 import { authService } from "../../services/authService"
 import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
+import { ApiService } from "../common/services/api"
+import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/model/task"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -41,6 +43,7 @@ const App: React.FC = () => {
     email?: string
     userId?: string
   } | null>(null)
+  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT)
 
   // 状态更新函数
   const updateAuthStatus = useCallback(
@@ -173,6 +176,27 @@ const App: React.FC = () => {
     }
   }, [loadAuthStatus, loginTimeoutId, updateAuthStatus])
 
+  // 在组件挂载时检查 URL 参数并获取任务数据
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const taskId = urlParams.get("taskId")
+    const action = urlParams.get("action")
+
+    if (taskId && action === "share") {
+      const fetchTaskData = async () => {
+        try {
+          const apiService = new ApiService(apiHost)
+          const taskContext = await apiService.getTask(taskId)
+          setFocusedTaskContext(taskContext)
+        } catch (error) {
+          console.error("Error fetching task data:", error)
+          setFocusedTaskContext(EMPTY_TASK_CONTEXT)
+        }
+      }
+      fetchTaskData()
+    }
+  }, [apiHost])
+
   // Display status message with auto-clear functionality
   const showStatus = useCallback(
     (message: string, type: string, duration: number = 3000) => {
@@ -206,20 +230,6 @@ const App: React.FC = () => {
       showStatus("Settings saved!", "success")
     })
   }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig, showStatus])
-
-  // Helper function to get display name for mode config
-  const getModeConfigDisplayName = useCallback((config: ModeConfig): string => {
-    switch (config) {
-      case "agent_only":
-        return "Agent only"
-      case "chat_only":
-        return "Chat only"
-      case "both":
-        return "Both Agent and Chat"
-      default:
-        return config
-    }
-  }, [])
 
   // Handle login button click - extracted outside render
   const handleLogin = useCallback(async () => {
@@ -492,7 +502,37 @@ const App: React.FC = () => {
             <h2>History</h2>
             <div className="history-container">
               <p>Your interaction history will be displayed here.</p>
-              {/* 这里可以添加历史记录的具体内容 */}
+              {/* 模态窗口 */}
+              {(() => {
+                const urlParams = new URLSearchParams(window.location.search)
+                const taskId = urlParams.get("taskId")
+                const action = urlParams.get("action")
+
+                if (taskId && action === "share") {
+                  return (
+                    <div className="modal-overlay">
+                      <div className="modal-content">
+                        <h3>Task Details</h3>
+                        <div className="task-info">
+                          <pre>{JSON.stringify(focusedTaskContext, null, 2)}</pre>
+                        </div>
+                        <button
+                          className="close-button"
+                          onClick={() => {
+                            // 移除 URL 参数并刷新页面
+                            const newUrl = window.location.pathname + "?page=History"
+                            window.history.replaceState({}, "", newUrl)
+                            window.location.reload()
+                          }}
+                        >
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })()}
             </div>
           </>
         )

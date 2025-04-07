@@ -33,6 +33,7 @@ import {
   TO_EXPAND_SYMBOL,
 } from "./model/symbols"
 import {
+  EMPTY_TASK_CONTEXT,
   TASK_ACTIVE_STATES,
   TaskContext,
   TaskState,
@@ -94,10 +95,7 @@ function App() {
   )
 
   /** 控制任务状态 */
-  const [taskContext, setTaskContext] = useState<TaskContext>({
-    id: undefined,
-    state: undefined,
-  })
+  const [taskContext, setTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT)
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -903,10 +901,7 @@ function App() {
       }
 
       // Reset task state
-      setTaskContext({
-        id: undefined,
-        state: undefined,
-      })
+      setTaskContext(EMPTY_TASK_CONTEXT)
 
       // Clear input and events
       setInput("")
@@ -998,18 +993,13 @@ function App() {
     if (!taskContext.id) return
 
     try {
-      const taskInfo = await apiService.getTask(taskContext.id)
-      console.log("Task info:", taskInfo)
-      // TODO: 这里可以添加分享逻辑，比如复制到剪贴板或打开分享对话框
-      setNotification({
-        message: "Task info retrieved successfully",
-        type: "success",
-        visible: true,
+      // 跳转到 history 页面，并携带 task id 和 share 动作参数
+      chrome.tabs.create({
+        url: chrome.runtime.getURL(`options.html?page=History&taskId=${taskContext.id}&action=share`)
       })
     } catch (error) {
-      console.error("Error getting task info:", error)
       setNotification({
-        message: "Failed to get task info",
+        message: "Failed to open history page",
         type: "error",
         visible: true,
       })
