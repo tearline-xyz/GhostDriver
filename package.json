@@ -5,7 +5,7 @@
   "version": "1.0.0-alpha.1",
   "type": "module",
   "scripts": {
-    "dev": "WXT_TEARLINE_AUTO_BROWSER_VERSION=dev.alpha.$(date +%Y%m%d%H%M%S) wxt",
+    "dev": "WXT_TEARLINE_AUTO_BROWSER_DEV_VERSION=dev.alpha.$(date +%Y%m%d%H%M%S) wxt",
     "dev:firefox": "wxt -b firefox",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "build": "wxt build",
