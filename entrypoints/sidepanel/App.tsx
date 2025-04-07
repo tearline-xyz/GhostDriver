@@ -12,7 +12,7 @@ import {
   TaskEvent,
   TaskEventType
 } from "./model/events"
-import { DEFAULT_INTERACTION_STATE, InteractionState } from "./model/interactionState"
+import { DEFAULT_INTERACTION_TOGGLE, InteractionToggle } from "./model/interactionToggle"
 import { Mode } from "./model/mode"
 import { SuggestionMenuItem, suggestionMenuItems } from "./model/suggestion"
 import {
@@ -73,7 +73,7 @@ function App() {
   const [notification, setNotification] = useState<NotificationState>(DEFAULT_NOTIFICATION_STATE)
 
   /** 控制UI状态 */
-  const [interactionState, setInteractionState] = useState<InteractionState>(DEFAULT_INTERACTION_STATE)
+  const [interactionToggle, setInteractionToggle] = useState<InteractionToggle>(DEFAULT_INTERACTION_TOGGLE)
 
   /** 控制任务状态 */
   const [taskContext, setTaskContext] = useState<TaskContext>({
@@ -662,7 +662,7 @@ function App() {
   const handleTaskSubmission = async () => {
     hideNotification()
 
-    setInteractionState(prev => ({
+    setInteractionToggle(prev => ({
       ...prev,
       input: { ...prev.input, enabled: false },
       taskControls: {
@@ -738,7 +738,7 @@ function App() {
       })
 
       // 发生错误时恢复 UI 状态
-      setInteractionState(prev => ({
+      setInteractionToggle(prev => ({
         ...prev,
         input: { ...prev.input, enabled: true },
         taskControls: {
@@ -826,7 +826,7 @@ function App() {
           id: taskContext.id,
           state: TaskState.STOPPED
         })
-        setInteractionState(prev => ({
+        setInteractionToggle(prev => ({
           ...prev,
           input: { ...prev.input, enabled: false },
           taskControls: {
@@ -872,7 +872,7 @@ function App() {
       setInput("")
       setEvents([])
       // 重置UI状态
-      setInteractionState(DEFAULT_INTERACTION_STATE)
+      setInteractionToggle(DEFAULT_INTERACTION_TOGGLE)
 
       // Focus on the textarea
       if (textareaRef.current) {
@@ -896,7 +896,7 @@ function App() {
           value={mode}
           onChange={(e) => setMode(e.target.value as Mode)}
           className="mode-select"
-          disabled={!interactionState.input.enabled}
+          disabled={!interactionToggle.input.enabled}
         >
           <option value="agent">Agent</option>
           <option value="chat">Chat</option>
@@ -1016,7 +1016,7 @@ function App() {
             placeholder="Plan, search, do anything"
             className="main-input"
             spellCheck={false}
-            disabled={!interactionState.input.enabled}
+            disabled={!interactionToggle.input.enabled}
           />
         </div>
 
@@ -1075,7 +1075,7 @@ function App() {
           <div className="left-controls">
             {renderModeSelector()}
             {llmSelectEnabled && (
-              <select className="llm-select" disabled={!interactionState.input.enabled}>
+              <select className="llm-select" disabled={!interactionToggle.input.enabled}>
                 <option value="gpt4">GPT-4o</option>
                 <option value="claude">Claude 3.5 Sonnet (Preview)</option>
                 <option value="claude">Claude 3.7 Sonnet (Preview)</option>
@@ -1088,39 +1088,39 @@ function App() {
           </div>
 
           <div className="right-controls">
-            {interactionState.taskControls.visible && taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
+            {interactionToggle.taskControls.visible && taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
               // NOTE: Not show control buttons when task state is created as there is no agent being attached to the task
               <div className="task-control-buttons">
                 <button
                   className={`pause-resume-button ${taskContext.state}`}
                   onClick={toggleTaskPauseState}
-                  disabled={!interactionState.taskControls.pauseButton.enabled}
+                  disabled={!interactionToggle.taskControls.pauseButton.enabled}
                 >
                   {taskContext.state === TaskState.RUNNING ? PAUSE_SYMBOL : RESUME_SYMBOL}
                 </button>
                 <button
                   className="stop-button"
                   onClick={stopTask}
-                  disabled={!interactionState.taskControls.stopButton.enabled}
+                  disabled={!interactionToggle.taskControls.stopButton.enabled}
                 >
                   {STOP_SYMBOL}
                 </button>
               </div>
             )}
-            {interactionState.shareButton.visible && taskContext.state && taskContext.state === TaskState.COMPLETED && (
+            {interactionToggle.shareButton.visible && taskContext.state && taskContext.state === TaskState.COMPLETED && (
               <button
                 className="share-button"
                 onClick={handleShareAction}
-                disabled={!interactionState.shareButton.enabled}
+                disabled={!interactionToggle.shareButton.enabled}
               >
                 Share
               </button>
             )}
-            {interactionState.sendButton.visible && (
+            {interactionToggle.sendButton.visible && (
               <button
                 className="send-button"
                 onClick={handleTaskSubmission}
-                disabled={!interactionState.sendButton.enabled}
+                disabled={!interactionToggle.sendButton.enabled}
               >
                 Send ⏎
               </button>
@@ -1144,7 +1144,7 @@ function App() {
       )}
 
       {/* Display task ID when notification is closed and we have a task running */}
-      {interactionState.taskId.visible && taskContext.id && !notification.visible && (
+      {interactionToggle.taskId.visible && taskContext.id && !notification.visible && (
         <div className="task-id-display">
           <small>
             Task ID: {taskContext.id}

@@ -1,5 +1,5 @@
 // UI状态接口
-export interface InteractionState {
+export interface InteractionToggle {
   // 输入区域控制
   input: {
     enabled: boolean;
@@ -52,7 +52,7 @@ export interface InteractionState {
 }
 
 // 默认UI状态
-export const DEFAULT_INTERACTION_STATE: InteractionState = {
+export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
   input: {
     enabled: true,
     visible: true
