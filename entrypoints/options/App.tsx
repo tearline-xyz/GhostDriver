@@ -282,36 +282,6 @@ const App: React.FC = () => {
     [showStatus]
   )
 
-  // Format user display information
-  const formatUserDisplay = useCallback(() => {
-    if (!userInfo) return null
-
-    const name = userInfo.name?.trim()
-    const email = userInfo.email?.trim()
-    const userId = userInfo.userId?.trim()
-
-    return (
-      <>
-        {name && <p className="user-name">{name}</p>}
-        {email && <p className="user-email">{email}</p>}
-        {userId && (
-          <div className="user-id-container">
-            <p className="user-id">{userId}</p>
-            <button
-              className="copy-button"
-              onClick={() => copyToClipboard(userId)}
-              title="Copy User ID"
-            >
-              <img src={CopyIcon} alt="Copy" />
-            </button>
-          </div>
-        )}
-        {!name && !email && !userId && (
-          <p className="user-unknown">Account connected</p>
-        )}
-      </>
-    )
-  }, [userInfo, copyToClipboard])
 
   // Helper function to check if current version is alpha
   const isAlphaVersion = useCallback(() => {

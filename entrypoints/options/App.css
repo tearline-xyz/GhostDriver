@@ -220,45 +220,6 @@
   margin-bottom: 12px;
 }
 
-/* User profile info styling */
-.user-id-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.user-id {
-  margin: 0;
-  color: #666;
-  font-style: italic;
-  font-size: 0.9rem; /* Match the font size of user-email */
-}
-
-.copy-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.copy-button:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.user-name {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.user-email {
-  font-size: 0.9rem;
-  margin-bottom: 8px;
-}
-
 /* Auth button container and styling */
 .auth-button-container {
   display: flex;
@@ -375,8 +336,7 @@
 
 .detail-value.user-id {
   font-family: monospace;
-  background: #f5f5f5;
-  padding: 4px 8px;
+  padding: 0px;
   border-radius: 4px;
   font-size: 13px;
 }
@@ -384,11 +344,13 @@
 .detail-value-with-action {
   display: flex;
   align-items: center;
+  gap: 4px;
+  width: fit-content; /* 宽度适应内容 */
 }
 
 .detail-value-with-action .detail-value {
-  flex: 1;
-  margin-right: 8px;
+  flex: 0 1 auto; /* 允许收缩，但不强制增长 */
+  margin-right: 0;
 }
 
 .copy-button {
@@ -398,9 +360,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 0;
   border-radius: 4px;
   transition: background-color 0.2s;
+  min-width: 20px;
+  min-height: 20px;
+  flex-shrink: 0; /* 防止按钮被压缩 */
 }
 
 .copy-button:hover {
