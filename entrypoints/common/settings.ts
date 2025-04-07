@@ -1,6 +1,9 @@
 import { version } from "../../package.json"
 
-export const VERSION = version
+// @ts-ignore
+// WXT 框架会自动处理 WXT_ 开头的环境变量，并将其注入到客户端代码中。
+// 这里我们使用 WXT_TEARLINE_AUTO_BROWSER_VERSION 环境变量来优先获取版本号，以确保开发阶段的版本号能自定义
+export const VERSION = import.meta.env.WXT_TEARLINE_AUTO_BROWSER_VERSION || version
 
 export const TEARLINE_HOST = "www1.test.tearline.io"
 
