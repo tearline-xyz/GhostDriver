@@ -26,6 +26,12 @@ export interface InteractionState {
     visible: boolean;
   };
 
+  // 分享按钮
+  shareButton: {
+    enabled: boolean;
+    visible: boolean;
+  };
+
   // 任务ID显示
   taskId: {
     enabled: boolean;
@@ -64,6 +70,10 @@ export const DEFAULT_INTERACTION_STATE: InteractionState = {
     }
   },
   sendButton: {
+    enabled: true,
+    visible: true
+  },
+  shareButton: {
     enabled: true,
     visible: true
   },

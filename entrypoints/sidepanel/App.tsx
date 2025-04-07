@@ -954,6 +954,28 @@ function App() {
       })
   }, [])
 
+  const handleShareAction = async () => {
+    if (!taskContext.id) return
+
+    try {
+      const taskInfo = await apiService.getTask(taskContext.id)
+      console.log('Task info:', taskInfo)
+      // TODO: 这里可以添加分享逻辑，比如复制到剪贴板或打开分享对话框
+      setNotification({
+        message: 'Task info retrieved successfully',
+        type: 'success',
+        visible: true
+      })
+    } catch (error) {
+      console.error('Error getting task info:', error)
+      setNotification({
+        message: 'Failed to get task info',
+        type: 'error',
+        visible: true
+      })
+    }
+  }
+
   return (
     <div className="app-container">
       {/* Toolbar container that can hold multiple buttons */}
@@ -1066,30 +1088,35 @@ function App() {
           </div>
 
           <div className="right-controls">
-            {interactionState.taskControls.visible ? (
+            {interactionState.taskControls.visible && taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
+              // NOTE: Not show control buttons when task state is created as there is no agent being attached to the task
               <div className="task-control-buttons">
-                {
-                // Not show control buttons when task state is created as there is no agent being attached to the task
-                taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
-                  <>
-                    <button
-                      className={`pause-resume-button ${taskContext.state}`}
-                      onClick={toggleTaskPauseState}
-                      disabled={!interactionState.taskControls.pauseButton.enabled}
-                    >
-                      {taskContext.state === TaskState.RUNNING ? PAUSE_SYMBOL : RESUME_SYMBOL}
-                    </button>
-                    <button
-                      className="stop-button"
-                      onClick={stopTask}
-                      disabled={!interactionState.taskControls.stopButton.enabled}
-                    >
-                      {STOP_SYMBOL}
-                    </button>
-                  </>
-                )}
+                <button
+                  className={`pause-resume-button ${taskContext.state}`}
+                  onClick={toggleTaskPauseState}
+                  disabled={!interactionState.taskControls.pauseButton.enabled}
+                >
+                  {taskContext.state === TaskState.RUNNING ? PAUSE_SYMBOL : RESUME_SYMBOL}
+                </button>
+                <button
+                  className="stop-button"
+                  onClick={stopTask}
+                  disabled={!interactionState.taskControls.stopButton.enabled}
+                >
+                  {STOP_SYMBOL}
+                </button>
               </div>
-            ) : interactionState.sendButton.visible ? (
+            )}
+            {interactionState.shareButton.visible && taskContext.state && taskContext.state === TaskState.COMPLETED && (
+              <button
+                className="share-button"
+                onClick={handleShareAction}
+                disabled={!interactionState.shareButton.enabled}
+              >
+                Share
+              </button>
+            )}
+            {interactionState.sendButton.visible && (
               <button
                 className="send-button"
                 onClick={handleTaskSubmission}
@@ -1097,7 +1124,7 @@ function App() {
               >
                 Send ⏎
               </button>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
