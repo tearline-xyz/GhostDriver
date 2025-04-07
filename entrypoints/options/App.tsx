@@ -128,6 +128,13 @@ const App: React.FC = () => {
       }
     )
 
+    // Check URL parameters for page selection
+    const urlParams = new URLSearchParams(window.location.search)
+    const pageParam = urlParams.get('page')
+    if (pageParam) {
+      setActivePage(pageParam)
+    }
+
     // Listen for auth state changes
     const messageListener = (message) => {
       if (message.type === "LOGIN_STATE_CHANGED") {
@@ -554,6 +561,16 @@ const App: React.FC = () => {
             </button>
           </>
         )
+      case "History":
+        return (
+          <>
+            <h2>History</h2>
+            <div className="history-container">
+              <p>Your interaction history will be displayed here.</p>
+              {/* 这里可以添加历史记录的具体内容 */}
+            </div>
+          </>
+        )
       default:
         return <div>Select an option from the sidebar</div>
     }
@@ -569,7 +586,7 @@ const App: React.FC = () => {
       <div className="sidebar">
         <h1>Tearline</h1>
         <ul className="nav-menu">
-          {["Account", ...(isAlphaVersion() ? ["Developer settings"] : []), "About"].map((page) => (
+          {["Account", "History", ...(isAlphaVersion() ? ["Developer settings"] : []), "About"].map((page) => (
             <li
               key={page}
               className={activePage === page ? "active" : ""}
