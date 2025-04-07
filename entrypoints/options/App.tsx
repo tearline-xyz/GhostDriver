@@ -9,6 +9,7 @@ import {
   VERSION,
 } from "../common/settings"
 import { authService } from "../../services/authService"
+import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -295,29 +296,7 @@ const App: React.FC = () => {
               onClick={() => copyToClipboard(userId)}
               title="Copy User ID"
             >
-              {/* 替换PNG图片为SVG图标 */}
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect
-                  x="9"
-                  y="9"
-                  width="13"
-                  height="13"
-                  rx="2"
-                  ry="2"
-                  fill="#888"
-                />
-                <path
-                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                  stroke="#888"
-                  strokeWidth="2"
-                />
-              </svg>
+              <img src={CopyIcon} alt="Copy" />
             </button>
           </div>
         )}
@@ -348,15 +327,7 @@ const App: React.FC = () => {
               {authStatus === "none" && (
                 <div className="profile-card not-logged-in">
                   <div className="profile-avatar">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      width="64"
-                      height="64"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                    </svg>
+                    <img src={UserIcon} alt="User" />
                   </div>
                   <div className="profile-status">Not logged in</div>
                   <p className="profile-message">Sign in to access Tearline services</p>
@@ -380,15 +351,7 @@ const App: React.FC = () => {
               {authStatus === "error" && (
                 <div className="profile-card error">
                   <div className="profile-avatar error">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      width="64"
-                      height="64"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-                    </svg>
+                    <img src={ErrorIcon} alt="Error" />
                   </div>
                   <div className="profile-status">Login failed or timed out</div>
                   <button
@@ -404,15 +367,7 @@ const App: React.FC = () => {
                 <div className="profile-card logged-in">
                   <div className="profile-header">
                     <div className="profile-avatar success">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        width="64"
-                        height="64"
-                      >
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                      </svg>
+                      <img src={UserIcon} alt="User" />
                     </div>
                   </div>
 
@@ -441,28 +396,7 @@ const App: React.FC = () => {
                             onClick={() => userInfo.userId && copyToClipboard(userInfo.userId)}
                             title="Copy User ID"
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <rect
-                                x="9"
-                                y="9"
-                                width="13"
-                                height="13"
-                                rx="2"
-                                ry="2"
-                                fill="#888"
-                              />
-                              <path
-                                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-                                stroke="#888"
-                                strokeWidth="2"
-                              />
-                            </svg>
+                            <img src={CopyIcon} alt="Copy" />
                           </button>
                         </div>
                       </div>
