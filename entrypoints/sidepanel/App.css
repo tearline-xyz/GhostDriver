@@ -539,11 +539,16 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
   font-weight: 500;
+  outline: none;
 }
 
 .new-task-button:hover {
   background-color: #1659b7;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.new-task-button:focus {
+  outline: none;
 }
 
 .new-task-button:before {
@@ -758,6 +763,7 @@
   justify-content: center;
   color: #9AA0A6;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  outline: none;
 }
 
 .history-button:hover,
@@ -795,4 +801,22 @@
   width: 16px;
   height: 16px;
   filter: brightness(0) invert(1);
+}
+
+.new-task-button:focus,
+.history-button:focus,
+.settings-button:focus {
+  outline: none;
+}
+
+.new-task-button,
+.history-button,
+.settings-button {
+  outline: none;
+}
+
+.new-task-button:focus-visible,
+.history-button:focus-visible,
+.settings-button:focus-visible {
+  box-shadow: 0 0 0 2px #1659b7;
 }
