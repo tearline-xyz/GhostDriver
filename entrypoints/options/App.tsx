@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react"
-import { createRoot } from "react-dom/client"
+import React, { useEffect, useState, useCallback, useRef } from "react"
 import "./App.css"
 import {
   AVAILABLE_HOSTS,
@@ -12,6 +11,10 @@ import { authService } from "../../services/authService"
 import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
 import { ApiService } from "../common/services/api"
 import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/model/task"
+import Reveal from "reveal.js"
+import "reveal.js/dist/reveal.css"
+import "reveal.js/dist/theme/black.css"
+import TaskResultModal from "./components/TaskResultModal"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -44,6 +47,8 @@ const App: React.FC = () => {
     userId?: string
   } | null>(null)
   const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT)
+  const deckDivRef = useRef<HTMLDivElement>(null)
+  const deckRef = useRef<Reveal.Api | null>(null)
 
   // 状态更新函数
   const updateAuthStatus = useCallback(
@@ -298,6 +303,12 @@ const App: React.FC = () => {
     return VERSION.toLowerCase().includes("alpha")
   }, [])
 
+  // 初始化 Reveal.js
+  useEffect(() => {
+    console.log('Current focusedTaskContext:', focusedTaskContext)
+    console.log('History data:', focusedTaskContext.result?.history)
+  }, [focusedTaskContext.result?.history])
+
   // Render different content based on active page
   const renderContent = () => {
     if (isLoading) {
@@ -509,26 +520,16 @@ const App: React.FC = () => {
                 const action = urlParams.get("action")
 
                 if (taskId && action === "share") {
+                  console.log('Rendering modal with taskId:', taskId)
                   return (
-                    <div className="modal-overlay">
-                      <div className="modal-content">
-                        <h3>Task Details</h3>
-                        <div className="task-info">
-                          <pre>{JSON.stringify(focusedTaskContext, null, 2)}</pre>
-                        </div>
-                        <button
-                          className="close-button"
-                          onClick={() => {
-                            // 移除 URL 参数并刷新页面
-                            const newUrl = window.location.pathname + "?page=History"
-                            window.history.replaceState({}, "", newUrl)
-                            window.location.reload()
-                          }}
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
+                    <TaskResultModal
+                      taskContext={focusedTaskContext}
+                      onClose={() => {
+                        const newUrl = window.location.pathname + "?page=History"
+                        window.history.replaceState({}, "", newUrl)
+                        window.location.reload()
+                      }}
+                    />
                   )
                 }
                 return null
@@ -572,13 +573,6 @@ const App: React.FC = () => {
       <div className="content">{renderContent()}</div>
     </div>
   )
-}
-
-// Initialize the React app
-const container = document.getElementById("app")
-if (container) {
-  const root = createRoot(container)
-  root.render(<App />)
 }
 
 export default App
