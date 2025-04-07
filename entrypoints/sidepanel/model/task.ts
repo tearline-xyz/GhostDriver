@@ -13,18 +13,18 @@ export const TASK_TERMINAL_STATES: Set<TaskState> = new Set([
   TaskState.COMPLETED,
   TaskState.FAILED,
   TaskState.STOPPED,
-]);
+])
 
 // 活动状态集合
 export const TASK_ACTIVE_STATES: Set<TaskState> = new Set([
   TaskState.RUNNING,
   TaskState.PAUSED,
-]);
+])
 
 // 任务上下文类型
 export interface TaskContext {
-  id?: string;
-  state?: TaskState;
+  id?: string
+  state?: TaskState
 }
 
 /**

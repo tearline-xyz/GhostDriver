@@ -34,8 +34,8 @@ export class ApiService {
     const response = await fetch(`${this.apiHost}/tasks/${taskId}`, {
       method: "GET",
       headers: {
-        "accept": "application/json"
-      }
+        accept: "application/json",
+      },
     })
 
     if (!response.ok) {

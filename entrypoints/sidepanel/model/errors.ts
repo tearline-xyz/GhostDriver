@@ -6,5 +6,5 @@ export const CONNECTION_REFUSED_ERROR_KEYWORDS = new Set([
   "err_connection_refused",
   "failed to fetch",
   "networkerror",
-  "network error"
+  "network error",
 ])

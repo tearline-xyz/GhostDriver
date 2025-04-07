@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
-import { connectToPlaywrightServer, disconnectFromPlaywrightServer } from "../../playwright-crx/lib/index.mjs"
+import {
+  connectToPlaywrightServer,
+  disconnectFromPlaywrightServer,
+} from "../../playwright-crx/lib/index.mjs"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
 import "./App.css"
 import { CONNECTION_REFUSED_ERROR_KEYWORDS } from "./model/errors"
@@ -10,9 +13,12 @@ import {
   SystemEventStatus,
   SystemPayload,
   TaskEvent,
-  TaskEventType
+  TaskEventType,
 } from "./model/events"
-import { DEFAULT_INTERACTION_TOGGLE, InteractionToggle } from "./model/interactionToggle"
+import {
+  DEFAULT_INTERACTION_TOGGLE,
+  InteractionToggle,
+} from "./model/interactionToggle"
 import { Mode } from "./model/mode"
 import { SuggestionMenuItem, suggestionMenuItems } from "./model/suggestion"
 import {
@@ -26,8 +32,16 @@ import {
   TO_COLLAPSE_SYMBOL,
   TO_EXPAND_SYMBOL,
 } from "./model/symbols"
-import { TASK_ACTIVE_STATES, TaskContext, TaskState, getTaskStateDisplayText } from "./model/task"
-import { NotificationState, DEFAULT_NOTIFICATION_STATE } from "./model/notification"
+import {
+  TASK_ACTIVE_STATES,
+  TaskContext,
+  TaskState,
+  getTaskStateDisplayText,
+} from "./model/task"
+import {
+  NotificationState,
+  DEFAULT_NOTIFICATION_STATE,
+} from "./model/notification"
 import { ApiService } from "./services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
 
@@ -70,15 +84,19 @@ function App() {
   const [userInputValue, setUserInputValue] = useState("")
 
   /** 操作结果信息 */
-  const [notification, setNotification] = useState<NotificationState>(DEFAULT_NOTIFICATION_STATE)
+  const [notification, setNotification] = useState<NotificationState>(
+    DEFAULT_NOTIFICATION_STATE
+  )
 
   /** 控制UI状态 */
-  const [interactionToggle, setInteractionToggle] = useState<InteractionToggle>(DEFAULT_INTERACTION_TOGGLE)
+  const [interactionToggle, setInteractionToggle] = useState<InteractionToggle>(
+    DEFAULT_INTERACTION_TOGGLE
+  )
 
   /** 控制任务状态 */
   const [taskContext, setTaskContext] = useState<TaskContext>({
     id: undefined,
-    state: undefined
+    state: undefined,
   })
 
   /** apiHost from settings */
@@ -189,8 +207,8 @@ function App() {
   }, [mode])
 
   /** Filtered menu items based on current search term */
-  const filteredSuggestionMenuItems = currentSuggestionMenuItems.filter((item) =>
-    item.label.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSuggestionMenuItems = currentSuggestionMenuItems.filter(
+    (item) => item.label.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   /**
@@ -236,7 +254,10 @@ function App() {
           break
         case "Tab":
           e.preventDefault()
-          if (selectedIndex >= 0 && selectedIndex < filteredSuggestionMenuItems.length) {
+          if (
+            selectedIndex >= 0 &&
+            selectedIndex < filteredSuggestionMenuItems.length
+          ) {
             handleMenuItemSelection(filteredSuggestionMenuItems[selectedIndex])
           }
           break
@@ -252,7 +273,12 @@ function App() {
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [showSuggestions, selectedIndex, filteredSuggestionMenuItems, selectedPath])
+  }, [
+    showSuggestions,
+    selectedIndex,
+    filteredSuggestionMenuItems,
+    selectedPath,
+  ])
 
   useEffect(() => {
     if (
@@ -348,7 +374,7 @@ function App() {
    * Helper function to hide notifications
    */
   const hideNotification = () => {
-    setNotification(prev => ({ ...prev, visible: false }))
+    setNotification((prev) => ({ ...prev, visible: false }))
   }
 
   /**
@@ -534,7 +560,8 @@ function App() {
         // Check for completion message from server
         if (
           data.type === TaskEventType.SYSTEM &&
-          (data.payload as SystemPayload).status === SystemEventStatus.EVENT_STREAM_END
+          (data.payload as SystemPayload).status ===
+            SystemEventStatus.EVENT_STREAM_END
         ) {
           console.log("Server indicated event stream end")
 
@@ -662,7 +689,7 @@ function App() {
   const handleTaskSubmission = async () => {
     hideNotification()
 
-    setInteractionToggle(prev => ({
+    setInteractionToggle((prev) => ({
       ...prev,
       input: { ...prev.input, enabled: false },
       taskControls: {
@@ -670,9 +697,9 @@ function App() {
         enabled: true,
         visible: true,
         pauseButton: { enabled: true, visible: true },
-        stopButton: { enabled: true, visible: true }
+        stopButton: { enabled: true, visible: true },
       },
-      sendButton: { enabled: false, visible: false }
+      sendButton: { enabled: false, visible: false },
     }))
 
     try {
@@ -686,7 +713,7 @@ function App() {
       // 开始任务，使用从响应中获取的taskId
       setTaskContext({
         id: taskId,
-        state: taskContext.state as TaskState
+        state: taskContext.state as TaskState,
       })
 
       // 使用 Promise.all 并行处理连接操作
@@ -696,12 +723,12 @@ function App() {
           async () => {
             try {
               const taskContext = await apiService.getTask(taskId)
-              setTaskContext(prev => ({
+              setTaskContext((prev) => ({
                 ...prev,
-                state: taskContext.state as TaskState
+                state: taskContext.state as TaskState,
               }))
             } catch (error) {
-              console.error('Error fetching task status:', error)
+              console.error("Error fetching task status:", error)
             }
           }
         ),
@@ -709,13 +736,13 @@ function App() {
         new Promise<void>((resolve) => {
           connectToEventStream(taskId)
           resolve()
-        })
+        }),
       ])
 
       // 更新任务状态为运行中
       setTaskContext((prev) => ({
         ...prev,
-        state: TaskState.RUNNING
+        state: TaskState.RUNNING,
       }))
     } catch (error) {
       console.error("Error creating or starting task:", error)
@@ -723,9 +750,9 @@ function App() {
       // Check for connection refused errors
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred"
-      const isConnectionRefused = Array.from(CONNECTION_REFUSED_ERROR_KEYWORDS).some(keyword =>
-        errorMessage.toLowerCase().includes(keyword)
-      )
+      const isConnectionRefused = Array.from(
+        CONNECTION_REFUSED_ERROR_KEYWORDS
+      ).some((keyword) => errorMessage.toLowerCase().includes(keyword))
 
       setNotification({
         message: isConnectionRefused
@@ -738,7 +765,7 @@ function App() {
       })
 
       // 发生错误时恢复 UI 状态
-      setInteractionToggle(prev => ({
+      setInteractionToggle((prev) => ({
         ...prev,
         input: { ...prev.input, enabled: true },
         taskControls: {
@@ -746,9 +773,9 @@ function App() {
           enabled: false,
           visible: false,
           pauseButton: { enabled: false, visible: false },
-          stopButton: { enabled: false, visible: false }
+          stopButton: { enabled: false, visible: false },
         },
-        sendButton: { enabled: true, visible: true }
+        sendButton: { enabled: true, visible: true },
       }))
     }
   }
@@ -759,7 +786,10 @@ function App() {
     if (taskContext.id) {
       try {
         // Determine the target state based on current running state
-        const targetState = taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING
+        const targetState =
+          taskContext.state === TaskState.RUNNING
+            ? TaskState.PAUSED
+            : TaskState.RUNNING
 
         await apiService.updateTaskState(taskContext.id, targetState)
 
@@ -768,9 +798,9 @@ function App() {
         )
 
         // Update task state after successful API call
-        setTaskContext(prev => ({
+        setTaskContext((prev) => ({
           ...prev,
-          state: targetState
+          state: targetState,
         }))
       } catch (error) {
         console.error("Error toggling task state:", error)
@@ -785,13 +815,17 @@ function App() {
 
   const terminateTaskOrConnection = async () => {
     // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so
-    if (taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && taskContext.id) {
+    if (
+      taskContext.state &&
+      TASK_ACTIVE_STATES.has(taskContext.state) &&
+      taskContext.id
+    ) {
       try {
         // 显示加载中的通知
         setNotification({
           message: "Stopping task...",
           type: "info",
-          visible: true
+          visible: true,
         })
 
         await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
@@ -802,7 +836,10 @@ function App() {
           hideNotification()
         }, 1000)
       } catch (error) {
-        console.warn("Error stopping task so that the websocket will be closed directly:", error)
+        console.warn(
+          "Error stopping task so that the websocket will be closed directly:",
+          error
+        )
         await disconnectFromPlaywrightServer()
       }
     }
@@ -824,9 +861,9 @@ function App() {
         // Reset states but keep taskId
         setTaskContext({
           id: taskContext.id,
-          state: TaskState.STOPPED
+          state: TaskState.STOPPED,
         })
-        setInteractionToggle(prev => ({
+        setInteractionToggle((prev) => ({
           ...prev,
           input: { ...prev.input, enabled: false },
           taskControls: {
@@ -834,12 +871,15 @@ function App() {
             enabled: false,
             visible: false,
             pauseButton: { enabled: false, visible: false },
-            stopButton: { enabled: false, visible: false }
+            stopButton: { enabled: false, visible: false },
           },
           sendButton: { enabled: false, visible: false },
         }))
       } catch (error) {
-        console.warn("Error stopping task so that the websocket will be closed directly:", error)
+        console.warn(
+          "Error stopping task so that the websocket will be closed directly:",
+          error
+        )
         await disconnectFromPlaywrightServer()
         setNotification({
           message: `Failed to stop task: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -865,7 +905,7 @@ function App() {
       // Reset task state
       setTaskContext({
         id: undefined,
-        state: undefined
+        state: undefined,
       })
 
       // Clear input and events
@@ -959,19 +999,19 @@ function App() {
 
     try {
       const taskInfo = await apiService.getTask(taskContext.id)
-      console.log('Task info:', taskInfo)
+      console.log("Task info:", taskInfo)
       // TODO: 这里可以添加分享逻辑，比如复制到剪贴板或打开分享对话框
       setNotification({
-        message: 'Task info retrieved successfully',
-        type: 'success',
-        visible: true
+        message: "Task info retrieved successfully",
+        type: "success",
+        visible: true,
       })
     } catch (error) {
-      console.error('Error getting task info:', error)
+      console.error("Error getting task info:", error)
       setNotification({
-        message: 'Failed to get task info',
-        type: 'error',
-        visible: true
+        message: "Failed to get task info",
+        type: "error",
+        visible: true,
       })
     }
   }
@@ -989,7 +1029,11 @@ function App() {
         <div className="toolbar-right">
           <button
             className="history-button"
-            onClick={() => chrome.tabs.create({ url: chrome.runtime.getURL('options.html?page=History') })}
+            onClick={() =>
+              chrome.tabs.create({
+                url: chrome.runtime.getURL("options.html?page=History"),
+              })
+            }
             title="View History"
           >
             <img src={HistoryIcon} alt="History" className="toolbar-icon" />
@@ -1075,7 +1119,10 @@ function App() {
           <div className="left-controls">
             {renderModeSelector()}
             {llmSelectEnabled && (
-              <select className="llm-select" disabled={!interactionToggle.input.enabled}>
+              <select
+                className="llm-select"
+                disabled={!interactionToggle.input.enabled}
+              >
                 <option value="gpt4">GPT-4o</option>
                 <option value="claude">Claude 3.5 Sonnet (Preview)</option>
                 <option value="claude">Claude 3.7 Sonnet (Preview)</option>
@@ -1088,34 +1135,44 @@ function App() {
           </div>
 
           <div className="right-controls">
-            {interactionToggle.taskControls.visible && taskContext.state && TASK_ACTIVE_STATES.has(taskContext.state) && (
-              // NOTE: Not show control buttons when task state is created as there is no agent being attached to the task
-              <div className="task-control-buttons">
+            {interactionToggle.taskControls.visible &&
+              taskContext.state &&
+              TASK_ACTIVE_STATES.has(taskContext.state) && (
+                // NOTE: Not show control buttons when task state is created as there is no agent being attached to the task
+                <div className="task-control-buttons">
+                  <button
+                    className={`pause-resume-button ${taskContext.state}`}
+                    onClick={toggleTaskPauseState}
+                    disabled={
+                      !interactionToggle.taskControls.pauseButton.enabled
+                    }
+                  >
+                    {taskContext.state === TaskState.RUNNING
+                      ? PAUSE_SYMBOL
+                      : RESUME_SYMBOL}
+                  </button>
+                  <button
+                    className="stop-button"
+                    onClick={stopTask}
+                    disabled={
+                      !interactionToggle.taskControls.stopButton.enabled
+                    }
+                  >
+                    {STOP_SYMBOL}
+                  </button>
+                </div>
+              )}
+            {interactionToggle.shareButton.visible &&
+              taskContext.state &&
+              taskContext.state === TaskState.COMPLETED && (
                 <button
-                  className={`pause-resume-button ${taskContext.state}`}
-                  onClick={toggleTaskPauseState}
-                  disabled={!interactionToggle.taskControls.pauseButton.enabled}
+                  className="share-button"
+                  onClick={handleShareAction}
+                  disabled={!interactionToggle.shareButton.enabled}
                 >
-                  {taskContext.state === TaskState.RUNNING ? PAUSE_SYMBOL : RESUME_SYMBOL}
+                  Share
                 </button>
-                <button
-                  className="stop-button"
-                  onClick={stopTask}
-                  disabled={!interactionToggle.taskControls.stopButton.enabled}
-                >
-                  {STOP_SYMBOL}
-                </button>
-              </div>
-            )}
-            {interactionToggle.shareButton.visible && taskContext.state && taskContext.state === TaskState.COMPLETED && (
-              <button
-                className="share-button"
-                onClick={handleShareAction}
-                disabled={!interactionToggle.shareButton.enabled}
-              >
-                Share
-              </button>
-            )}
+              )}
             {interactionToggle.sendButton.visible && (
               <button
                 className="send-button"
@@ -1133,10 +1190,7 @@ function App() {
         <div className={`notification notification-${notification.type}`}>
           <div className="notification-content">
             <span>{notification.message}</span>
-            <button
-              className="notification-close"
-              onClick={hideNotification}
-            >
+            <button className="notification-close" onClick={hideNotification}>
               ×
             </button>
           </div>
@@ -1144,20 +1198,22 @@ function App() {
       )}
 
       {/* Display task ID when notification is closed and we have a task running */}
-      {interactionToggle.taskId.visible && taskContext.id && !notification.visible && (
-        <div className="task-id-display">
-          <small>
-            Task ID: {taskContext.id}
-            <button
-              className="copy-task-id-button"
-              onClick={() => copyToClipboard(taskContext.id || "")}
-              title="Copy Task ID"
-            >
-              <img src={CopyIcon} alt="Copy" />
-            </button>
-          </small>
-        </div>
-      )}
+      {interactionToggle.taskId.visible &&
+        taskContext.id &&
+        !notification.visible && (
+          <div className="task-id-display">
+            <small>
+              Task ID: {taskContext.id}
+              <button
+                className="copy-task-id-button"
+                onClick={() => copyToClipboard(taskContext.id || "")}
+                title="Copy Task ID"
+              >
+                <img src={CopyIcon} alt="Copy" />
+              </button>
+            </small>
+          </div>
+        )}
 
       {/* Event Stream Area */}
       <div ref={eventStreamRef} className="event-stream-area">
@@ -1236,7 +1292,9 @@ function App() {
 
         {/* progress indicator - shown when task is working, stopped,... */}
         {taskContext.state && (
-          <div className={`progress-indicator ${taskContext.state === TaskState.RUNNING ? 'working' : taskContext.state}`}>
+          <div
+            className={`progress-indicator ${taskContext.state === TaskState.RUNNING ? "working" : taskContext.state}`}
+          >
             {getTaskStateDisplayText(taskContext.state)}
           </div>
         )}

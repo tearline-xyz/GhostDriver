@@ -43,62 +43,68 @@ const App: React.FC = () => {
   } | null>(null)
 
   // 状态更新函数
-  const updateAuthStatus = useCallback((
-    newStatus: "none" | "pending" | "success" | "error",
-    shouldOverridePending: boolean = false
-  ) => {
-    setAuthStatus(currentStatus => {
-      // 如果当前状态是 pending，且没有强制覆盖，则保持 pending 状态
-      if (!shouldOverridePending && currentStatus === "pending") {
-        return "pending"
-      }
-      // 否则更新为新状态
-      return newStatus
-    })
-  }, [])
+  const updateAuthStatus = useCallback(
+    (
+      newStatus: "none" | "pending" | "success" | "error",
+      shouldOverridePending: boolean = false
+    ) => {
+      setAuthStatus((currentStatus) => {
+        // 如果当前状态是 pending，且没有强制覆盖，则保持 pending 状态
+        if (!shouldOverridePending && currentStatus === "pending") {
+          return "pending"
+        }
+        // 否则更新为新状态
+        return newStatus
+      })
+    },
+    []
+  )
 
   // Load auth status from secure storage (chrome.storage.local)
-  const loadAuthStatus = useCallback(async (shouldOverridePending: boolean = false) => {
-    try {
-      const isLoggedIn = await authService.isLoggedIn()
-      if (isLoggedIn) {
-        const authInfo = await authService.getAuthInfo()
+  const loadAuthStatus = useCallback(
+    async (shouldOverridePending: boolean = false) => {
+      try {
+        const isLoggedIn = await authService.isLoggedIn()
+        if (isLoggedIn) {
+          const authInfo = await authService.getAuthInfo()
 
-        // Extract user information from the nested JSON token
-        let parsedUserInfo: {
-          email?: string
-          name?: string
-          userId?: string
-        } | null = null
-        if (authInfo?.token) {
-          try {
-            // Parse the token which is a JSON string
-            const parsedToken = JSON.parse(authInfo.token)
+          // Extract user information from the nested JSON token
+          let parsedUserInfo: {
+            email?: string
+            name?: string
+            userId?: string
+          } | null = null
+          if (authInfo?.token) {
+            try {
+              // Parse the token which is a JSON string
+              const parsedToken = JSON.parse(authInfo.token)
 
-            // Extract user data from the nested structure
-            if (parsedToken.data) {
-              parsedUserInfo = {
-                email: parsedToken.data.email,
-                name: parsedToken.data.name,
-                userId: parsedToken.data.user_id,
+              // Extract user data from the nested structure
+              if (parsedToken.data) {
+                parsedUserInfo = {
+                  email: parsedToken.data.email,
+                  name: parsedToken.data.name,
+                  userId: parsedToken.data.user_id,
+                }
               }
+            } catch (err) {
+              console.error("Error parsing token data:", err)
             }
-          } catch (err) {
-            console.error("Error parsing token data:", err)
           }
-        }
 
-        updateAuthStatus("success", shouldOverridePending)
-        setUserInfo(parsedUserInfo || authInfo?.user || null)
-      } else {
-        updateAuthStatus("none", shouldOverridePending)
-        setUserInfo(null)
+          updateAuthStatus("success", shouldOverridePending)
+          setUserInfo(parsedUserInfo || authInfo?.user || null)
+        } else {
+          updateAuthStatus("none", shouldOverridePending)
+          setUserInfo(null)
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error)
+        updateAuthStatus("error", shouldOverridePending)
       }
-    } catch (error) {
-      console.error("Error checking auth status:", error)
-      updateAuthStatus("error", shouldOverridePending)
-    }
-  }, [updateAuthStatus])
+    },
+    [updateAuthStatus]
+  )
 
   // Load saved settings from chrome.storage.sync
   useEffect(() => {
@@ -131,7 +137,7 @@ const App: React.FC = () => {
 
     // Check URL parameters for page selection
     const urlParams = new URLSearchParams(window.location.search)
-    const pageParam = urlParams.get('page')
+    const pageParam = urlParams.get("page")
     if (pageParam) {
       setActivePage(pageParam)
     }
@@ -176,7 +182,7 @@ const App: React.FC = () => {
       // Automatically clear the status after the specified duration
       setTimeout(() => {
         // First set visible to false to trigger the slide-out animation
-        setStatus(prev => prev ? { ...prev, visible: false } : null)
+        setStatus((prev) => (prev ? { ...prev, visible: false } : null))
 
         // Then completely remove it after the animation completes
         setTimeout(() => {
@@ -330,7 +336,9 @@ const App: React.FC = () => {
                     <img src={UserIcon} alt="User" />
                   </div>
                   <div className="profile-status">Not logged in</div>
-                  <p className="profile-message">Sign in to access Tearline services</p>
+                  <p className="profile-message">
+                    Sign in to access Tearline services
+                  </p>
                   <button
                     className="auth-button login-button"
                     onClick={handleLogin}
@@ -344,7 +352,9 @@ const App: React.FC = () => {
                 <div className="profile-card pending">
                   <div className="loader"></div>
                   <div className="profile-status">Login in progress</div>
-                  <p className="profile-message">Please complete login in the opened page...</p>
+                  <p className="profile-message">
+                    Please complete login in the opened page...
+                  </p>
                 </div>
               )}
 
@@ -353,7 +363,9 @@ const App: React.FC = () => {
                   <div className="profile-avatar error">
                     <img src={ErrorIcon} alt="Error" />
                   </div>
-                  <div className="profile-status">Login failed or timed out</div>
+                  <div className="profile-status">
+                    Login failed or timed out
+                  </div>
                   <button
                     className="auth-button login-button"
                     onClick={handleLogin}
@@ -390,10 +402,15 @@ const App: React.FC = () => {
                       <div className="profile-detail">
                         <span className="detail-label">User ID</span>
                         <div className="detail-value-with-action">
-                          <span className="detail-value user-id">{userInfo.userId}</span>
+                          <span className="detail-value user-id">
+                            {userInfo.userId}
+                          </span>
                           <button
                             className="copy-button"
-                            onClick={() => userInfo.userId && copyToClipboard(userInfo.userId)}
+                            onClick={() =>
+                              userInfo.userId &&
+                              copyToClipboard(userInfo.userId)
+                            }
                             title="Copy User ID"
                           >
                             <img src={CopyIcon} alt="Copy" />
@@ -402,11 +419,15 @@ const App: React.FC = () => {
                       </div>
                     )}
 
-                    {!userInfo?.name && !userInfo?.email && !userInfo?.userId && (
-                      <div className="profile-detail">
-                        <span className="detail-value">Account connected successfully</span>
-                      </div>
-                    )}
+                    {!userInfo?.name &&
+                      !userInfo?.email &&
+                      !userInfo?.userId && (
+                        <div className="profile-detail">
+                          <span className="detail-value">
+                            Account connected successfully
+                          </span>
+                        </div>
+                      )}
                   </div>
 
                   <button
@@ -513,14 +534,21 @@ const App: React.FC = () => {
   return (
     <div className="options-container">
       {status && (
-        <div className={`status ${status.type} ${status.visible ? 'visible' : ''}`}>
+        <div
+          className={`status ${status.type} ${status.visible ? "visible" : ""}`}
+        >
           {status.message}
         </div>
       )}
       <div className="sidebar">
         <h1>Tearline</h1>
         <ul className="nav-menu">
-          {["Account", "History", ...(isAlphaVersion() ? ["Developer settings"] : []), "About"].map((page) => (
+          {[
+            "Account",
+            "History",
+            ...(isAlphaVersion() ? ["Developer settings"] : []),
+            "About",
+          ].map((page) => (
             <li
               key={page}
               className={activePage === page ? "active" : ""}
@@ -531,9 +559,7 @@ const App: React.FC = () => {
           ))}
         </ul>
       </div>
-      <div className="content">
-        {renderContent()}
-      </div>
+      <div className="content">{renderContent()}</div>
     </div>
   )
 }

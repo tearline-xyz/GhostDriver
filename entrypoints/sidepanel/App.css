@@ -608,10 +608,18 @@
 }
 
 @keyframes dots {
-  0% { content: "."; }
-  33% { content: ".."; }
-  66% { content: "..."; }
-  100% { content: "."; }
+  0% {
+    content: ".";
+  }
+  33% {
+    content: "..";
+  }
+  66% {
+    content: "...";
+  }
+  100% {
+    content: ".";
+  }
 }
 
 .scroll-to-bottom-button {
@@ -762,7 +770,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9AA0A6;
+  color: #9aa0a6;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   outline: none;
 }

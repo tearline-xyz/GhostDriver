@@ -33,11 +33,11 @@ export enum TaskEventType {
 
 export enum SystemEventStatus {
   EVENT_STREAM_ERROR = "event_stream_error",
-  EVENT_STREAM_END = "event_stream_end"
+  EVENT_STREAM_END = "event_stream_end",
 }
 
 export enum ActionType {
-  QUESTION = "question"
+  QUESTION = "question",
 }
 
 export interface SystemPayload {

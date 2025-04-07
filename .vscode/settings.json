@@ -1,6 +1,6 @@
 {
   "files.readonlyInclude": {
-    "node_modules/**": false,
+    "node_modules/**": false
   },
   "editor.detectIndentation": true,
   "[javascript]": {
@@ -15,6 +15,6 @@
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   "files.exclude": {
-    "**/.git": true,
-  },
+    "**/.git": true
+  }
 }
