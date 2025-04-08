@@ -5,7 +5,7 @@ import {
 } from "../../playwright-crx/lib/index.mjs"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
 import "./App.css"
-import { CONNECTION_REFUSED_ERROR_KEYWORDS } from "./model/errors"
+import { isConnectionRefusedError } from "./model/errors"
 import {
   ActionPayload,
   LogPayload,
@@ -744,15 +744,11 @@ function App() {
         state: TaskState.RUNNING,
       }))
     } catch (error) {
-      // Check for connection refused errors
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred"
-      const isConnectionRefused = Array.from(
-        CONNECTION_REFUSED_ERROR_KEYWORDS
-      ).some((keyword) => errorMessage.toLowerCase().includes(keyword))
 
       setNotification({
-        message: isConnectionRefused
+        message: isConnectionRefusedError(errorMessage)
           ? `Unable to connect to ${apiHost}`
           : errorMessage,
         type: "error",
