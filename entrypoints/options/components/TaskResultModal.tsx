@@ -10,21 +10,24 @@ interface TaskResultModalProps {
   onClose: () => void
 }
 
-const TaskResultModal: React.FC<TaskResultModalProps> = ({ taskContext, onClose }) => {
+const TaskResultModal: React.FC<TaskResultModalProps> = ({
+  taskContext,
+  onClose,
+}) => {
   const deckDivRef = useRef<HTMLDivElement>(null)
   const deckRef = useRef<Reveal.Api | null>(null)
 
   // 初始化 Reveal.js
   useEffect(() => {
-    console.log('Current taskContext:', taskContext)
-    console.log('History data:', taskContext.result?.history)
+    console.log("Current taskContext:", taskContext)
+    console.log("History data:", taskContext.result?.history)
 
     const initializeReveal = async () => {
       // 等待一个渲染周期
-      await new Promise(resolve => setTimeout(resolve, 0))
+      await new Promise((resolve) => setTimeout(resolve, 0))
 
       if (!deckDivRef.current || !taskContext.result?.history) {
-        console.log('Missing required data for Reveal.js initialization')
+        console.log("Missing required data for Reveal.js initialization")
         return
       }
 
@@ -41,16 +44,16 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({ taskContext, onClose 
           progress: true,
           center: true,
           hash: false,
-          transition: 'slide',
-          width: '100%',
-          height: '100%',
+          transition: "slide",
+          width: "100%",
+          height: "100%",
           margin: 0,
         })
 
         await deckRef.current.initialize()
-        console.log('Reveal.js initialized successfully')
+        console.log("Reveal.js initialized successfully")
       } catch (error) {
-        console.error('Failed to initialize Reveal.js:', error)
+        console.error("Failed to initialize Reveal.js:", error)
       }
     }
 
@@ -77,33 +80,49 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({ taskContext, onClose 
           ) : (
             <div className="reveal" ref={deckDivRef}>
               <div className="slides">
-                {taskContext.result.history.map((step, index) => (
-                  <section key={index} data-transition="slide">
-                    <span>Step {step.metadata.step_number-1}</span>
-                    <div>
-                      <div>
-                        <pre>{JSON.stringify(step.model_output, null, 2)}</pre>
-                      </div>
-                      <div>
-                        <h5>Result</h5>
-                        <pre>{JSON.stringify(step.result, null, 2)}</pre>
-                      </div>
-                      <div>
-                        <h5>State</h5>
-                        <pre>{JSON.stringify(step.state, null, 2)}</pre>
-                      </div>
+                {/* Cover Slide */}
+                <section data-auto-animate>
+                  <span>Task ID: {taskContext.id}</span>
+                  <p>Generated on: {taskContext.created_at}</p>
+                  <p className="model-info">
+                    Powered by {taskContext.chat_model_tag}
+                  </p>
+                </section>
+
+                {/* Overview Slide */}
+                <section data-auto-animate>
+                  <h2>Task Overview</h2>
+                  <div className="overview-container">
+                    <div className="query-box">
+                      <p>
+                        <strong>Final State:</strong> "{taskContext.state}"
+                      </p>
+                      <p>
+                        <strong>Total Steps:</strong>{" "}
+                        {taskContext.result.history.length}
+                      </p>
                     </div>
-                  </section>
-                ))}
+                  </div>
+                </section>
+
+                {/* Journey Slide */}
+                <section>
+                  <h2>Journey</h2>
+                  <div className="journey-timeline">
+                    {taskContext.result.history.map((step, index) => (
+                      <div className="journey-step" key={`journey-${index}`}>
+                        <div className="step-number">{index + 1}</div>
+                        <div className="step-details"></div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
             </div>
           )}
         </div>
         <div className="modal-footer">
-          <button
-            className="share-button"
-            onClick={onClose}
-          >
+          <button className="share-button" onClick={onClose}>
             Share
           </button>
         </div>
