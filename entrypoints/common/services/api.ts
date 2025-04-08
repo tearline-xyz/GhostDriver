@@ -12,22 +12,36 @@ export class ApiService {
   }
 
   async createTask(content: string): Promise<TaskContext> {
-    const response = await fetch(`${this.apiHost}/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        content,
-        crx_mode: true,
-      }),
-    })
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
-    if (!response.ok) {
-      await this.handleErrorResponse(response, 'Failed to create task');
+    try {
+      const response = await fetch(`${this.apiHost}/tasks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content,
+          crx_mode: true,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        await this.handleErrorResponse(response, 'Failed to create task');
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeout);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timed out');
+      }
+      throw error;
     }
-
-    return response.json()
   }
 
   async getTask(taskId: string): Promise<TaskContext> {

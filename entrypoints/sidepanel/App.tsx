@@ -753,7 +753,7 @@ function App() {
 
       setNotification({
         message: isConnectionRefused
-          ? `Unable to connect to ${apiHost}.`
+          ? `Unable to connect to ${apiHost}`
           : errorMessage,
         type: "error",
         visible: true,
