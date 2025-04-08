@@ -95,7 +95,8 @@ function App() {
   )
 
   /** 控制任务状态 */
-  const [taskContext, setTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT)
+  const [taskContext, setTaskContext] =
+    useState<TaskContext>(EMPTY_TASK_CONTEXT)
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -743,8 +744,6 @@ function App() {
         state: TaskState.RUNNING,
       }))
     } catch (error) {
-      console.error("Error creating or starting task:", error)
-
       // Check for connection refused errors
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred"
@@ -754,9 +753,7 @@ function App() {
 
       setNotification({
         message: isConnectionRefused
-          ? `Unable to connect to server ${apiHost}. Please:
-            ${BULLET_SYMBOL} Check the network connection.
-            ${BULLET_SYMBOL} Config the accessible server in the options page.`
+          ? `Unable to connect to ${apiHost}.`
           : errorMessage,
         type: "error",
         visible: true,
@@ -995,7 +992,9 @@ function App() {
     try {
       // 跳转到 history 页面，并携带 task id 和 share 动作参数
       chrome.tabs.create({
-        url: chrome.runtime.getURL(`options.html?page=History&taskId=${taskContext.id}&action=share`)
+        url: chrome.runtime.getURL(
+          `options.html?page=History&taskId=${taskContext.id}&action=share`
+        ),
       })
     } catch (error) {
       setNotification({

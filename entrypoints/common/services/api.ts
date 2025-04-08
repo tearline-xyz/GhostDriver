@@ -24,7 +24,7 @@ export class ApiService {
     })
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`)
+      await this.handleErrorResponse(response, 'Failed to create task');
     }
 
     return response.json()
@@ -39,7 +39,7 @@ export class ApiService {
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch task: ${response.status}`)
+      await this.handleErrorResponse(response, 'Failed to get task');
     }
 
     return response.json()
@@ -57,7 +57,7 @@ export class ApiService {
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to update task state: ${response.status}`)
+      await this.handleErrorResponse(response, 'Failed to set task state');
     }
   }
 
@@ -67,5 +67,21 @@ export class ApiService {
 
   getPlaywrightWebSocketUrl(taskId: string): string {
     return `${this.apiHost}/ws/playwright?task_id=${taskId}`
+  }
+
+  private async handleErrorResponse(response: Response, defaultMessage: string): Promise<never> {
+    let errorMessage = defaultMessage;
+    let responseBody: any;
+
+    try {
+      responseBody = await response.clone().json();
+      const msg = responseBody?.detail?.[0]?.msg;
+      errorMessage += msg ? `. ${msg}` : '';
+    } catch {
+      responseBody = await response.clone().text();
+      errorMessage += `. ${responseBody}`;
+    }
+
+    throw new Error(errorMessage);
   }
 }

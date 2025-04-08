@@ -7,4 +7,5 @@ export const CONNECTION_REFUSED_ERROR_KEYWORDS = new Set([
   "failed to fetch",
   "networkerror",
   "network error",
+  "<center>nginx"
 ])
