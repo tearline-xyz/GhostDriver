@@ -42,12 +42,13 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
           embedded: true,
           controls: true,
           progress: true,
-          center: true,
+          center: false, // Disable centering to allow titles to stay at the top
           hash: false,
           transition: "slide",
           width: "100%",
           height: "100%",
           margin: 0,
+          navigationMode: "default"
         })
 
         await deckRef.current.initialize()
@@ -71,7 +72,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <span className="task-id-title">Task ID: {taskContext.id}</span>
+          <span className="task-id-title">Task completed ✔</span>
           <button className="modal-close" onClick={onClose} />
         </div>
         <div className="modal-body">
@@ -80,42 +81,45 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
           ) : (
             <div className="reveal" ref={deckDivRef}>
               <div className="slides">
-                {/* Cover Slide */}
-                <section data-auto-animate>
-                  <span>Task ID: {taskContext.id}</span>
-                  <p>Generated on: {taskContext.created_at}</p>
-                  <p className="model-info">
-                    Powered by {taskContext.chat_model_tag}
-                  </p>
-                </section>
-
+              <section>
                 {/* Overview Slide */}
                 <section data-auto-animate>
-                  <h2>Task Overview</h2>
-                  <div className="overview-container">
-                    <div className="query-box">
-                      <p>
-                        <strong>Final State:</strong> "{taskContext.state}"
-                      </p>
-                      <p>
-                        <strong>Total Steps:</strong>{" "}
-                        {taskContext.result.history.length}
-                      </p>
+                  <h2 style={{ fontSize: '24px' }}>Task Overview</h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '16px' }}>
+                    <p><strong>Task ID:</strong> {taskContext.id}</p>
+                    <p><strong>Generated on:</strong> {taskContext.created_at}</p>
+                    <p><strong>Powered by:</strong> GhostDriver and {taskContext.chat_model_tag}</p>
+                    <p><strong>Final State:</strong> {taskContext.state}</p>
+                    <p><strong>Total Steps:</strong> {taskContext.result.history.length}</p>
+                  </div>
+                </section>
+
+                {/* Task Details Slide */}
+                <section data-auto-animate>
+                  <h2 style={{ fontSize: '24px' }}>Task Details</h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', fontSize: '16px', color: '#fff' }}>
+                    <div style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+                      <p>{taskContext.content}</p>
                     </div>
                   </div>
                 </section>
 
                 {/* Journey Slide */}
-                <section>
-                  <h2>Journey</h2>
-                  <div className="journey-timeline">
-                    {taskContext.result.history.map((step, index) => (
-                      <div className="journey-step" key={`journey-${index}`}>
-                        <div className="step-number">{index + 1}</div>
-                        <div className="step-details"></div>
-                      </div>
-                    ))}
-                  </div>
+                {taskContext.result.history.map((step, index) => (
+                  <section key={`journey-${index}`} data-auto-animate >
+                    <h2 style={{ fontSize: '24px' }}>Step {index + 1}</h2>
+                    <div style={{ padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', color: '#fff', fontSize: '14px' }}>
+                      <p><strong>State:</strong> {step.state.title || "Untitled"}</p>
+                      <p><strong>URL:</strong> {step.state.url}</p>
+                      <p><strong>Memory:</strong> {step.model_output.current_state.memory}</p>
+                      <p><strong>Next Goal:</strong> {step.model_output.current_state.next_goal}</p>
+                      <p><strong>Step Time:</strong> {new Date(step.metadata.step_start_time * 1000).toLocaleString()} - {new Date(step.metadata.step_end_time * 1000).toLocaleString()}</p>
+                      {step.state.screenshot && (
+                        <img src={step.state.screenshot} alt={`Screenshot for step ${index + 1}`} style={{ width: '100%', borderRadius: '10px', marginTop: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)' }} />
+                      )}
+                    </div>
+                  </section>
+                ))}
                 </section>
               </div>
             </div>
