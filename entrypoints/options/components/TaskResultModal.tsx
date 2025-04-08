@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from "react"
 import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github-dark.css'
 import { TaskContext } from "../../common/model/task"
 import "./TaskResultModal.css"
 
@@ -52,6 +54,12 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
         })
 
         await deckRef.current.initialize()
+
+        // 初始化代码高亮
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block as HTMLElement)
+        })
+
         console.log("Reveal.js initialized successfully")
       } catch (error) {
         console.error("Failed to initialize Reveal.js:", error)
@@ -96,27 +104,74 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
 
                 {/* Task Details Slide */}
                 <section data-auto-animate>
-                  <h2 style={{ fontSize: '24px' }}>Task Details</h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', fontSize: '16px', color: '#fff' }}>
-                    <div style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '15px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
-                      <p>{taskContext.content}</p>
-                    </div>
-                  </div>
+                  <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Task Details</h2>
+                  <pre style={{
+                    margin: '0 20px',
+                    padding: '15px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderRadius: '8px',
+                    overflowY: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    fontFamily: 'monospace',
+                    lineHeight: '1.5',
+                    textAlign: 'left',
+                    height: 'calc(100% - 100px)',
+                    maxHeight: '100%',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <code className="language-markdown" style={{
+                      display: 'block',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontSize: '16px',
+                      color: '#e0e0e0'
+                    }}>{taskContext.content}</code>
+                  </pre>
                 </section>
 
                 {/* Journey Slide */}
                 {taskContext.result.history.map((step, index) => (
                   <section key={`journey-${index}`} data-auto-animate >
-                    <h2 style={{ fontSize: '24px' }}>Step {index + 1}</h2>
-                    <div style={{ padding: '20px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', color: '#fff', fontSize: '14px' }}>
-                      <p><strong>State:</strong> {step.state.title || "Untitled"}</p>
-                      <p><strong>URL:</strong> {step.state.url}</p>
-                      <p><strong>Memory:</strong> {step.model_output.current_state.memory}</p>
-                      <p><strong>Next Goal:</strong> {step.model_output.current_state.next_goal}</p>
-                      <p><strong>Step Time:</strong> {new Date(step.metadata.step_start_time * 1000).toLocaleString()} - {new Date(step.metadata.step_end_time * 1000).toLocaleString()}</p>
-                      {step.state.screenshot && (
-                        <img src={step.state.screenshot} alt={`Screenshot for step ${index + 1}`} style={{ width: '100%', borderRadius: '10px', marginTop: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)' }} />
-                      )}
+                    <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>Step {index + 1}</h2>
+                    <div className="browser-frame">
+                      <div className="browser-header">
+                        <div className="browser-controls">
+                          <div className="browser-dot dot-red"></div>
+                          <div className="browser-dot dot-yellow"></div>
+                          <div className="browser-dot dot-green"></div>
+                        </div>
+                        <div className="browser-address-bar">
+                          {step.state.url}
+                        </div>
+                      </div>
+                      <div className="browser-content">
+                        <div className="skeleton-screen">
+                          <div className="skeleton-header">
+                            <div className="skeleton-nav"></div>
+                            <div className="skeleton-search"></div>
+                          </div>
+                          <div className="skeleton-main">
+                            <div className="skeleton-line long"></div>
+                            <div className="skeleton-line medium"></div>
+                            <div className="skeleton-card"></div>
+                            <div className="skeleton-line short"></div>
+                            <div className="skeleton-line medium"></div>
+                          </div>
+                          <div className="skeleton-sidebar">
+                            <div className="skeleton-card"></div>
+                            <div className="skeleton-line short"></div>
+                            <div className="skeleton-line medium"></div>
+                          </div>
+                        </div>
+                        <div className="step-info">
+                          <p><strong>State:</strong> {step.state.title || "Untitled"}</p>
+                          <p><strong>Memory:</strong> {step.model_output.current_state.memory}</p>
+                          <p><strong>Next Goal:</strong> {step.model_output.current_state.next_goal}</p>
+                          <p><strong>Step Time:</strong> {new Date(step.metadata.step_start_time * 1000).toLocaleString()} - {new Date(step.metadata.step_end_time * 1000).toLocaleString()}</p>
+                        </div>
+                      </div>
                     </div>
                   </section>
                 ))}
