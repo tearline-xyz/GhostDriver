@@ -79,17 +79,16 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({ taskContext, onClose 
               <div className="slides">
                 {taskContext.result.history.map((step, index) => (
                   <section key={index} data-transition="slide">
-                    <h4>Step {step.metadata.step_number}</h4>
-                    <div className="step-content">
-                      <div className="step-section">
-                        <h5>Model Output</h5>
+                    <span>Step {step.metadata.step_number-1}</span>
+                    <div>
+                      <div>
                         <pre>{JSON.stringify(step.model_output, null, 2)}</pre>
                       </div>
-                      <div className="step-section">
+                      <div>
                         <h5>Result</h5>
                         <pre>{JSON.stringify(step.result, null, 2)}</pre>
                       </div>
-                      <div className="step-section">
+                      <div>
                         <h5>State</h5>
                         <pre>{JSON.stringify(step.state, null, 2)}</pre>
                       </div>
