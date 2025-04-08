@@ -9,7 +9,7 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   manifestVersion: 3,
   manifest: {
-    name: "Tearline Auto Browser",
+    name: "GhostDriver",
     permissions: [
       "debugger",
       "tabs",

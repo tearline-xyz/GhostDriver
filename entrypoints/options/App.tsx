@@ -436,7 +436,6 @@ const App: React.FC = () => {
         return (
           <>
             <h2>About</h2>
-            <p>Tearline Auto Browser Extension</p>
             <p>Version: {VERSION}</p>
             <p>
               This extension empowers AI to work alongside you in the browser.
@@ -552,7 +551,7 @@ const App: React.FC = () => {
         </div>
       )}
       <div className="sidebar">
-        <h1>Tearline</h1>
+        <h1>GhostDriver</h1>
         <ul className="nav-menu">
           {[
             "Account",
