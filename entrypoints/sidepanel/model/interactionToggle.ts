@@ -74,8 +74,8 @@ export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
     visible: true,
   },
   shareButton: {
-    enabled: true,
-    visible: true,
+    enabled: false,
+    visible: false,
   },
   taskId: {
     enabled: true,
