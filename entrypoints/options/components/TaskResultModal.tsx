@@ -4,8 +4,8 @@ import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
-import { TaskContext } from "../../common/model/task"
 import "./TaskResultModal.css"
+import { TaskContext } from "../../common/models/task"
 
 interface TaskResultModalProps {
   taskContext: TaskContext

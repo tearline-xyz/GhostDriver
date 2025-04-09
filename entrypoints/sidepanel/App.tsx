@@ -5,7 +5,7 @@ import {
 } from "../../playwright-crx/lib/index.mjs"
 import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
 import "./App.css"
-import { isConnectionRefusedError } from "./model/errors"
+import { isConnectionRefusedError } from "./models/errors"
 import {
   ActionPayload,
   LogPayload,
@@ -14,13 +14,13 @@ import {
   SystemPayload,
   TaskEvent,
   TaskEventType,
-} from "./model/events"
+} from "./models/events"
 import {
   DEFAULT_INTERACTION_TOGGLE,
   InteractionToggle,
-} from "./model/interactionToggle"
-import { Mode } from "../common/model/mode"
-import { SuggestionMenuItem, suggestionMenuItems } from "./model/suggestion"
+} from "./models/interactionToggle"
+import { Mode } from "../common/models/mode"
+import { SuggestionMenuItem, suggestionMenuItems } from "./models/suggestion"
 import {
   BACK_SYMBOL,
   BULLET_SYMBOL,
@@ -31,18 +31,18 @@ import {
   STOP_SYMBOL,
   TO_COLLAPSE_SYMBOL,
   TO_EXPAND_SYMBOL,
-} from "./model/symbols"
+} from "./models/symbols"
 import {
   EMPTY_TASK_CONTEXT,
   TASK_ACTIVE_STATES,
   TaskContext,
   TaskState,
   getTaskStateDisplayText,
-} from "../common/model/task"
+} from "../common/models/task"
 import {
   NotificationState,
   DEFAULT_NOTIFICATION_STATE,
-} from "./model/notification"
+} from "./models/notification"
 import { ApiService } from "../common/services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
 

@@ -20,7 +20,8 @@
     "highlight.js": "^11.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "reveal.js": "^5.2.1"
+    "reveal.js": "^5.2.1",
+    "xstate": "^5.19.2"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.280",

@@ -27,3 +27,5 @@ export const DEFAULT_SETTINGS = {
   enableLlmSelect: false, // Added new setting, default to false
   modeConfig: "agent_only" as ModeConfig, // Default to agent only
 }
+
+export const AUTHINFO_KEY = 'AUTHINFO';

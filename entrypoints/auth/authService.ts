@@ -1,24 +1,17 @@
 // AuthService: Centralized service for handling authentication
 
-interface AuthInfo {
-  token: string
-  expiresAt?: number // Timestamp when token expires
-  user?: {
-    name?: string
-    email?: string
-    avatar?: string
-  }
-}
+import { AUTHINFO_KEY } from "../common/settings"
+import { AuthInfo, AuthMessageType } from "./models"
 
 // Time before expiration to trigger refresh (15 minutes)
-const REFRESH_THRESHOLD_MS = 15 * 60 * 1000
+const AUTH_TOKEN_REFRESH_THRESHOLD_MS = 15 * 60 * 1000
 
 class AuthService {
   // Store auth info in chrome.storage.local for better security
   async getAuthInfo(): Promise<AuthInfo | null> {
     return new Promise((resolve) => {
-      chrome.storage.local.get("authInfo", (result) => {
-        resolve(result.authInfo || null)
+      chrome.storage.local.get(AUTHINFO_KEY, (result) => {
+        resolve(result[AUTHINFO_KEY] || null)
       })
     })
   }
@@ -30,13 +23,13 @@ class AuthService {
     }
 
     return new Promise((resolve) => {
-      chrome.storage.local.set({ authInfo }, resolve)
+      chrome.storage.local.set({ [AUTHINFO_KEY]: authInfo }, resolve)
     })
   }
 
   async clearAuthInfo(): Promise<void> {
     return new Promise((resolve) => {
-      chrome.storage.local.remove("authInfo", resolve)
+      chrome.storage.local.remove(AUTHINFO_KEY, resolve)
     })
   }
 
@@ -63,7 +56,7 @@ class AuthService {
     }
 
     // Check if token is approaching expiration
-    return authInfo.expiresAt - Date.now() < REFRESH_THRESHOLD_MS
+    return authInfo.expiresAt - Date.now() < AUTH_TOKEN_REFRESH_THRESHOLD_MS
   }
 
   // Broadcast login state to all extension components
@@ -72,7 +65,7 @@ class AuthService {
     authData?: string
   ): Promise<void> {
     chrome.runtime.sendMessage({
-      type: isLogin ? "LOGIN_STATE_CHANGED" : "LOGOUT_STATE_CHANGED",
+      type: isLogin ? AuthMessageType.LOGIN_STATE_CHANGED : AuthMessageType.LOGOUT_STATE_CHANGED,
       data: authData,
       timestamp: Date.now(),
     })

@@ -1,7 +1,8 @@
 import { defineBackground } from "wxt/sandbox"
-import { authService } from "./common/services/authService"
+import { authService } from "./auth/authService"
 import { browser } from "wxt/browser"
 import { TEARLINE_HOST } from "./common/settings"
+import { AuthMessageType } from "./auth/models"
 
 export default defineBackground(() => {
   // Check auth status on startup
@@ -15,12 +16,12 @@ export default defineBackground(() => {
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // Handle INIT_LOGIN from options or sidepanel
-    if (message.type === "INIT_LOGIN") {
+    if (message.type === AuthMessageType.INIT_LOGIN) {
       // Forward to all matching Tearline tabs
       chrome.tabs.query({ url: `*://${TEARLINE_HOST}/*` }, (tabs) => {
         tabs.forEach((tab) => {
           if (tab.id) {
-            chrome.tabs.sendMessage(tab.id, { type: "INIT_LOGIN" })
+            chrome.tabs.sendMessage(tab.id, { type: AuthMessageType.INIT_LOGIN })
           }
         })
       })
@@ -33,19 +34,19 @@ export default defineBackground(() => {
     }
 
     // Handle LOGIN message from content script
-    if (message.type === "LOGIN" && message.data) {
+    if (message.type === AuthMessageType.LOGIN && message.data) {
       handleLogin(message.data, sender)
     }
 
     // Handle LOGOUT message
-    if (message.type === "LOGOUT") {
+    if (message.type === AuthMessageType.LOGOUT) {
       handleLogout()
     }
 
     // Forward login state changes to all extension views
     if (
-      message.type === "LOGIN_STATE_CHANGED" ||
-      message.type === "LOGOUT_STATE_CHANGED"
+      message.type === AuthMessageType.LOGIN_STATE_CHANGED ||
+      message.type === AuthMessageType.LOGOUT_STATE_CHANGED
     ) {
       broadcastToAllViews(message)
     }

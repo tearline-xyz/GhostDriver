@@ -2,9 +2,10 @@ import React, { useEffect, useCallback } from "react"
 import ReactDOM from "react-dom/client"
 import App from "./App"
 import "./style.css"
-import { authService } from "../common/services/authService"
+import { authService } from "../auth/authService"
 import LoginPrompt from "./components/LoginPrompt"
-import useAuth from "../common/hooks/useAuth"
+import useAuth from "../auth/useAuth"
+import { AuthMessageType } from "../auth/models"
 
 const SidePanelApp: React.FC = () => {
   const showStatus = (message: string, type: string) => {
@@ -29,11 +30,11 @@ const SidePanelApp: React.FC = () => {
 
   useEffect(() => {
     const messageListener = (message) => {
-      if (message.type === "LOGIN_STATE_CHANGED") {
+      if (message.type === AuthMessageType.LOGIN_STATE_CHANGED) {
         updateAuthStatus("success", true);
       }
 
-      if (message.type === "LOGOUT_STATE_CHANGED") {
+      if (message.type === AuthMessageType.LOGOUT_STATE_CHANGED) {
         updateAuthStatus("none", true);
       }
     };

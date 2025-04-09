@@ -1,5 +1,6 @@
 import { defineContentScript } from "wxt/sandbox"
-import { TEARLINE_HOST } from "./common/settings"
+import { AUTHINFO_KEY, TEARLINE_HOST } from "./common/settings"
+import { AuthMessageType } from "./auth/models"
 
 export default defineContentScript({
   matches: [`*://${TEARLINE_HOST}/*`],
@@ -12,7 +13,7 @@ export default defineContentScript({
       }
 
       chrome.runtime.sendMessage({
-        type: "LOGIN",
+        type: AuthMessageType.LOGIN,
         data: authData,
         timestamp: Date.now(),
       })
@@ -20,10 +21,10 @@ export default defineContentScript({
 
     // Handle initialization request
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      if (request.type === "INIT_LOGIN") {
+      if (request.type === AuthMessageType.INIT_LOGIN) {
         console.log("Initializing login state")
-        if (localStorage.getItem("AUTHINFO")) {
-          postLoginMessage(localStorage.getItem("AUTHINFO"))
+        if (localStorage.getItem(AUTHINFO_KEY)) {
+          postLoginMessage(localStorage.getItem(AUTHINFO_KEY))
         }
         // Acknowledge receipt
         sendResponse({ success: true })
@@ -73,16 +74,16 @@ export default defineContentScript({
       }
 
       // Handle logout messages
-      if (event.data && event.data.type === "LOGOUT") {
+      if (event.data && event.data.type === AuthMessageType.LOGOUT) {
         console.log("Logout event received from page")
         chrome.runtime.sendMessage({
-          type: "LOGOUT",
+          type: AuthMessageType.LOGOUT,
           timestamp: Date.now(),
         })
       }
 
       // Handle login messages
-      if (event.data && event.data.type === "LOGIN" && event.data.data) {
+      if (event.data && event.data.type === AuthMessageType.LOGIN && event.data.data) {
         console.log("Login event received from page")
         postLoginMessage(event.data.data)
       }
@@ -91,8 +92,8 @@ export default defineContentScript({
     // Handle extension messages from background
     chrome.runtime.onMessage.addListener((message) => {
       if (
-        message.type === "LOGIN_STATE_CHANGED" ||
-        message.type === "LOGOUT_STATE_CHANGED"
+        message.type === AuthMessageType.LOGIN_STATE_CHANGED ||
+        message.type === AuthMessageType.LOGOUT_STATE_CHANGED
       ) {
         // Forward state changes to the page
         window.postMessage(message, window.location.origin)

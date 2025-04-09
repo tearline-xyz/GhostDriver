@@ -1,4 +1,4 @@
-import { TaskContext, TaskState } from "../model/task"
+import { TaskContext, TaskState } from "../models/task"
 
 export class ApiService {
   private apiHost: string

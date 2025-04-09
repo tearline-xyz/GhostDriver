@@ -1,11 +1,6 @@
 import { defineUnlistedScript } from "wxt/sandbox"
-import { TEARLINE_HOST } from "./common/settings"
-
-interface AuthMessage {
-  type: "LOGIN" | "LOGOUT" | "LOGIN_STATE_CHANGED" | "LOGOUT_STATE_CHANGED"
-  data?: string
-  timestamp?: number
-}
+import { TEARLINE_HOST, AUTHINFO_KEY } from "./common/settings"
+import { AuthMessage, AuthMessageType } from "./auth/models"
 
 export default defineUnlistedScript(() => {
   // Script injected into the page context to monitor auth changes
@@ -18,11 +13,11 @@ export default defineUnlistedScript(() => {
     console.log("Tearline auth monitoring initialized")
 
     // Send initial auth state if already logged in
-    if (localStorage.getItem("AUTHINFO")) {
+    if (localStorage.getItem(AUTHINFO_KEY)) {
       window.postMessage(
         {
-          type: "LOGIN",
-          data: localStorage.getItem("AUTHINFO"),
+          type: AuthMessageType.LOGIN,
+          data: localStorage.getItem(AUTHINFO_KEY),
         } as AuthMessage,
         window.location.origin
       )
@@ -32,10 +27,10 @@ export default defineUnlistedScript(() => {
     const originalSetItem = localStorage.setItem
     localStorage.setItem = function (key: string, value: string) {
       // Detect login
-      if (key === "AUTHINFO" && value) {
+      if (key === AUTHINFO_KEY && value) {
         window.postMessage(
           {
-            type: "LOGIN",
+            type: AuthMessageType.LOGIN,
             data: value,
           } as AuthMessage,
           window.location.origin
@@ -47,9 +42,9 @@ export default defineUnlistedScript(() => {
     // Detect logout
     const originalRemoveItem = localStorage.removeItem
     localStorage.removeItem = function (key: string) {
-      if (key === "AUTHINFO") {
+      if (key === AUTHINFO_KEY) {
         window.postMessage(
-          { type: "LOGOUT" } as AuthMessage,
+          { type: AuthMessageType.LOGOUT } as AuthMessage,
           window.location.origin
         )
       }
@@ -63,14 +58,14 @@ export default defineUnlistedScript(() => {
       const data = event.data as AuthMessage
 
       // Handle login/logout state syncing
-      if (data.type === "LOGIN_STATE_CHANGED" && data.data) {
-        const currentAuth = localStorage.getItem("AUTHINFO")
+      if (data.type === AuthMessageType.LOGIN_STATE_CHANGED && data.data) {
+        const currentAuth = localStorage.getItem(AUTHINFO_KEY)
         if (currentAuth !== data.data) {
-          originalSetItem.call(localStorage, "AUTHINFO", data.data)
+          originalSetItem.call(localStorage, AUTHINFO_KEY, data.data)
         }
-      } else if (data.type === "LOGOUT_STATE_CHANGED") {
-        if (localStorage.getItem("AUTHINFO")) {
-          originalRemoveItem.call(localStorage, "AUTHINFO")
+      } else if (data.type === AuthMessageType.LOGOUT_STATE_CHANGED) {
+        if (localStorage.getItem(AUTHINFO_KEY)) {
+          originalRemoveItem.call(localStorage, AUTHINFO_KEY)
         }
       }
     })

@@ -4,180 +4,71 @@ import {
   AVAILABLE_HOSTS,
   DEFAULT_SETTINGS,
   ModeConfig,
-  TEARLINE_HOST,
   VERSION,
 } from "../common/settings"
-import { authService } from "../common/services/authService"
 import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
 import { ApiService } from "../common/services/api"
-import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/model/task"
+import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
-import { AuthStatus } from "../common/model/authStatus"
+import { AuthStatus } from "../auth/models"
+import useAuth from "../auth/useAuth"
 
 const App: React.FC = () => {
-  const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
+  const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
   const [status, setStatus] = useState<{
-    message: string
-    type: string
-    visible: boolean
-  } | null>(null)
-  const [activePage, setActivePage] = useState<string>("Account")
+    message: string;
+    type: string;
+    visible: boolean;
+  } | null>(null);
+  const [activePage, setActivePage] = useState<string>("Account");
   const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(
     DEFAULT_SETTINGS.enableAtSyntax
-  )
+  );
   const [enableLlmSelect, setEnableLlmSelect] = useState<boolean>(
     DEFAULT_SETTINGS.enableLlmSelect
-  )
+  );
   const [modeConfig, setModeConfig] = useState<ModeConfig>(
     DEFAULT_SETTINGS.modeConfig
-  )
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  // Track login status with timeout handling
-  const [authStatus, setAuthStatus] = useState<
-    AuthStatus
-  >(AuthStatus.NONE)
-  // Track login timeout
-  const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null)
-  // User info
-  const [userInfo, setUserInfo] = useState<{
-    name?: string
-    email?: string
-    userId?: string
-  } | null>(null)
-  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT)
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT);
 
-  // 状态更新函数
-  const updateAuthStatus = useCallback(
-    (
-      newStatus: AuthStatus,
-      shouldOverridePending: boolean = false
-    ) => {
-      setAuthStatus((currentStatus) => {
-        // 如果当前状态是 pending，且没有强制覆盖，则保持 pending 状态
-        if (!shouldOverridePending && currentStatus === AuthStatus.PENDING) {
-          return AuthStatus.PENDING
-        }
-        // 否则更新为新状态
-        return newStatus
-      })
+  const { authStatus, userInfo, handleLogin, handleLogout } = useAuth();
+
+  const showStatus = useCallback(
+    (message: string, type: string, duration: number = 3000) => {
+      setStatus({ message, type, visible: true });
+      setTimeout(() => {
+        setStatus((prev) => (prev ? { ...prev, visible: false } : null));
+        setTimeout(() => {
+          setStatus(null);
+        }, 300);
+      }, duration);
     },
     []
-  )
+  );
 
-  // Load auth status from secure storage (chrome.storage.local)
-  const loadAuthStatus = useCallback(
-    async (shouldOverridePending: boolean = false) => {
-      try {
-        const isLoggedIn = await authService.isLoggedIn()
-        if (isLoggedIn) {
-          const authInfo = await authService.getAuthInfo()
-
-          // Extract user information from the nested JSON token
-          let parsedUserInfo: {
-            email?: string
-            name?: string
-            userId?: string
-          } | null = null
-          if (authInfo?.token) {
-            try {
-              // Parse the token which is a JSON string
-              const parsedToken = JSON.parse(authInfo.token)
-
-              // Extract user data from the nested structure
-              if (parsedToken.data) {
-                parsedUserInfo = {
-                  email: parsedToken.data.email,
-                  name: parsedToken.data.name,
-                  userId: parsedToken.data.user_id,
-                }
-              }
-            } catch (err) {
-              console.error("Error parsing token data:", err)
-            }
-          }
-
-          updateAuthStatus(AuthStatus.SUCCESS, shouldOverridePending)
-          setUserInfo(parsedUserInfo || authInfo?.user || null)
-        } else {
-          updateAuthStatus(AuthStatus.NONE, shouldOverridePending)
-          setUserInfo(null)
-        }
-      } catch (error) {
-        console.error("Error checking auth status:", error)
-        updateAuthStatus(AuthStatus.ERROR, shouldOverridePending)
-      }
-    },
-    [updateAuthStatus]
-  )
-
-  // Load saved settings from chrome.storage.sync
   useEffect(() => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     // Load settings
     chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
-      setApiHost(items.apiHost)
-      setEnableAtSyntax(items.enableAtSyntax)
-      setEnableLlmSelect(items.enableLlmSelect)
-      setModeConfig(items.modeConfig)
-      setIsLoading(false)
-    })
-
-    // Load auth status
-    loadAuthStatus()
-
-    // Initialize login check
-    chrome.runtime.sendMessage(
-      {
-        type: "INIT_LOGIN",
-      },
-      (response) => {
-        // If response indicates already logged in, update state
-        if (response && response.isLoggedIn) {
-          loadAuthStatus(true)
-        }
-      }
-    )
+      setApiHost(items.apiHost);
+      setEnableAtSyntax(items.enableAtSyntax);
+      setEnableLlmSelect(items.enableLlmSelect);
+      setModeConfig(items.modeConfig);
+      setIsLoading(false);
+    });
 
     // Check URL parameters for page selection
-    const urlParams = new URLSearchParams(window.location.search)
-    const pageParam = urlParams.get("page")
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get("page");
     if (pageParam) {
-      setActivePage(pageParam)
+      setActivePage(pageParam);
     }
-
-    // Listen for auth state changes
-    const messageListener = (message) => {
-      if (message.type === "LOGIN_STATE_CHANGED") {
-        // Clear any pending login timeout
-        if (loginTimeoutId) {
-          window.clearTimeout(loginTimeoutId)
-          setLoginTimeoutId(null)
-        }
-
-        // 强制更新状态
-        loadAuthStatus(true)
-      }
-
-      if (message.type === "LOGOUT_STATE_CHANGED") {
-        updateAuthStatus(AuthStatus.NONE, true)
-        setUserInfo(null)
-      }
-    }
-
-    chrome.runtime.onMessage.addListener(messageListener)
-
-    // Clean up listener on unmount
-    return () => {
-      chrome.runtime.onMessage.removeListener(messageListener)
-      // Clear any pending timeout
-      if (loginTimeoutId) {
-        window.clearTimeout(loginTimeoutId)
-      }
-    }
-  }, [loadAuthStatus, loginTimeoutId, updateAuthStatus])
+  }, []);
 
   // 在组件挂载时检查 URL 参数并获取任务数据
   useEffect(() => {
@@ -200,26 +91,6 @@ const App: React.FC = () => {
     }
   }, [apiHost])
 
-  // Display status message with auto-clear functionality
-  const showStatus = useCallback(
-    (message: string, type: string, duration: number = 3000) => {
-      // First set the status with visible: true
-      setStatus({ message, type, visible: true })
-
-      // Automatically clear the status after the specified duration
-      setTimeout(() => {
-        // First set visible to false to trigger the slide-out animation
-        setStatus((prev) => (prev ? { ...prev, visible: false } : null))
-
-        // Then completely remove it after the animation completes
-        setTimeout(() => {
-          setStatus(null)
-        }, 300) // Match this with the CSS transition duration
-      }, duration)
-    },
-    []
-  )
-
   // Save settings to chrome.storage.sync
   const saveOptions = useCallback(() => {
     const settings = {
@@ -233,51 +104,6 @@ const App: React.FC = () => {
       showStatus("Settings saved!", "success")
     })
   }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig, showStatus])
-
-  // Handle login button click - extracted outside render
-  const handleLogin = useCallback(async () => {
-    try {
-      // Check current auth status first
-      const isLoggedIn = await authService.isLoggedIn()
-      if (isLoggedIn) {
-        updateAuthStatus(AuthStatus.SUCCESS, true)
-        loadAuthStatus()
-        return
-      }
-
-      // Set pending state and open login page
-      updateAuthStatus(AuthStatus.PENDING)
-
-      // Set a timeout to revert to "none" if login doesn't complete
-      const timeoutId = window.setTimeout(() => {
-        updateAuthStatus(AuthStatus.ERROR, true)
-        showStatus("Login timed out. Please try again.", "error")
-      }, 120000) // 2 minutes timeout
-
-      setLoginTimeoutId(timeoutId)
-
-      // Open the login page
-      const url = `https://${TEARLINE_HOST}/#`
-      await chrome.tabs.create({ url })
-    } catch (error) {
-      console.error("Login error:", error)
-      updateAuthStatus(AuthStatus.ERROR, true)
-      showStatus("Login failed. Please try again.", "error")
-    }
-  }, [showStatus, updateAuthStatus])
-
-  // Handle logout
-  const handleLogout = useCallback(async () => {
-    try {
-      await authService.clearAuthInfo()
-      await authService.broadcastLoginState(false)
-      updateAuthStatus(AuthStatus.NONE, true)
-      setUserInfo(null)
-    } catch (error) {
-      console.error("Logout error:", error)
-      showStatus("Logout failed. Please try again.", "error")
-    }
-  }, [showStatus, updateAuthStatus])
 
   // Copy text to clipboard
   const copyToClipboard = useCallback(
@@ -294,7 +120,6 @@ const App: React.FC = () => {
     },
     [showStatus]
   )
-
 
   // Helper function to check if current version is alpha
   const isAlphaVersion = useCallback(() => {
@@ -330,7 +155,7 @@ const App: React.FC = () => {
                   </p>
                   <button
                     className="auth-button login-button"
-                    onClick={handleLogin}
+                    onClick={() => handleLogin(showStatus)}
                   >
                     Login with Tearline
                   </button>
@@ -357,7 +182,7 @@ const App: React.FC = () => {
                   </div>
                   <button
                     className="auth-button login-button"
-                    onClick={handleLogin}
+                    onClick={() => handleLogin(showStatus)}
                   >
                     Try Again
                   </button>
@@ -421,7 +246,7 @@ const App: React.FC = () => {
 
                   <button
                     className="auth-button logout-button"
-                    onClick={handleLogout}
+                    onClick={() => handleLogout(showStatus)}
                   >
                     Logout
                   </button>
