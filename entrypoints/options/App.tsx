@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import "./App.css"
 import {
   AVAILABLE_HOSTS,
@@ -11,7 +11,6 @@ import { authService } from "../../services/authService"
 import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
 import { ApiService } from "../common/services/api"
 import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/model/task"
-import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
@@ -47,8 +46,6 @@ const App: React.FC = () => {
     userId?: string
   } | null>(null)
   const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT)
-  const deckDivRef = useRef<HTMLDivElement>(null)
-  const deckRef = useRef<Reveal.Api | null>(null)
 
   // 状态更新函数
   const updateAuthStatus = useCallback(
@@ -511,7 +508,7 @@ const App: React.FC = () => {
           <>
             <h2>History</h2>
             <div className="history-container">
-              <p>Your interaction history will be displayed here.</p>
+              <p>Historical tasks will be displayed here.</p>
               {/* 模态窗口 */}
               {(() => {
                 const urlParams = new URLSearchParams(window.location.search)

@@ -55,3 +55,17 @@ git push tearline tearline:tearline
 
 1. 修改package.json中的version字段的值。
 2. 执行`pnpm zip`，在`dist`目录下会生成一个文件名包含版本号的zip文件。
+
+## Feature Toggle
+
+### Share feature
+
+- `DEFAULT_INTERACTION_TOGGLE.shareButton`
+
+### Developer Settigns page
+
+- `WXT_GHOST_DRIVER_DEV_VERSION`
+
+### `apiHost` of `DEFAULT_SETTINGS`
+
+- `WXT_GHOST_DRIVER_DEV_VERSION`
