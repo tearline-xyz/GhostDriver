@@ -23,7 +23,6 @@ import { Mode } from "../common/models/mode"
 import { SuggestionMenuItem, suggestionMenuItems } from "./models/suggestion"
 import {
   BACK_SYMBOL,
-  BULLET_SYMBOL,
   DOWN_ARROW_SYMBOL,
   FORWARD_SYMBOL,
   PAUSE_SYMBOL,
