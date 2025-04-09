@@ -1,5 +1,5 @@
 import { defineBackground } from "wxt/sandbox"
-import { authService } from "../services/authService"
+import { authService } from "./common/services/authService"
 import { browser } from "wxt/browser"
 import { TEARLINE_HOST } from "./common/settings"
 
@@ -97,5 +97,6 @@ export default defineBackground(() => {
     console.log("Attempting to refresh token")
   }
 
+  // @ts-ignore
   browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
 })

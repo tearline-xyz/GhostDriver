@@ -14,6 +14,7 @@ import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/model/task"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
+import { AuthStatus } from "../common/model/authStatus"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -35,8 +36,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true)
   // Track login status with timeout handling
   const [authStatus, setAuthStatus] = useState<
-    "none" | "pending" | "success" | "error"
-  >("none")
+    AuthStatus
+  >(AuthStatus.NONE)
   // Track login timeout
   const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null)
   // User info
@@ -50,13 +51,13 @@ const App: React.FC = () => {
   // 状态更新函数
   const updateAuthStatus = useCallback(
     (
-      newStatus: "none" | "pending" | "success" | "error",
+      newStatus: AuthStatus,
       shouldOverridePending: boolean = false
     ) => {
       setAuthStatus((currentStatus) => {
         // 如果当前状态是 pending，且没有强制覆盖，则保持 pending 状态
-        if (!shouldOverridePending && currentStatus === "pending") {
-          return "pending"
+        if (!shouldOverridePending && currentStatus === AuthStatus.PENDING) {
+          return AuthStatus.PENDING
         }
         // 否则更新为新状态
         return newStatus
@@ -97,15 +98,15 @@ const App: React.FC = () => {
             }
           }
 
-          updateAuthStatus("success", shouldOverridePending)
+          updateAuthStatus(AuthStatus.SUCCESS, shouldOverridePending)
           setUserInfo(parsedUserInfo || authInfo?.user || null)
         } else {
-          updateAuthStatus("none", shouldOverridePending)
+          updateAuthStatus(AuthStatus.NONE, shouldOverridePending)
           setUserInfo(null)
         }
       } catch (error) {
         console.error("Error checking auth status:", error)
-        updateAuthStatus("error", shouldOverridePending)
+        updateAuthStatus(AuthStatus.ERROR, shouldOverridePending)
       }
     },
     [updateAuthStatus]
@@ -161,7 +162,7 @@ const App: React.FC = () => {
       }
 
       if (message.type === "LOGOUT_STATE_CHANGED") {
-        updateAuthStatus("none", true)
+        updateAuthStatus(AuthStatus.NONE, true)
         setUserInfo(null)
       }
     }
@@ -239,17 +240,17 @@ const App: React.FC = () => {
       // Check current auth status first
       const isLoggedIn = await authService.isLoggedIn()
       if (isLoggedIn) {
-        updateAuthStatus("success", true)
+        updateAuthStatus(AuthStatus.SUCCESS, true)
         loadAuthStatus()
         return
       }
 
       // Set pending state and open login page
-      updateAuthStatus("pending")
+      updateAuthStatus(AuthStatus.PENDING)
 
       // Set a timeout to revert to "none" if login doesn't complete
       const timeoutId = window.setTimeout(() => {
-        updateAuthStatus("error", true)
+        updateAuthStatus(AuthStatus.ERROR, true)
         showStatus("Login timed out. Please try again.", "error")
       }, 120000) // 2 minutes timeout
 
@@ -260,7 +261,7 @@ const App: React.FC = () => {
       await chrome.tabs.create({ url })
     } catch (error) {
       console.error("Login error:", error)
-      updateAuthStatus("error", true)
+      updateAuthStatus(AuthStatus.ERROR, true)
       showStatus("Login failed. Please try again.", "error")
     }
   }, [showStatus, updateAuthStatus])
@@ -270,7 +271,7 @@ const App: React.FC = () => {
     try {
       await authService.clearAuthInfo()
       await authService.broadcastLoginState(false)
-      updateAuthStatus("none", true)
+      updateAuthStatus(AuthStatus.NONE, true)
       setUserInfo(null)
     } catch (error) {
       console.error("Logout error:", error)
@@ -318,7 +319,7 @@ const App: React.FC = () => {
           <>
             <h2>Account Settings</h2>
             <div className="account-container">
-              {authStatus === "none" && (
+              {authStatus === AuthStatus.NONE && (
                 <div className="profile-card not-logged-in">
                   <div className="profile-avatar">
                     <img src={UserIcon} alt="User" />
@@ -336,7 +337,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {authStatus === "pending" && (
+              {authStatus === AuthStatus.PENDING && (
                 <div className="profile-card pending">
                   <div className="loader"></div>
                   <div className="profile-status">Login in progress</div>
@@ -346,7 +347,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {authStatus === "error" && (
+              {authStatus === AuthStatus.ERROR && (
                 <div className="profile-card error">
                   <div className="profile-avatar error">
                     <img src={ErrorIcon} alt="Error" />
@@ -363,7 +364,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {authStatus === "success" && (
+              {authStatus === AuthStatus.SUCCESS && (
                 <div className="profile-card logged-in">
                   <div className="profile-header">
                     <div className="profile-avatar success">
