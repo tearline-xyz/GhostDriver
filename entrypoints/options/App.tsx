@@ -7,7 +7,7 @@ import {
   TEARLINE_HOST,
   VERSION,
 } from "../common/settings"
-import { authService } from "../../services/authService"
+import { authService } from "../common/services/authService"
 import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
 import { ApiService } from "../common/services/api"
 import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/model/task"
