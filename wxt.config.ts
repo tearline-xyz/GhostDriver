@@ -1,5 +1,5 @@
 import { defineConfig } from "wxt"
-import { TEARLINE_HOST } from "./entrypoints/common/settings"
+import { EXTENSION_NAME, TEARLINE_HOST } from "./entrypoints/common/settings"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -9,7 +9,7 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   manifestVersion: 3,
   manifest: {
-    name: "GhostDriver",
+    name: EXTENSION_NAME,
     permissions: [
       "debugger",
       "tabs",

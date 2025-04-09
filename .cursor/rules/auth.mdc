@@ -50,7 +50,7 @@ alwaysApply: false
 ## 核心组件
 
 ### 1. 身份验证设置
-- `TEARLINE_HOST` 在 `settings.ts` 中定义为 `"www1.test.tearline.io"`
+- `TEARLINE_HOST` 在 `settings.ts` 中定义
 - `AUTHINFO_KEY` 用作存储身份验证数据的键名
 
 ### 2. 身份验证模型

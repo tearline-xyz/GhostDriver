@@ -3,6 +3,7 @@ import "./App.css"
 import {
   AVAILABLE_HOSTS,
   DEFAULT_SETTINGS,
+  EXTENSION_NAME,
   ModeConfig,
   VERSION,
 } from "../common/settings"
@@ -374,7 +375,7 @@ const App: React.FC = () => {
         </div>
       )}
       <div className="sidebar">
-        <h1>GhostDriver</h1>
+        <h1>{EXTENSION_NAME}</h1>
         <ul className="nav-menu">
           {[
             "Account",

@@ -1,5 +1,6 @@
 import React from 'react';
 import { TearlineLogo } from '../../../assets/icons';
+import { EXTENSION_NAME } from '../../common/settings';
 
 const LoginPrompt: React.FC<{ onLogin: () => void }> = ({ onLogin }) => (
   <div style={{
@@ -27,7 +28,7 @@ const LoginPrompt: React.FC<{ onLogin: () => void }> = ({ onLogin }) => (
         gap: '16px'
       }}>
         <img src={TearlineLogo} alt="Copy" style={{ width: '60px', height: '60px' }} />
-        <p style={{ fontSize: '1.2em', textAlign: 'center' }}>Please login with Tearline to use GhostDriver.</p>
+        <p style={{ fontSize: '1.2em', textAlign: 'center' }}>Please login with Tearline to use {EXTENSION_NAME}.</p>
         <button style={{
           backgroundColor: '#2b7eef',
           color: '#ffffff',

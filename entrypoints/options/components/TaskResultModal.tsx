@@ -6,6 +6,7 @@ import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 import "./TaskResultModal.css"
 import { TaskContext } from "../../common/models/task"
+import { EXTENSION_NAME } from "../../common/settings"
 
 interface TaskResultModalProps {
   taskContext: TaskContext
@@ -96,7 +97,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '16px' }}>
                     <p><strong>Task ID:</strong> {taskContext.id}</p>
                     <p><strong>Generated on:</strong> {taskContext.created_at}</p>
-                    <p><strong>Powered by:</strong> GhostDriver and {taskContext.chat_model_tag}</p>
+                    <p><strong>Powered by:</strong> {EXTENSION_NAME} and {taskContext.chat_model_tag}</p>
                     <p><strong>Final State:</strong> {taskContext.state}</p>
                     <p><strong>Total Steps:</strong> {taskContext.result.history.length}</p>
                   </div>
