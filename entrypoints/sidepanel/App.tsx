@@ -44,7 +44,7 @@ import {
 } from "./models/notification"
 import { ApiService } from "../common/services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
-import { addTask } from "../db/taskStore"
+import { addTask, updateTask } from "../db/taskStore"
 
 function App() {
   /** Main input text content */
@@ -689,10 +689,8 @@ function App() {
   const onPlaywrightServerDisconnectCallback = async (taskId: string) => {
     try {
       const taskContext = await apiService.getTask(taskId)
-      setTaskContext((prev) => ({
-        ...prev,
-        state: taskContext.state as TaskState,
-      }))
+      setTaskContext(taskContext)
+      await updateTask(taskContext)
     } catch (error) {
       console.error("Error fetching task status:", error)
     }
@@ -726,10 +724,7 @@ function App() {
       await addTask(taskContext)
 
       // 开始任务，使用从响应中获取的taskId
-      setTaskContext({
-        id: taskId,
-        state: taskContext.state as TaskState,
-      })
+      setTaskContext(taskContext)
 
       // 使用 Promise.all 并行处理连接操作
       await Promise.all([
