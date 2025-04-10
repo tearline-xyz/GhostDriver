@@ -34,7 +34,6 @@ export interface InteractionToggle {
 
   // 任务ID显示
   taskId: {
-    enabled: boolean
     visible: boolean
   }
 
@@ -78,7 +77,6 @@ export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
     visible: false,
   },
   taskId: {
-    enabled: true,
     visible: true,
   },
   modeSelector: {
