@@ -7,7 +7,7 @@ import {
   ModeConfig,
   VERSION,
 } from "../common/settings"
-import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
+import { CopyIcon, UserIcon, ErrorIcon, ClearAllIcon } from "../../assets/icons"
 import { ApiService } from "../common/services/api"
 import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
@@ -15,6 +15,7 @@ import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
 import { AuthStatus } from "../auth/models"
 import useAuth from "../auth/useAuth"
+import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
@@ -35,6 +36,7 @@ const App: React.FC = () => {
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT);
+  const [allTasks, setAllTasks] = useState<TaskContext[]>([]);
 
   const { authStatus, userInfo, handleLogin, handleLogout } = useAuth();
 
@@ -132,6 +134,35 @@ const App: React.FC = () => {
     console.log('Current focusedTaskContext:', focusedTaskContext)
     console.log('History data:', focusedTaskContext.result?.history)
   }, [focusedTaskContext.result?.history])
+
+  // 加载历史任务
+  useEffect(() => {
+    const loadTasks = async () => {
+      try {
+        const allTasks = await getAllTasksSortedByCreatedAt();
+        setAllTasks(allTasks);
+      } catch (error) {
+        console.error("Error loading tasks:", error);
+        showStatus("Failed to load history", "error");
+      }
+    };
+
+    if (activePage === "History") {
+      loadTasks();
+    }
+  }, [activePage]);
+
+  // 清空历史记录
+  const handleClearHistory = useCallback(async () => {
+    try {
+      await clearAllTasks();
+      setAllTasks([]);
+      showStatus("History cleared successfully!", "success");
+    } catch (error) {
+      console.error("Error clearing history:", error);
+      showStatus("Failed to clear history", "error");
+    }
+  }, [showStatus]);
 
   // Render different content based on active page
   const renderContent = () => {
@@ -333,9 +364,48 @@ const App: React.FC = () => {
       case "History":
         return (
           <>
-            <h2>History</h2>
+            <div className="history-header">
+              <h2>History</h2>
+              <button
+                className="clear-history-button"
+                onClick={handleClearHistory}
+                disabled={allTasks.length === 0}
+              >
+                <img src={ClearAllIcon} alt="Delete" />
+                Clear History
+              </button>
+            </div>
             <div className="history-container">
-              <p>Historical tasks will be displayed here.</p>
+              {allTasks.length === 0 ? (
+                <p>No historical tasks found.</p>
+              ) : (
+                <div className="task-list">
+                  {allTasks.map((task) => (
+                    <div key={task.id} className="task-item">
+                      <div className="task-header">
+                        <span className="task-id">Task ID: {task.id}</span>
+                        <span className="task-state">{task.state}</span>
+                        <span className="task-time">
+                          {task.created_at}
+                        </span>
+                      </div>
+                      <div className="task-input">{task.content}</div>
+                      <div className="task-actions">
+                        <button
+                          className="share-button"
+                          onClick={() => {
+                            const newUrl = `${window.location.pathname}?page=History&taskId=${task.id}&action=share`;
+                            window.history.pushState({}, "", newUrl);
+                            window.location.reload();
+                          }}
+                        >
+                          Share
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               {/* 模态窗口 */}
               {(() => {
                 const urlParams = new URLSearchParams(window.location.search)
@@ -343,7 +413,6 @@ const App: React.FC = () => {
                 const action = urlParams.get("action")
 
                 if (taskId && action === "share") {
-                  console.log('Rendering modal with taskId:', taskId)
                   return (
                     <TaskResultModal
                       taskContext={focusedTaskContext}

@@ -44,6 +44,7 @@ import {
 } from "./models/notification"
 import { ApiService } from "../common/services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
+import { addTask } from "../db/taskStore"
 
 function App() {
   /** Main input text content */
@@ -707,6 +708,9 @@ function App() {
       if (!taskId) {
         throw new Error("Failed to get task ID from server")
       }
+
+      // 保存任务到数据库
+      await addTask(taskContext)
 
       // 开始任务，使用从响应中获取的taskId
       setTaskContext({
