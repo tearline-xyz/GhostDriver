@@ -685,6 +685,19 @@ function App() {
     }
   }, [])
 
+  /** 处理任务状态更新 */
+  const onPlaywrightServerDisconnectCallback = async (taskId: string) => {
+    try {
+      const taskContext = await apiService.getTask(taskId)
+      setTaskContext((prev) => ({
+        ...prev,
+        state: taskContext.state as TaskState,
+      }))
+    } catch (error) {
+      console.error("Error fetching task status:", error)
+    }
+  }
+
   const handleTaskSubmission = async () => {
     hideNotification()
 
@@ -722,17 +735,7 @@ function App() {
       await Promise.all([
         connectToPlaywrightServer(
           apiService.getPlaywrightWebSocketUrl(taskId),
-          async () => {
-            try {
-              const taskContext = await apiService.getTask(taskId)
-              setTaskContext((prev) => ({
-                ...prev,
-                state: taskContext.state as TaskState,
-              }))
-            } catch (error) {
-              console.error("Error fetching task status:", error)
-            }
-          }
+          () => onPlaywrightServerDisconnectCallback(taskId)
         ),
         // 创建一个 Promise 来连接事件流
         new Promise<void>((resolve) => {
