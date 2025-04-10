@@ -1,12 +1,12 @@
 import { defineUnlistedScript } from "wxt/sandbox"
-import { TEARLINE_HOST, AUTHINFO_KEY } from "./common/settings"
+import { TEARLINE_WEBSITE, AUTHINFO_KEY } from "./common/settings"
 import { AuthMessage, AuthMessageType } from "./auth/models"
 
 export default defineUnlistedScript(() => {
   // Script injected into the page context to monitor auth changes
   ;(function () {
     // Only run on the expected domain
-    if (!window.location.hostname.includes(TEARLINE_HOST)) {
+    if (!window.location.hostname.includes(TEARLINE_WEBSITE)) {
       return
     }
 

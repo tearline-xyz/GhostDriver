@@ -1,5 +1,5 @@
 import { defineConfig } from "wxt"
-import { EXTENSION_NAME, TEARLINE_HOST } from "./entrypoints/common/settings"
+import { EXTENSION_NAME, TEARLINE_WEBSITE } from "./entrypoints/common/settings"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -35,7 +35,7 @@ export default defineConfig({
     web_accessible_resources: [
       {
         resources: ["injectScript.js"],
-        matches: [`*://${TEARLINE_HOST}/*`],
+        matches: [`*://${TEARLINE_WEBSITE}/*`],
       },
     ],
   },

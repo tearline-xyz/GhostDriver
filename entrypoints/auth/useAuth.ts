@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { authService } from './authService';
-import { TEARLINE_HOST } from '../common/settings';
+import { TEARLINE_WEBSITE } from '../common/settings';
 import { authStateMachineActor } from './models';
 import { AuthEventType, AuthMessageType } from './models';
 
@@ -64,7 +64,7 @@ const useAuth = () => {
       }, 120000);
       setLoginTimeoutId(timeoutId);
 
-      const url = `https://${TEARLINE_HOST}/#`;
+      const url = `https://${TEARLINE_WEBSITE}/#`;
       await chrome.tabs.create({ url });
     } catch (error) {
       console.error('Login error:', error);

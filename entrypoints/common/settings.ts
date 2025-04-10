@@ -8,7 +8,7 @@ export const VERSION =
   // @ts-ignore
   import.meta.env.WXT_GHOST_DRIVER_DEV_VERSION || version
 
-export const TEARLINE_HOST = "www1.test.tearline.io"
+export const TEARLINE_WEBSITE = "www.tearline.io"
 
 export const AVAILABLE_HOSTS = [
   "http://localhost:8000",

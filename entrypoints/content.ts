@@ -1,9 +1,9 @@
 import { defineContentScript } from "wxt/sandbox"
-import { AUTHINFO_KEY, TEARLINE_HOST } from "./common/settings"
+import { AUTHINFO_KEY, TEARLINE_WEBSITE } from "./common/settings"
 import { AuthMessageType } from "./auth/models"
 
 export default defineContentScript({
-  matches: [`*://${TEARLINE_HOST}/*`],
+  matches: [`*://${TEARLINE_WEBSITE}/*`],
   main() {
     // Securely post login message to background
     const postLoginMessage = (authData) => {
@@ -66,8 +66,8 @@ export default defineContentScript({
     window.addEventListener("message", (event) => {
       // Verify message origin for security
       if (
-        event.origin !== `https://${TEARLINE_HOST}` &&
-        event.origin !== `http://${TEARLINE_HOST}`
+        event.origin !== `https://${TEARLINE_WEBSITE}` &&
+        event.origin !== `http://${TEARLINE_WEBSITE}`
       ) {
         console.warn(`Ignored message from untrusted origin: ${event.origin}`)
         return

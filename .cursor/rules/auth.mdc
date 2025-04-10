@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
 # Summary
@@ -10,7 +10,7 @@ alwaysApply: false
 ## 业务需求
 
 - tearline官网：
-  tearline官网的域名`TEARLINE_HOST`定义在 [settings.ts](mdc:entrypoints/common/settings.ts)
+  tearline官网的域名`TEARLINE_WEBSITE`定义在 [settings.ts](mdc:entrypoints/common/settings.ts)
 
 - 这个浏览器扩展在管理用户登入登出状态的时候能够和官网的登入登出操作完全同步：
   - 监听到用户从官网登出，则扩展自动登出
@@ -50,7 +50,7 @@ alwaysApply: false
 ## 核心组件
 
 ### 1. 身份验证设置
-- `TEARLINE_HOST` 在 `settings.ts` 中定义
+- `TEARLINE_WEBSITE` 在 `settings.ts` 中定义
 - `AUTHINFO_KEY` 用作存储身份验证数据的键名
 
 ### 2. 身份验证模型
@@ -81,7 +81,7 @@ alwaysApply: false
 2. **登录过程**：
    - 当用户点击"使用 Tearline 登录"按钮时：
      - 身份验证状态变为"PENDING"
-     - 扩展打开新标签页到 `https://${TEARLINE_HOST}/#`
+     - 扩展打开新标签页到 `https://${TEARLINE_WEBSITE}/#`
      - 设置超时（120秒）处理登录超时
 
 3. **身份验证数据捕获**：
@@ -227,4 +227,3 @@ alwaysApply: false
 这种设计确保了 UI 始终与用户的认证状态保持一致。
 
 通过以上这些机制，状态机在认证状态管理中发挥了重要作用，使得状态管理更加清晰、可控和易于维护。
-
