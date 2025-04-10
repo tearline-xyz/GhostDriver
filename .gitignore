@@ -16,8 +16,8 @@ stats-*.json
 web-ext.config.ts
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# .vscode/*
+# !.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -25,3 +25,6 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+
+# 不将playwright-crx仓库作为子模块
+/playwright-crx

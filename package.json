@@ -1,11 +1,11 @@
 {
-  "name": "tearline-auto-browser",
+  "name": "ghost-driver",
   "description": "manifest.json description",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.1",
   "type": "module",
   "scripts": {
-    "dev": "wxt",
+    "dev": "WXT_GHOST_DRIVER_DEV_VERSION=dev.alpha.$(date +%Y%m%d%H%M%S) wxt",
     "dev:firefox": "wxt -b firefox",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "build": "wxt build",
@@ -16,8 +16,12 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@types/reveal.js": "^5.0.5",
+    "highlight.js": "^11.11.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "reveal.js": "^5.2.1",
+    "xstate": "^5.19.2"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.280",

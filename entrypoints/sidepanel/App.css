@@ -14,6 +14,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .input-container {
@@ -21,9 +22,10 @@
   width: calc(100% - 24px);
   background-color: #2d2d2d;
   border-radius: 8px;
-  padding: 12px;
+  padding: 12px 12px 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .input-wrapper {
@@ -32,8 +34,9 @@
 }
 
 .main-input {
-  width: calc(100% - 16px);
-  min-height: 100px;
+  width: 100%;
+  min-height: 10vh;
+  max-height: 40vh; /* Limiting to 40% of viewport height */
   background-color: transparent;
   border: none;
   color: #ffffff;
@@ -43,8 +46,8 @@
     Arial;
   resize: vertical;
   outline: none;
-  padding: 8px;
-  margin-bottom: 8px;
+  padding: 0;
+  margin: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
   caret-color: #ffffff;
@@ -82,6 +85,9 @@
 .left-controls {
   display: flex;
   gap: 8px;
+  flex: 1;
+  min-width: 0; /* Allow the container to shrink below its content size */
+  overflow: hidden; /* Hide overflow content */
 }
 
 .right-controls {
@@ -100,8 +106,22 @@
   font-size: 12px;
   cursor: pointer;
   outline: none;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
+}
+
+.llm-select {
+  width: auto;
+  min-width: 60px;
+  max-width: 100px;
+  text-overflow: ellipsis;
+}
+
+.llm-select option {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mode-select:hover,
@@ -109,29 +129,35 @@
   background-color: #4d4d4d;
 }
 
+.share-button,
 .send-button {
   background-color: #2b7eef;
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 2px 12px; /* Reduced vertical padding from 4px to 2px */
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
 .send-button:disabled {
-  background-color: #666;
+  background-color: #6c757d;
   cursor: not-allowed;
   opacity: 0.7;
+  box-shadow: none;
 }
 
 .send-button:hover {
-  background-color: #3889f0;
+  background-color: #1659b7; /* Darker blue for send button hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .suggestions-dropdown {
@@ -227,8 +253,8 @@
 }
 
 .notification {
-  margin: 12px 0px;
-  padding: 0px 12px;
+  margin: 1.5px 0px;
+  padding: 5px 12px;
   border-radius: 6px;
   color: #ffffff;
   animation: slideIn 0.3s ease;
@@ -240,6 +266,11 @@
   justify-content: space-between;
   align-items: center;
   line-height: 1;
+}
+
+.notification-content span {
+  white-space: pre-line;
+  display: block;
 }
 
 .notification-success {
@@ -260,7 +291,10 @@
   color: white;
   font-size: 18px;
   cursor: pointer;
-  margin-left: 8px;
+  margin-left: 2px;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
   opacity: 0.8;
 }
 
@@ -271,47 +305,188 @@
 .pause-resume-button {
   border: none;
   border-radius: 4px;
-  padding: 4px 8px;
+  padding: 2px 8px; /* Reduced vertical padding from 4px to 2px */
   font-size: 12px;
   cursor: pointer;
   font-weight: 500;
-  background-color: #ffc107; /* 黄色背景 */
+  background-color: #f0ad4e; /* More professional amber/gold color */
   color: #212529;
-  transition: background-color 0.2s;
-  height: 28px;
+  transition: all 0.2s;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .pause-resume-button:hover {
-  opacity: 0.9;
+  background-color: #e09111; /* Darker amber/gold for hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .pause-resume-button.running {
-  background-color: #ffc107; /* 运行状态为黄色 */
+  background-color: #f0ad4e;
+}
+
+.pause-resume-button.running:hover {
+  background-color: #e09111; /* Darker amber/gold for running hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .pause-resume-button.paused {
-  background-color: #28a745; /* 暂停状态为绿色 */
+  background-color: #5cb85c; /* More professional green */
+}
+
+.pause-resume-button.paused:hover {
+  background-color: #449d44; /* Darker green for paused hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .stop-button {
-  background-color: #dc3545; /* 红色背景 */
+  background-color: #d9534f; /* More professional red */
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 2px 12px; /* Reduced vertical padding from 4px to 2px */
   font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: the4px;
+  justify-content: center;
   font-weight: 500;
-  height: 28px;
+  height: 24px; /* Reduced from 28px to 24px */
   box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
 }
 
 .stop-button:hover {
-  background-color: #c82333;
+  background-color: #c12e2a; /* Darker red for hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.task-control-buttons {
+  display: flex;
+  gap: 8px; /* Spacing between the buttons */
+  width: 100%; /* Use full width of container */
+}
+
+.pause-resume-button,
+.stop-button,
+.send-button {
+  min-width: 60px; /* Set a consistent minimum width for all buttons */
+  justify-content: center; /* Center text/content in buttons */
+}
+
+.pause-resume-button,
+.stop-button {
+  flex: 1; /* Make both buttons equal width when side by side */
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.event-stream-area {
+  flex: 1;
+  overflow-y: auto;
+  margin: 0;
+  width: 100%;
+  background-color: transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  box-shadow:
+    inset 0 15px 12px -10px rgba(0, 0, 0, 0.7),
+    /* Stronger top inset shadow */ inset 0 1px 4px rgba(0, 0, 0, 0.6); /* Additional fine shadow for depth */
+  border-top: 1px solid rgba(255, 255, 255, 0.08); /* Slightly more visible top border */
+  padding-top: 16px; /* Increased padding to enhance shadow visibility */
+  background-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0%,
+    transparent 15px
+  ); /* Gradient overlay for added depth */
+}
+
+/* Custom scrollbar for event-stream-area */
+.event-stream-area::-webkit-scrollbar {
+  width: 8px; /* Narrower scrollbar */
+}
+
+.event-stream-area::-webkit-scrollbar-track {
+  background-color: #1e1e1e; /* Dark background to match app theme */
+  border-radius: 4px; /* Rounded corners for the track */
+}
+
+.event-stream-area::-webkit-scrollbar-thumb {
+  background-color: #3d3d3d; /* Dark gray for the scrollbar thumb */
+  border-radius: 4px; /* Rounded corners for the thumb */
+}
+
+.event-stream-area::-webkit-scrollbar-thumb:hover {
+  background-color: #4d4d4d; /* Slightly lighter on hover */
+}
+
+.event-item {
+  padding: 5px;
+  background-color: #282828;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.event-action {
+  background-color: rgba(41, 128, 185, 0.25);
+}
+
+.event-log {
+  background-color: rgba(120, 120, 120, 0.2); /* Default color for log events */
+}
+
+.event-log-debug {
+  background-color: rgba(230, 162, 60, 0.25); /* More professional amber */
+}
+
+.event-log-info {
+  background-color: rgba(
+    130,
+    140,
+    150,
+    0.2
+  ); /* Slightly distinguished from default */
+}
+
+.event-log-warning {
+  background-color: rgba(230, 162, 60, 0.25); /* Amber color for warnings */
+}
+
+.event-log-error,
+.event-log-critical {
+  background-color: rgba(
+    192,
+    57,
+    43,
+    0.25
+  ); /* More refined red for error/critical logs */
+}
+
+.event-unknown {
+  background-color: rgba(
+    142,
+    68,
+    173,
+    0.25
+  ); /* More subtle purple for unknown event types */
+}
+
+.event-timestamp {
+  font-size: 0.75rem;
+  color: #888888;
+  margin-bottom: 4px;
+}
+
+.event-content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #ffffff;
 }
 
 @keyframes slideIn {
@@ -323,4 +498,334 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.toolbar-container {
+  width: 100%;
+  margin: 0 0 5px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 20px; /* 添加固定高度 */
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 100%; /* 确保子元素高度一致 */
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  height: 100%; /* 确保子元素高度一致 */
+}
+
+.new-task-button {
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  height: 24px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+  font-weight: 500;
+  outline: none;
+}
+
+.new-task-button:hover {
+  background-color: #1659b7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.new-task-button:focus {
+  outline: none;
+}
+
+.new-task-button:before {
+  content: "+";
+  font-size: 15px; /* Increased from 12px for better visibility */
+  font-weight: bold;
+  line-height: 1; /* Ensure line height is consistent */
+  display: inline-block; /* Use inline-block for better vertical alignment */
+  vertical-align: middle; /* Align vertically in the middle */
+  margin-top: -2px; /* Slight adjustment to align with text */
+}
+
+.mode-display {
+  background-color: #3d3d3d;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: auto;
+  font-size: 12px;
+  height: 24px; /* Reduced from 28px to 24px */
+  line-height: 24px; /* Adjusted to match new height */
+  box-sizing: border-box;
+  min-width: 60px;
+  text-align: center;
+  opacity: 0.8;
+  user-select: none;
+}
+
+/* Add this to your existing CSS */
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 8px 8px 0;
+  margin-top: 5px;
+  font-style: italic;
+  color: #ffffff;
+  background-color: transparent;
+  position: relative;
+  margin-left: 0;
+}
+
+.progress-indicator.working {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-indicator.working::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  text-align: left;
+  animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: ".";
+  }
+  33% {
+    content: "..";
+  }
+  66% {
+    content: "...";
+  }
+  100% {
+    content: ".";
+  }
+}
+
+.scroll-to-bottom-button {
+  position: fixed;
+  bottom: 20px;
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Adjust for exact centering */
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #3d4451;
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 10;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+
+.scroll-to-bottom-button:hover {
+  background-color: #505866;
+  transform: translateX(-50%) translateY(-2px); /* Keep horizontal centering while moving up */
+}
+
+.scroll-to-bottom-button:active {
+  transform: translateX(-50%) translateY(0); /* Keep horizontal centering while returning to normal */
+}
+
+.task-id-display {
+  font-size: 12px;
+  color: #666;
+  margin: 5px 0;
+  padding: 4px 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.task-id-display small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copy-task-id-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.copy-task-id-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.copy-task-id-button svg {
+  opacity: 0.7;
+}
+
+.copy-task-id-button:hover svg {
+  opacity: 1;
+}
+
+/* Add these styles to your App.css file */
+
+.event-item-container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.collapse-toggle {
+  width: 20px; /* Slightly smaller, was 22px */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: #ffffff;
+  padding: 3px 0; /* Reduced from 5px */
+  /* Add these properties to center it vertically */
+  align-self: center;
+  height: 100%;
+  margin-top: 2px; /* Slight adjustment to visually center with content */
+  /* Add these properties to prevent text selection */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* Make it more noticeable */
+  font-size: 12px; /* Reduced from 14px */
+  font-weight: bold;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  background-color: rgba(70, 70, 70, 0.2);
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.collapse-toggle:hover {
+  color: #ffffff;
+  background-color: rgba(70, 70, 70, 0.5);
+  transform: scale(1.1);
+}
+
+.event-content-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-level-1 {
+  background-color: rgba(52, 152, 219, 0.2);
+}
+
+.event-level-2 {
+  margin-left: 20px;
+}
+
+/* Ensure the event timestamp and content layout still works */
+.event-timestamp {
+  font-size: 0.8em;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.event-content {
+  word-break: break-word;
+}
+
+.history-button,
+.settings-button {
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9aa0a6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.history-button:hover,
+.settings-button:hover {
+  background-color: #1659b7;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.history-button:active,
+.settings-button:active {
+  background-color: #124d8c;
+}
+
+.history-button img,
+.settings-button img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1) saturate(1.5);
+  opacity: 0.9;
+}
+
+.history-button:hover img,
+.settings-button:hover img {
+  opacity: 1;
+  filter: brightness(0) invert(1) saturate(2);
+}
+
+/* 为了让设置图标看起来更协调，我们需要调整它的大小 */
+.settings-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toolbar-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+.new-task-button:focus,
+.history-button:focus,
+.settings-button:focus {
+  outline: none;
+}
+
+.new-task-button,
+.history-button,
+.settings-button {
+  outline: none;
+}
+
+.new-task-button:focus-visible,
+.history-button:focus-visible,
+.settings-button:focus-visible {
+  box-shadow: 0 0 0 2px #1659b7;
 }

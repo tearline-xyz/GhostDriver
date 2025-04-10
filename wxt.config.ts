@@ -1,4 +1,5 @@
 import { defineConfig } from "wxt"
+import { EXTENSION_NAME, TEARLINE_WEBSITE } from "./entrypoints/common/settings"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -8,7 +9,7 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   manifestVersion: 3,
   manifest: {
-    name: "Tearline Auto Browser",
+    name: EXTENSION_NAME,
     permissions: [
       "debugger",
       "tabs",
@@ -31,5 +32,11 @@ export default defineConfig({
     action: {
       default_title: "Click to open panel",
     },
+    web_accessible_resources: [
+      {
+        resources: ["injectScript.js"],
+        matches: [`*://${TEARLINE_WEBSITE}/*`],
+      },
+    ],
   },
 })

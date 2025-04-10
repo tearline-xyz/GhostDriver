@@ -1,49 +1,137 @@
-import React, { useEffect, useState } from "react"
-import { createRoot } from "react-dom/client"
+import React, { useEffect, useState, useCallback } from "react"
 import "./App.css"
-import { AVAILABLE_HOSTS, DEFAULT_SETTINGS } from "../common/settings"
+import {
+  AVAILABLE_HOSTS,
+  DEFAULT_SETTINGS,
+  EXTENSION_NAME,
+  ModeConfig,
+  VERSION,
+} from "../common/settings"
+import { CopyIcon, UserIcon, ErrorIcon } from "../../assets/icons"
+import { ApiService } from "../common/services/api"
+import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/models/task"
+import "reveal.js/dist/reveal.css"
+import "reveal.js/dist/theme/black.css"
+import TaskResultModal from "./components/TaskResultModal"
+import { AuthStatus } from "../auth/models"
+import useAuth from "../auth/useAuth"
 
 const App: React.FC = () => {
-  const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
+  const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
   const [status, setStatus] = useState<{
-    message: string
-    type: string
-  } | null>(null)
-  const [activePage, setActivePage] = useState<string>("Account")
+    message: string;
+    type: string;
+    visible: boolean;
+  } | null>(null);
+  const [activePage, setActivePage] = useState<string>("Account");
   const [enableAtSyntax, setEnableAtSyntax] = useState<boolean>(
     DEFAULT_SETTINGS.enableAtSyntax
-  )
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  );
+  const [enableLlmSelect, setEnableLlmSelect] = useState<boolean>(
+    DEFAULT_SETTINGS.enableLlmSelect
+  );
+  const [modeConfig, setModeConfig] = useState<ModeConfig>(
+    DEFAULT_SETTINGS.modeConfig
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT);
 
-  // Load saved settings from chrome.storage.sync
+  const { authStatus, userInfo, handleLogin, handleLogout } = useAuth();
+
+  const showStatus = useCallback(
+    (message: string, type: string, duration: number = 3000) => {
+      setStatus({ message, type, visible: true });
+      setTimeout(() => {
+        setStatus((prev) => (prev ? { ...prev, visible: false } : null));
+        setTimeout(() => {
+          setStatus(null);
+        }, 300);
+      }, duration);
+    },
+    []
+  );
+
   useEffect(() => {
-    setIsLoading(true)
+    setIsLoading(true);
+
+    // Load settings
     chrome.storage.sync.get(DEFAULT_SETTINGS, (items) => {
-      setApiHost(items.apiHost)
-      setEnableAtSyntax(items.enableAtSyntax)
-      setIsLoading(false)
-    })
-  }, [])
+      setApiHost(items.apiHost);
+      setEnableAtSyntax(items.enableAtSyntax);
+      setEnableLlmSelect(items.enableLlmSelect);
+      setModeConfig(items.modeConfig);
+      setIsLoading(false);
+    });
+
+    // Check URL parameters for page selection
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get("page");
+    if (pageParam) {
+      setActivePage(pageParam);
+    }
+  }, []);
+
+  // 在组件挂载时检查 URL 参数并获取任务数据
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const taskId = urlParams.get("taskId")
+    const action = urlParams.get("action")
+
+    if (taskId && action === "share") {
+      const fetchTaskData = async () => {
+        try {
+          const apiService = new ApiService(apiHost)
+          const taskContext = await apiService.getTask(taskId)
+          setFocusedTaskContext(taskContext)
+        } catch (error) {
+          console.error("Error fetching task data:", error)
+          setFocusedTaskContext(EMPTY_TASK_CONTEXT)
+        }
+      }
+      fetchTaskData()
+    }
+  }, [apiHost])
 
   // Save settings to chrome.storage.sync
-  const saveOptions = () => {
+  const saveOptions = useCallback(() => {
     const settings = {
       apiHost,
       enableAtSyntax,
+      enableLlmSelect,
+      modeConfig,
     }
 
     chrome.storage.sync.set(settings, () => {
-      showStatus("Settings saved successfully!", "success")
-      setTimeout(() => {
-        setStatus(null)
-      }, 2000)
+      showStatus("Settings saved!", "success")
     })
-  }
+  }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig, showStatus])
 
-  // Display status message
-  const showStatus = (message: string, type: string) => {
-    setStatus({ message, type })
-  }
+  // Copy text to clipboard
+  const copyToClipboard = useCallback(
+    (text: string) => {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          showStatus("Copied to clipboard!", "success")
+        })
+        .catch((err) => {
+          console.error("Failed to copy: ", err)
+          showStatus("Failed to copy!", "error")
+        })
+    },
+    [showStatus]
+  )
+
+  // Helper function to check if current version is alpha
+  const isAlphaVersion = useCallback(() => {
+    return VERSION.toLowerCase().includes("alpha")
+  }, [])
+
+  // 初始化 Reveal.js
+  useEffect(() => {
+    console.log('Current focusedTaskContext:', focusedTaskContext)
+    console.log('History data:', focusedTaskContext.result?.history)
+  }, [focusedTaskContext.result?.history])
 
   // Render different content based on active page
   const renderContent = () => {
@@ -57,26 +145,114 @@ const App: React.FC = () => {
           <>
             <h2>Account Settings</h2>
             <div className="account-container">
-              <div className="profile-section">
-                <div className="avatar-container">
-                  {/* Default profile avatar */}
+              {authStatus === AuthStatus.NONE && (
+                <div className="profile-card not-logged-in">
                   <div className="profile-avatar">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      width="48"
-                      height="48"
-                    >
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                    </svg>
+                    <img src={UserIcon} alt="User" />
                   </div>
+                  <div className="profile-status">Not logged in</div>
+                  <p className="profile-message">
+                    Sign in to access Tearline services
+                  </p>
+                  <button
+                    className="auth-button login-button"
+                    onClick={() => handleLogin(showStatus)}
+                  >
+                    Login with Tearline
+                  </button>
                 </div>
-                <div className="profile-info">
-                  <p>Not logged in</p>
-                  <button className="login-button">Login</button>
+              )}
+
+              {authStatus === AuthStatus.PENDING && (
+                <div className="profile-card pending">
+                  <div className="loader"></div>
+                  <div className="profile-status">Login in progress</div>
+                  <p className="profile-message">
+                    Please complete login in the opened page...
+                  </p>
                 </div>
-              </div>
+              )}
+
+              {authStatus === AuthStatus.ERROR && (
+                <div className="profile-card error">
+                  <div className="profile-avatar error">
+                    <img src={ErrorIcon} alt="Error" />
+                  </div>
+                  <div className="profile-status">
+                    Login failed or timed out
+                  </div>
+                  <button
+                    className="auth-button login-button"
+                    onClick={() => handleLogin(showStatus)}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
+
+              {authStatus === AuthStatus.SUCCESS && (
+                <div className="profile-card logged-in">
+                  <div className="profile-header">
+                    <div className="profile-avatar success">
+                      <img src={UserIcon} alt="User" />
+                    </div>
+                  </div>
+
+                  <div className="profile-info-container">
+                    {userInfo?.name && (
+                      <div className="profile-detail">
+                        <span className="detail-label">Name</span>
+                        <span className="detail-value">{userInfo.name}</span>
+                      </div>
+                    )}
+
+                    {userInfo?.email && (
+                      <div className="profile-detail">
+                        <span className="detail-label">Email</span>
+                        <span className="detail-value">{userInfo.email}</span>
+                      </div>
+                    )}
+
+                    {userInfo?.userId && (
+                      <div className="profile-detail">
+                        <span className="detail-label">User ID</span>
+                        <div className="detail-value-with-action">
+                          <span className="detail-value user-id">
+                            {userInfo.userId}
+                          </span>
+                          <button
+                            className="copy-button"
+                            onClick={() =>
+                              userInfo.userId &&
+                              copyToClipboard(userInfo.userId)
+                            }
+                            title="Copy User ID"
+                          >
+                            <img src={CopyIcon} alt="Copy" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {!userInfo?.name &&
+                      !userInfo?.email &&
+                      !userInfo?.userId && (
+                        <div className="profile-detail">
+                          <span className="detail-value">
+                            Account connected successfully
+                          </span>
+                        </div>
+                      )}
+                  </div>
+
+                  <button
+                    className="auth-button logout-button"
+                    onClick={() => handleLogout(showStatus)}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </>
         )
@@ -84,11 +260,9 @@ const App: React.FC = () => {
         return (
           <>
             <h2>About</h2>
-            <p>Tearline Auto Browser Extension</p>
-            <p>Version: 1.0.0</p>
+            <p>Version: {VERSION}</p>
             <p>
-              This extension allows automated browsing and testing for Tearline
-              services.
+              This extension empowers AI to work alongside you in the browser.
             </p>
           </>
         )
@@ -111,6 +285,22 @@ const App: React.FC = () => {
               </select>
             </div>
             <div className="form-group">
+              <label htmlFor="mode-config-select">Available modes:</label>
+              <select
+                id="mode-config-select"
+                value={modeConfig}
+                onChange={(e) => setModeConfig(e.target.value as ModeConfig)}
+                className="mode-config-select"
+              >
+                <option value="agent_only">Agent only</option>
+                <option value="chat_only">Chat only</option>
+                <option value="both">Both Agent and Chat</option>
+              </select>
+              <div className="setting-description">
+                Configure which mode options are available in the sidepanel
+              </div>
+            </div>
+            <div className="form-group">
               <label>Feature Toggles:</label>
               <div className="toggle-options">
                 <div className="toggle-item">
@@ -122,9 +312,52 @@ const App: React.FC = () => {
                   />
                   <label htmlFor="enable-at-syntax">Enable @ syntax</label>
                 </div>
+                <div className="toggle-item">
+                  <input
+                    type="checkbox"
+                    id="enable-llm-select"
+                    checked={enableLlmSelect}
+                    onChange={(e) => setEnableLlmSelect(e.target.checked)}
+                  />
+                  <label htmlFor="enable-llm-select">
+                    Enable LLM selection
+                  </label>
+                </div>
               </div>
             </div>
-            <button onClick={saveOptions}>Save</button>
+            <button className="save-button" onClick={saveOptions}>
+              Save Settings
+            </button>
+          </>
+        )
+      case "History":
+        return (
+          <>
+            <h2>History</h2>
+            <div className="history-container">
+              <p>Historical tasks will be displayed here.</p>
+              {/* 模态窗口 */}
+              {(() => {
+                const urlParams = new URLSearchParams(window.location.search)
+                const taskId = urlParams.get("taskId")
+                const action = urlParams.get("action")
+
+                if (taskId && action === "share") {
+                  console.log('Rendering modal with taskId:', taskId)
+                  return (
+                    <TaskResultModal
+                      taskContext={focusedTaskContext}
+                      onClose={() => {
+                        const newUrl = window.location.pathname + "?page=History"
+                        window.history.replaceState({}, "", newUrl)
+                        window.location.reload()
+                      }}
+                    />
+                  )
+                }
+                return null
+              })()}
+            </div>
           </>
         )
       default:
@@ -134,10 +367,22 @@ const App: React.FC = () => {
 
   return (
     <div className="options-container">
+      {status && (
+        <div
+          className={`status ${status.type} ${status.visible ? "visible" : ""}`}
+        >
+          {status.message}
+        </div>
+      )}
       <div className="sidebar">
-        <h1>Tearline</h1>
+        <h1>{EXTENSION_NAME}</h1>
         <ul className="nav-menu">
-          {["Account", "Developer settings", "About"].map((page) => (
+          {[
+            "Account",
+            "History",
+            ...(isAlphaVersion() ? ["Developer settings"] : []),
+            "About",
+          ].map((page) => (
             <li
               key={page}
               className={activePage === page ? "active" : ""}
@@ -148,21 +393,9 @@ const App: React.FC = () => {
           ))}
         </ul>
       </div>
-      <div className="content">
-        {renderContent()}
-        {status && (
-          <div className={`status ${status.type}`}>{status.message}</div>
-        )}
-      </div>
+      <div className="content">{renderContent()}</div>
     </div>
   )
-}
-
-// Initialize the React app
-const container = document.getElementById("app")
-if (container) {
-  const root = createRoot(container)
-  root.render(<App />)
 }
 
 export default App
