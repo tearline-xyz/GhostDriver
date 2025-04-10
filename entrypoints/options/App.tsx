@@ -8,7 +8,6 @@ import {
   VERSION,
 } from "../common/settings"
 import { CopyIcon, UserIcon, ErrorIcon, ClearAllIcon } from "../../assets/icons"
-import { ApiService } from "../common/services/api"
 import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
@@ -16,6 +15,7 @@ import TaskResultModal from "./components/TaskResultModal"
 import { AuthStatus } from "../auth/models"
 import useAuth from "../auth/useAuth"
 import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
+import { getTaskById } from "../db/taskStore"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
@@ -82,9 +82,12 @@ const App: React.FC = () => {
     if (taskId && action === "share") {
       const fetchTaskData = async () => {
         try {
-          const apiService = new ApiService(apiHost)
-          const taskContext = await apiService.getTask(taskId)
-          setFocusedTaskContext(taskContext)
+          const taskContext = await getTaskById(taskId)
+          if (taskContext) {
+            setFocusedTaskContext(taskContext)
+          } else {
+            setFocusedTaskContext(EMPTY_TASK_CONTEXT)
+          }
         } catch (error) {
           console.error("Error fetching task data:", error)
           setFocusedTaskContext(EMPTY_TASK_CONTEXT)
@@ -92,7 +95,7 @@ const App: React.FC = () => {
       }
       fetchTaskData()
     }
-  }, [apiHost])
+  }, [])
 
   // Save settings to chrome.storage.sync
   const saveOptions = useCallback(() => {
