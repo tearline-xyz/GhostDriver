@@ -493,10 +493,22 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8rem;
+  transition: background-color 0.3s;
 }
 
-.share-button:hover {
+.share-button:hover:not(:disabled) {
   background: #357abd;
+}
+
+.share-button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.share-button:disabled:hover {
+  background-color: #cccccc;
 }
 
 .history-actions {

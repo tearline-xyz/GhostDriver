@@ -8,7 +8,7 @@ import {
   VERSION,
 } from "../common/settings"
 import { CopyIcon, UserIcon, ErrorIcon, ClearAllIcon } from "../../assets/icons"
-import { TaskContext, EMPTY_TASK_CONTEXT } from "../common/models/task"
+import { TaskContext, EMPTY_TASK_CONTEXT, TaskState } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
@@ -401,6 +401,7 @@ const App: React.FC = () => {
                             window.history.pushState({}, "", newUrl);
                             window.location.reload();
                           }}
+                          disabled={task.state !== TaskState.COMPLETED}
                         >
                           Share
                         </button>
