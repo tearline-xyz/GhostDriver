@@ -2,6 +2,7 @@ import React from "react"
 import { ClearAllIcon } from "../../../assets/icons"
 import { TaskContext, TaskState } from "../../common/models/task"
 import TaskResultModal from "./TaskResultModal"
+import "./History.css"
 
 interface HistoryProps {
   allTasks: TaskContext[];
