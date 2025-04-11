@@ -42,7 +42,7 @@ import {
   DEFAULT_NOTIFICATION_STATE,
 } from "./models/notification"
 import { ApiService } from "../common/services/api"
-import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
+import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
 import { addTask, updateTask } from "../db/taskStore"
 
 function App() {
@@ -1164,11 +1164,12 @@ function App() {
               taskContext?.state &&
               taskContext.state === TaskState.COMPLETED && (
                 <button
-                  className="share-button"
+                  className="icon-share-button"
                   onClick={handleShareAction}
+                  title="Share"
                   disabled={!interactionToggle.shareButton.enabled}
                 >
-                  Share
+                  <img src={ShareIcon} alt="Share" />
                 </button>
               )}
             {interactionToggle.sendButton.visible && (

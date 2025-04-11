@@ -829,3 +829,52 @@
 .settings-button:focus-visible {
   box-shadow: 0 0 0 2px #1659b7;
 }
+
+.icon-share-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 24px; /* 从28px改为24px，与其他按钮一致 */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  margin-left: 8px; /* 与其他元素保持一定间距 */
+  border-radius: 4px; /* 添加圆角使悬停效果更美观 */
+}
+
+.icon-share-button:hover {
+  transform: translateY(-1px);
+  background-color: #4a90e2; /* 悬停时背景变为蓝色 */
+}
+
+.icon-share-button:active {
+  transform: translateY(1px);
+}
+
+.icon-share-button img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1) opacity(0.8); /* 修改为白色图标以适应暗色背景 */
+  transition: filter 0.2s ease;
+}
+
+.icon-share-button:hover img {
+  filter: brightness(0) invert(1); /* 悬停时图标变为更亮的白色 */
+}
+
+.icon-share-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.icon-share-button:disabled:hover {
+  background-color: transparent;
+  transform: none;
+}
+
+.icon-share-button:disabled img {
+  filter: brightness(0) invert(1) opacity(0.4);
+}
