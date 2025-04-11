@@ -6,14 +6,13 @@ import {
   ModeConfig,
   VERSION,
 } from "../common/settings"
-import { ClearAllIcon } from "../../assets/icons"
-import { TaskContext, TaskState } from "../common/models/task"
+import { TaskContext } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
-import TaskResultModal from "./components/TaskResultModal"
 import Account from "./components/Account"
 import About from "./components/About"
 import DeveloperSettings from "./components/DeveloperSettings"
+import History from "./components/History"
 import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
 import { getTaskById } from "../db/taskStore"
 
@@ -199,72 +198,12 @@ const App: React.FC = () => {
         )
       case "History":
         return (
-          <>
-            <div className="history-header">
-              <h2>History</h2>
-              <button
-                className="clear-history-button"
-                onClick={handleClearHistory}
-                disabled={allTasks.length === 0}
-              >
-                <img src={ClearAllIcon} alt="Delete" />
-                Clear History
-              </button>
-            </div>
-            <div className="history-container">
-              {allTasks.length === 0 ? (
-                <p>No historical tasks found.</p>
-              ) : (
-                <div className="task-list">
-                  {allTasks.map((task) => (
-                    <div key={task.id} className="task-item">
-                      <div className="task-header">
-                        <span className="task-id">Task ID: {task.id}</span>
-                        <span className="task-state">{task.state}</span>
-                        <span className="task-time">
-                          {task.created_at}
-                        </span>
-                      </div>
-                      <div className="task-input">{task.content}</div>
-                      <div className="task-actions">
-                        <button
-                          className="share-button"
-                          onClick={() => {
-                            const newUrl = `${window.location.pathname}?page=History&taskId=${task.id}&action=share`;
-                            window.history.pushState({}, "", newUrl);
-                            window.location.reload();
-                          }}
-                          disabled={task.state !== TaskState.COMPLETED}
-                        >
-                          Share
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {/* 模态窗口 */}
-              {(() => {
-                const urlParams = new URLSearchParams(window.location.search)
-                const taskId = urlParams.get("taskId")
-                const action = urlParams.get("action")
-
-                if (taskId && action === "share" && focusedTaskContext) {
-                  return (
-                    <TaskResultModal
-                      taskContext={focusedTaskContext}
-                      onClose={() => {
-                        const newUrl = window.location.pathname + "?page=History"
-                        window.history.replaceState({}, "", newUrl)
-                        window.location.reload()
-                      }}
-                    />
-                  )
-                }
-                return null
-              })()}
-            </div>
-          </>
+          <History
+            allTasks={allTasks}
+            focusedTaskContext={focusedTaskContext}
+            handleClearHistory={handleClearHistory}
+            showStatus={showStatus}
+          />
         )
       default:
         return <div>Select an option from the sidebar</div>
