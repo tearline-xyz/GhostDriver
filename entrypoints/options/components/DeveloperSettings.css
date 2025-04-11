@@ -1,0 +1,73 @@
+/* Form styling */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.save-button {
+  border-radius: 6px;
+  font-weight: 600;
+  width: 100%;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  background-color: #1976d2;
+  max-width: 480px;
+}
+
+.save-button:hover {
+  background-color: #1565c0;
+}
+
+/* Feature toggle styling */
+.toggle-options {
+  margin-top: 8px;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+
+.toggle-item input[type="checkbox"] {
+  margin-right: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  vertical-align: middle;
+}
+
+.toggle-item label {
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+  line-height: 1;
+}
+
+/* Add styles for the mode configuration select and setting description */
+.mode-config-select {
+  margin-bottom: 8px;
+}
+
+.setting-description {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+/* Add styles for developer settings form to make it match the profile card aesthetics */
+#developer-settings .form-group {
+  max-width: 480px;
+}
+
+/* Additional styles to limit width of form elements in developer settings */
+.form-group select,
+.form-group input {
+  max-width: 480px;
+}

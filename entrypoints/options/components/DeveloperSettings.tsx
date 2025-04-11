@@ -1,5 +1,6 @@
 import React from "react"
 import { AVAILABLE_HOSTS, ModeConfig } from "../../common/settings"
+import "./DeveloperSettings.css"
 
 interface DeveloperSettingsProps {
   apiHost: string;
