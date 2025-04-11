@@ -2,8 +2,6 @@ import React, { useEffect, useRef } from "react"
 import Reveal from "reveal.js"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
-import hljs from "highlight.js"
-import "highlight.js/styles/github-dark.css"
 import "./TaskResultModal.css"
 import { TaskContext } from "../../common/models/task"
 import { EXTENSION_NAME } from "../../common/settings"
@@ -304,11 +302,6 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
         })
 
         await deckRef.current.initialize()
-
-        // Initialize code highlighting
-        document.querySelectorAll("pre code").forEach((block) => {
-          hljs.highlightElement(block as HTMLElement)
-        })
 
         console.log("Reveal.js initialized successfully")
       } catch (error) {
