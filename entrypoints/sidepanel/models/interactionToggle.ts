@@ -48,6 +48,11 @@ export interface InteractionToggle {
     enabled: boolean
     visible: boolean
   }
+
+  // 新任务按钮
+  newTaskButton: {
+    highlight: boolean,
+  },
 }
 
 // 默认UI状态
@@ -86,5 +91,8 @@ export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
   llmSelector: {
     enabled: true,
     visible: true,
+  },
+  newTaskButton: {
+    highlight: false,
   },
 }

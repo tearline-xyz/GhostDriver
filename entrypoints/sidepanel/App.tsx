@@ -338,7 +338,10 @@ function App() {
       lastAtSymbolPosition !== -1 &&
       cursorPos > lastAtSymbolPosition
     ) {
-      const newSearchTerm = value.substring(lastAtSymbolPosition + 1, cursorPos)
+      const newSearchTerm = value.substring(
+        lastAtSymbolPosition + 1,
+        cursorPos
+      )
       setSearchTerm(newSearchTerm)
       setShowSuggestions(true)
 
@@ -689,6 +692,15 @@ function App() {
       const taskContext = await apiService.getTask(taskId)
       setTaskContext(taskContext)
       await updateTask(taskContext)
+
+      // Highlight the New Task button when task completes
+      setInteractionToggle((prev) => ({
+        ...prev,
+        newTaskButton: {
+          ...prev.newTaskButton,
+          highlight: true
+        },
+      }))
     } catch (error) {
       console.error("Error fetching task status:", error)
     }
@@ -910,8 +922,15 @@ function App() {
       // Clear input and events
       setInput("")
       setEvents([])
+
       // 重置UI状态
-      setInteractionToggle(DEFAULT_INTERACTION_TOGGLE)
+      setInteractionToggle((prev) => ({
+        ...DEFAULT_INTERACTION_TOGGLE,
+        newTaskButton: {
+          ...DEFAULT_INTERACTION_TOGGLE.newTaskButton,
+          highlight: false // Make sure highlight is turned off for new tasks
+        }
+      }))
 
       // Focus on the textarea
       if (textareaRef.current) {
@@ -1017,7 +1036,11 @@ function App() {
       {/* Toolbar container that can hold multiple buttons */}
       <div className="toolbar-container">
         <div className="toolbar-left">
-          <button className="new-task-button" onClick={resetToNewTask}>
+          <button
+            className="new-task-button"
+            onClick={resetToNewTask}
+            data-highlight={interactionToggle.newTaskButton.highlight}
+          >
             New Task
           </button>
           {/* Future buttons can be added here */}

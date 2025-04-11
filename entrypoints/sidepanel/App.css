@@ -543,6 +543,18 @@
   outline: none;
 }
 
+/* Add highlight effect for New Task button - like Send button */
+.new-task-button[data-highlight="true"] {
+  background-color: #2b7eef;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.new-task-button[data-highlight="true"]:hover {
+  background-color: #1659b7; /* Darker blue on hover, same as Send button hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
 .new-task-button:hover {
   background-color: #1659b7;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
