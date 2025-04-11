@@ -1,5 +1,5 @@
 import React from "react"
-import { ClearAllIcon } from "../../../assets/icons"
+import { ClearAllIcon, ShareIcon } from "../../../assets/icons"
 import { TaskContext, TaskState } from "../../common/models/task"
 import TaskResultModal from "./TaskResultModal"
 import "./History.css"
@@ -15,7 +15,22 @@ const History: React.FC<HistoryProps> = ({
   allTasks,
   focusedTaskContext,
   handleClearHistory,
+  showStatus,
 }) => {
+  // 获取状态标签的样式
+  const getStateStyle = (state: TaskState) => {
+    switch (state) {
+      case TaskState.COMPLETED:
+        return { background: '#e6f4ea', color: '#137333' };
+      case TaskState.FAILED:
+        return { background: '#fce8e6', color: '#c5221f' };
+      case TaskState.RUNNING:
+        return { background: '#e8f0fe', color: '#1a73e8' };
+      default:
+        return { background: '#f1f3f4', color: '#5f6368' };
+    }
+  };
+
   return (
     <>
       <div className="history-header">
@@ -37,26 +52,27 @@ const History: React.FC<HistoryProps> = ({
             {allTasks.map((task) => (
               <div key={task.id} className="task-item">
                 <div className="task-header">
-                  <span className="task-id">Task ID: {task.id}</span>
-                  <span className="task-state">{task.state}</span>
+                  <span className="task-id">{task.id}</span>
+                  <span className="task-state" style={getStateStyle(task.state as TaskState)}>{task.state}</span>
                   <span className="task-time">
                     {task.created_at}
                   </span>
+                  {task.state === TaskState.COMPLETED && (
+                    <button
+                      className="icon-share-button"
+                      onClick={() => {
+                        const newUrl = `${window.location.pathname}?page=History&taskId=${task.id}&action=share`;
+                        window.history.pushState({}, "", newUrl);
+                        window.location.reload();
+                        showStatus("Opening share modal...", "info");
+                      }}
+                      title="Share"
+                    >
+                      <img src={ShareIcon} alt="Share" />
+                    </button>
+                  )}
                 </div>
                 <div className="task-input">{task.content}</div>
-                <div className="task-actions">
-                  <button
-                    className="share-button"
-                    onClick={() => {
-                      const newUrl = `${window.location.pathname}?page=History&taskId=${task.id}&action=share`;
-                      window.history.pushState({}, "", newUrl);
-                      window.location.reload();
-                    }}
-                    disabled={task.state !== TaskState.COMPLETED}
-                  >
-                    Share
-                  </button>
-                </div>
               </div>
             ))}
           </div>
