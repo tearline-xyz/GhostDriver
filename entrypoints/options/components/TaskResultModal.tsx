@@ -42,6 +42,8 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
 
       try {
         deckRef.current = new Reveal(deckDivRef.current, {
+          // See https://revealjs.com/config/
+
           // Display presentation control arrows
           controls: true,
 
@@ -115,7 +117,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
           overview: true,
 
           // Vertical centering of slides
-          center: true,
+          center: false,
 
           // Enables touch navigation on devices with touch input
           touch: true,
@@ -164,7 +166,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
 
           // Flags if the presentation is running in an embedded mode,
           // i.e. contained within a limited portion of the screen
-          embedded: false,
+          embedded: true,
 
           // Flags if we should show a help overlay when the question-mark
           // key is pressed
@@ -219,13 +221,18 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
             "outline",
             "outline-offset",
           ],
+          width: "120%",
+          height: "120%",
+          // width: "100%",
+          // height: "100%",
+          // margin: 0,
 
           // Controls automatic progression to the next slide
           // - 0:      Auto-sliding only happens if the data-autoslide HTML attribute
           //           is present on the current slide or fragment
           // - 1+:     All slides will progress automatically at the given interval
           // - false:  No auto-sliding, even if data-autoslide is present
-          autoSlide: 0,
+          autoSlide: false,
 
           // Stop auto-sliding after user input
           autoSlideStoppable: true,
