@@ -13,6 +13,7 @@ import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
 import Account from "./components/Account"
+import About from "./components/About"
 import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
 import { getTaskById } from "../db/taskStore"
 
@@ -181,15 +182,7 @@ const App: React.FC = () => {
       case "Account":
         return <Account showStatus={showStatus} />
       case "About":
-        return (
-          <>
-            <h2>About</h2>
-            <p>Version: {VERSION}</p>
-            <p>
-              This extension empowers AI to work alongside you in the browser.
-            </p>
-          </>
-        )
+        return <About />
       case "Developer settings":
         return (
           <>
