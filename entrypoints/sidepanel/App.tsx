@@ -1026,7 +1026,9 @@ function App() {
           </button>
           <button
             className="settings-button"
-            onClick={() => chrome.runtime.openOptionsPage()}
+            onClick={() => chrome.tabs.create({
+              url: chrome.runtime.getURL("options.html?page=Account")
+            })}
             title="Settings"
           >
             <img src={SettingsIcon} alt="Settings" className="toolbar-icon" />
