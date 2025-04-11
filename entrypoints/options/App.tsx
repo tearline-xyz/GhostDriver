@@ -167,6 +167,13 @@ const App: React.FC = () => {
     }
   }, [showStatus]);
 
+  // 处理页面切换
+  const handlePageChange = (page: string) => {
+    setActivePage(page);
+    const newUrl = `${window.location.pathname}?page=${page}`;
+    window.history.pushState({}, "", newUrl);
+  };
+
   // Render different content based on active page
   const renderContent = () => {
     if (isLoading) {
@@ -459,7 +466,7 @@ const App: React.FC = () => {
             <li
               key={page}
               className={activePage === page ? "active" : ""}
-              onClick={() => setActivePage(page)}
+              onClick={() => handlePageChange(page)}
             >
               {page}
             </li>
