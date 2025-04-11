@@ -68,9 +68,9 @@ export interface TaskContext {
 }
 
 /**
- * 获取任务状态的显示文本
- * @param state 任务状态
- * @returns 状态对应的显示文本
+ * Get the display text for task state
+ * @param state Task state
+ * @returns Display text corresponding to the state
  */
 export function getTaskStateDisplayText(state?: TaskState): string {
   if (!state) return "Unknown"

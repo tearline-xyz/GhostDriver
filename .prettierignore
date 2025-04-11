@@ -1,11 +1,11 @@
-# 构建输出
+# Build output
 .output
 dist
 build
 
-# 依赖
+# Dependencies
 node_modules
 
-# 其他不需要格式化的文件
+# Other files that don't need formatting
 *.min.js
 *.d.ts

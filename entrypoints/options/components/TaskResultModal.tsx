@@ -26,7 +26,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
     console.log("History data:", taskContext.result?.history)
 
     const initializeReveal = async () => {
-      // 等待一个渲染周期
+      // Wait for one render cycle
       await new Promise((resolve) => setTimeout(resolve, 0))
 
       if (!deckDivRef.current || !taskContext.result?.history) {
@@ -34,7 +34,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
         return
       }
 
-      // 如果已经有实例，先销毁
+      // If there's an existing instance, destroy it first
       if (deckRef.current) {
         deckRef.current.destroy()
         deckRef.current = null
@@ -305,7 +305,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
 
         await deckRef.current.initialize()
 
-        // 初始化代码高亮
+        // Initialize code highlighting
         document.querySelectorAll("pre code").forEach((block) => {
           hljs.highlightElement(block as HTMLElement)
         })

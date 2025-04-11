@@ -26,5 +26,5 @@ web-ext.config.ts
 *.sln
 *.sw?
 
-# 不将playwright-crx仓库作为子模块
+# Do not include playwright-crx repository as a submodule
 /playwright-crx

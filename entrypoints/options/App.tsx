@@ -87,7 +87,7 @@ const App: React.FC = () => {
     return VERSION.toLowerCase().includes("alpha")
   }, [])
 
-  // 加载历史任务
+  // Load history tasks
   useEffect(() => {
     const loadTasks = async () => {
       try {
@@ -104,7 +104,7 @@ const App: React.FC = () => {
     }
   }, [activePage]);
 
-  // 清空历史记录
+  // Clear history
   const handleClearHistory = useCallback(async () => {
     try {
       await clearAllTasks();

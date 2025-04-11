@@ -83,17 +83,17 @@ function App() {
   /** Value of user input field */
   const [userInputValue, setUserInputValue] = useState("")
 
-  /** 操作结果信息 */
+  /** Operation result information */
   const [notification, setNotification] = useState<NotificationState>(
     DEFAULT_NOTIFICATION_STATE
   )
 
-  /** 控制UI状态 */
+  /** Control UI state */
   const [interactionToggle, setInteractionToggle] = useState<InteractionToggle>(
     DEFAULT_INTERACTION_TOGGLE
   )
 
-  /** 控制任务状态 */
+  /** Control task state */
   const [taskContext, setTaskContext] = useState<TaskContext | null>(null)
 
   /** apiHost from settings */
@@ -259,7 +259,7 @@ function App() {
           }
           break
         case "Enter":
-          e.preventDefault() // 阻止默认行为
+          e.preventDefault() // Prevent default behavior
           break
         case "Escape":
           e.preventDefault()

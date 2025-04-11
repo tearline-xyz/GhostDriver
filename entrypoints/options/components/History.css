@@ -1,11 +1,11 @@
 .task-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* 减小列表项之间的间距 */
+  gap: 1rem; /* reduce spacing between list items */
   margin-top: 1rem;
 }
 
-/* 登录提示样式 */
+/* login prompt style */
 .login-notice {
   padding: 2rem;
   text-align: center;
@@ -20,8 +20,8 @@
 
 .task-item {
   background: #ffffff;
-  border-radius: 8px; /* 略微减小圆角 */
-  padding: 0.75rem 1rem; /* 减小内边距 */
+  border-radius: 8px; /* slightly reduced border radius */
+  padding: 0.75rem 1rem; /* reduced padding */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   border: 1px solid #eaeaea;
@@ -36,49 +36,49 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem; /* 减小底部边距 */
-  font-size: 0.85rem; /* 略微减小字体大小 */
+  margin-bottom: 0.5rem; /* reduced bottom margin */
+  font-size: 0.85rem; /* slightly smaller font size */
   flex-wrap: wrap;
-  gap: 6px; /* 减小元素间间距 */
+  gap: 6px; /* reduced spacing between elements */
 }
 
 .task-id {
   font-family: monospace;
   color: #606060;
   font-weight: 500;
-  font-size: 0.8rem; /* 减小ID的字体大小 */
+  font-size: 0.8rem; /* smaller font size for ID */
 }
 
 .task-state {
-  padding: 0.15rem 0.6rem; /* 减小状态标签内边距 */
+  padding: 0.15rem 0.6rem; /* reduced padding for status label */
   border-radius: 16px;
   background: #e8f0fe;
   color: #1a73e8;
-  font-size: 0.75rem; /* 减小状态标签字体大小 */
+  font-size: 0.75rem; /* smaller font size for status label */
   font-weight: 500;
   letter-spacing: 0.3px;
 }
 
 .task-time {
   color: #70757a;
-  font-size: 0.8rem; /* 减小时间字体大小 */
-  margin-right: auto; /* 将时间推到左侧 */
+  font-size: 0.8rem; /* smaller font size for time */
+  margin-right: auto; /* push time to the left */
 }
 
 .task-input {
-  margin: 0.5rem 0; /* 减小上下边距 */
-  padding: 0.5rem 0.75rem; /* 减小内边距 */
+  margin: 0.5rem 0; /* reduced vertical margins */
+  padding: 0.5rem 0.75rem; /* reduced padding */
   background: #f8f9fa;
   border-radius: 6px;
-  font-size: 0.9rem; /* 略微减小字体大小 */
-  line-height: 1.4; /* 减小行高 */
+  font-size: 0.9rem; /* slightly smaller font size */
+  line-height: 1.4; /* reduced line height */
   color: #202124;
   border-left: 3px solid #4285f4;
-  white-space: pre-wrap; /* 保留原始格式如回车符等 */
-  word-wrap: break-word; /* 确保长文本自动换行 */
-  overflow-wrap: break-word; /* 增强自动换行支持 */
-  max-height: 300px; /* 限制最大高度 */
-  overflow-y: auto; /* 内容过多时显示滚动条 */
+  white-space: pre-wrap; /* preserve original formatting such as line breaks */
+  word-wrap: break-word; /* ensure long text wraps automatically */
+  overflow-wrap: break-word; /* enhance automatic text wrapping support */
+  max-height: 300px; /* limit maximum height */
+  overflow-y: auto; /* show scrollbar when content overflows */
 }
 
 .task-actions {
@@ -103,7 +103,7 @@
 }
 
 .share-button img {
-  filter: brightness(0) invert(1); /* 将SVG图标转换为白色，与按钮文字颜色匹配 */
+  filter: brightness(0) invert(1); /* convert SVG icon to white to match button text color */
   width: 14px;
   height: 14px;
   vertical-align: middle;
@@ -130,8 +130,8 @@
 }
 
 .share-button:disabled img {
-  opacity: 0.7; /* 保持与禁用状态文字的透明度一致 */
-  filter: brightness(0) invert(0.4); /* 改为灰色，与禁用状态文字颜色匹配 */
+  opacity: 0.7; /* maintain consistency with disabled text opacity */
+  filter: brightness(0) invert(0.4); /* change to gray to match disabled text color */
 }
 
 .icon-share-button {
@@ -145,13 +145,13 @@
   cursor: pointer;
   padding: 0;
   transition: all 0.2s ease;
-  margin-left: 8px; /* 与其他元素保持一定间距 */
-  border-radius: 4px; /* 添加圆角使悬停效果更美观 */
+  margin-left: 8px; /* maintain some spacing from other elements */
+  border-radius: 4px; /* add rounded corners for a nicer hover effect */
 }
 
 .icon-share-button:hover {
   transform: translateY(-1px);
-  background-color: #4a90e2; /* 悬停时背景变为蓝色 */
+  background-color: #4a90e2; /* background changes to blue on hover */
 }
 
 .icon-share-button:active {
@@ -161,12 +161,12 @@
 .icon-share-button img {
   width: 18px;
   height: 18px;
-  filter: brightness(0) opacity(0.7); /* 使图标为深灰色 */
+  filter: brightness(0) opacity(0.7); /* make the icon dark gray */
   transition: filter 0.2s ease;
 }
 
 .icon-share-button:hover img {
-  filter: brightness(0) invert(1); /* 悬停时图标变为白色，与蓝色背景形成对比 */
+  filter: brightness(0) invert(1); /* icon becomes white on hover, contrasting with blue background */
 }
 
 .history-actions {

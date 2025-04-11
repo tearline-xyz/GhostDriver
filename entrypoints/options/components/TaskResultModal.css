@@ -10,7 +10,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(3px);  /* 减轻了模糊效果 */
+  backdrop-filter: blur(3px);  /* Reduced blur effect */
   animation: fadeIn 0.3s ease;
 }
 
@@ -401,12 +401,12 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 60vh;  /* 确保有足够的高度来实现居中效果 */
+  min-height: 60vh;  /* Ensure sufficient height for centering */
 }
 
 .modal-task-content {
-  margin: 1.5rem 0; /* 增加上下间距 */
-  padding: 1rem 0.75rem; /* 增加内边距 */
+  margin: 1.5rem 0; /* Increased vertical spacing */
+  padding: 1rem 0.75rem; /* Increased padding */
   background: #f8f9fa;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -418,12 +418,12 @@
   overflow-wrap: break-word;
   max-height: 40vh;
   overflow-y: auto;
-  text-align: left; /* 确保文字左对齐 */
+  text-align: left; /* Ensure text is left-aligned */
 }
 
 .modal-task-meta-info {
   margin-top: 20px;
-  margin-bottom: 30px; /* 增加底部间距 */
+  margin-bottom: 30px; /* Increased bottom margin */
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -467,7 +467,7 @@
 }
 
 .modal-task-powered-by {
-  margin-top: 40px; /* 已经有一定的上边距 */
+  margin-top: 40px; /* Already has some top margin */
   width: 100%;
   display: flex;
   justify-content: center;

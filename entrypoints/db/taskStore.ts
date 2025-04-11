@@ -3,7 +3,7 @@ import { TASK_STORE_NAME } from "./constants";
 import { openDatabase } from "./database";
 
 /**
- * 添加任务
+ * Add a task
  */
 export async function addTask(task: TaskContext): Promise<void> {
   const db = await openDatabase();
@@ -18,7 +18,7 @@ export async function addTask(task: TaskContext): Promise<void> {
 }
 
 /**
- * 获取所有任务
+ * Get all tasks
  */
 export async function getAllTasksSortedByCreatedAt(): Promise<TaskContext[]> {
   const db = await openDatabase();
@@ -29,7 +29,7 @@ export async function getAllTasksSortedByCreatedAt(): Promise<TaskContext[]> {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => {
       const tasks = request.result;
-      // 按创建时间降序排序
+      // Sort by creation time in descending order
       tasks.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       resolve(tasks);
     };
@@ -38,7 +38,7 @@ export async function getAllTasksSortedByCreatedAt(): Promise<TaskContext[]> {
 }
 
 /**
- * 根据ID获取任务
+ * Get task by ID
  */
 export async function getTaskById(id: string): Promise<TaskContext | undefined> {
   const db = await openDatabase();
@@ -53,7 +53,7 @@ export async function getTaskById(id: string): Promise<TaskContext | undefined> 
 }
 
 /**
- * 更新任务
+ * Update task
  */
 export async function updateTask(task: TaskContext): Promise<void> {
   const db = await openDatabase();
@@ -68,7 +68,7 @@ export async function updateTask(task: TaskContext): Promise<void> {
 }
 
 /**
- * 删除任务
+ * Delete task
  */
 export async function deleteTask(id: string): Promise<void> {
   const db = await openDatabase();
@@ -83,7 +83,7 @@ export async function deleteTask(id: string): Promise<void> {
 }
 
 /**
- * 清空所有任务
+ * Clear all tasks
  */
 export async function clearAllTasks(): Promise<void> {
   const db = await openDatabase();

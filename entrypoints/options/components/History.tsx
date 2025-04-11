@@ -17,21 +17,21 @@ const History: React.FC<HistoryProps> = ({
   handleClearHistory,
   showStatus,
 }) => {
-  // 使用React state管理模态窗口显示状态和当前选中的任务
+  // Use React state to manage modal window display state and currently selected task
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const { authStatus } = useAuth();
 
-  // 获取当前选中的任务上下文
+  // Get the currently selected task context
   const selectedTaskContext = allTasks.find(task => task.id === selectedTaskId) || null;
 
-  // 从URL参数中获取任务ID和动作
+  // Get task ID and action from URL parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const taskId = urlParams.get("taskId");
     const action = urlParams.get("action");
 
-    // 如果URL中有任务ID和share动作，打开相应的模态窗口
+    // If URL has task ID and share action, open the corresponding modal window
     if (taskId && action === "share") {
       const task = allTasks.find(task => task.id === taskId);
       if (task) {
@@ -42,7 +42,7 @@ const History: React.FC<HistoryProps> = ({
     }
   }, [allTasks, showStatus]);
 
-  // 获取状态标签的样式
+  // Get styling for status labels
   const getStateStyle = (state: TaskState) => {
     switch (state) {
       case TaskState.COMPLETED:
@@ -56,7 +56,7 @@ const History: React.FC<HistoryProps> = ({
     }
   };
 
-  // 将UTC时间格式化为本地时间
+  // Format UTC time to local time
   const formatLocalTime = (utcTimestamp: string) => {
     if (!utcTimestamp) return "";
 
@@ -69,19 +69,19 @@ const History: React.FC<HistoryProps> = ({
     }
   };
 
-  // 打开分享模态窗口
+  // Open share modal window
   const openShareModal = (taskId: string) => {
     setSelectedTaskId(taskId);
     setIsModalOpen(true);
     showStatus("Reviewing shared task...", "info");
   };
 
-  // 关闭分享模态窗口
+  // Close share modal window
   const closeShareModal = () => {
     setIsModalOpen(false);
     setSelectedTaskId(null);
 
-    // 如果是通过URL参数打开的，关闭后清除URL参数
+    // If opened via URL parameters, clear them when closing
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has("taskId") && urlParams.has("action")) {
       const newUrl = window.location.pathname + "?page=History";
@@ -89,7 +89,7 @@ const History: React.FC<HistoryProps> = ({
     }
   };
 
-  // 如果用户未登录，只显示提示文本
+  // If user is not logged in, only show the prompt text
   if (authStatus !== AuthStatus.SUCCESS) {
     return (
       <div className="login-notice">
@@ -140,7 +140,7 @@ const History: React.FC<HistoryProps> = ({
           </div>
         )}
 
-        {/* 使用React状态控制模态窗口显示 */}
+        {/* Use React state to control modal window display */}
         {isModalOpen && selectedTaskContext && (
           <TaskResultModal
             taskContext={selectedTaskContext}
