@@ -34,7 +34,7 @@ const History: React.FC<HistoryProps> = ({
       if (task) {
         setSelectedTaskId(taskId);
         setIsModalOpen(true);
-        showStatus("Opening share modal...", "info");
+        showStatus("Reviewing shared task...", "info");
       }
     }
   }, [allTasks, showStatus]);
@@ -57,7 +57,7 @@ const History: React.FC<HistoryProps> = ({
   const openShareModal = (taskId: string) => {
     setSelectedTaskId(taskId);
     setIsModalOpen(true);
-    showStatus("Opening share modal...", "info");
+    showStatus("Reviewing shared task...", "info");
   };
 
   // 关闭分享模态窗口

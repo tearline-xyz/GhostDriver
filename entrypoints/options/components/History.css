@@ -61,6 +61,11 @@
   line-height: 1.4; /* 减小行高 */
   color: #202124;
   border-left: 3px solid #4285f4;
+  white-space: pre-wrap; /* 保留原始格式如回车符等 */
+  word-wrap: break-word; /* 确保长文本自动换行 */
+  overflow-wrap: break-word; /* 增强自动换行支持 */
+  max-height: 300px; /* 限制最大高度 */
+  overflow-y: auto; /* 内容过多时显示滚动条 */
 }
 
 .task-actions {
