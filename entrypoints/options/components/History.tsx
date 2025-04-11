@@ -53,6 +53,19 @@ const History: React.FC<HistoryProps> = ({
     }
   };
 
+  // 将UTC时间格式化为本地时间
+  const formatLocalTime = (utcTimestamp: string) => {
+    if (!utcTimestamp) return "";
+
+    try {
+      const date = new Date(utcTimestamp);
+      return date.toLocaleString();
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return utcTimestamp;
+    }
+  };
+
   // 打开分享模态窗口
   const openShareModal = (taskId: string) => {
     setSelectedTaskId(taskId);
@@ -97,7 +110,7 @@ const History: React.FC<HistoryProps> = ({
                   <span className="task-id">{task.id}</span>
                   <span className="task-state" style={getStateStyle(task.state as TaskState)}>{task.state}</span>
                   <span className="task-time">
-                    {task.created_at}
+                    {formatLocalTime(task.created_at)}
                   </span>
                   {task.state === TaskState.COMPLETED && (
                     <button
