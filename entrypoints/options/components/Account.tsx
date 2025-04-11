@@ -1,4 +1,5 @@
 import React from "react"
+import "./Account.css"
 import { CopyIcon, UserIcon, ErrorIcon } from "../../../assets/icons"
 import { AuthStatus } from "../../auth/models"
 import useAuth from "../../auth/useAuth"
