@@ -14,7 +14,6 @@ const History: React.FC<HistoryProps> = ({
   allTasks,
   focusedTaskContext,
   handleClearHistory,
-  showStatus,
 }) => {
   return (
     <>

@@ -108,32 +108,10 @@ const App: React.FC = () => {
     })
   }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig, showStatus])
 
-  // Copy text to clipboard
-  const copyToClipboard = useCallback(
-    (text: string) => {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          showStatus("Copied to clipboard!", "success")
-        })
-        .catch((err) => {
-          console.error("Failed to copy: ", err)
-          showStatus("Failed to copy!", "error")
-        })
-    },
-    [showStatus]
-  )
-
   // Helper function to check if current version is alpha
   const isAlphaVersion = useCallback(() => {
     return VERSION.toLowerCase().includes("alpha")
   }, [])
-
-  // 初始化 Reveal.js
-  useEffect(() => {
-    console.log('Current focusedTaskContext:', focusedTaskContext)
-    console.log('History data:', focusedTaskContext?.result?.history)
-  }, [focusedTaskContext?.result?.history])
 
   // 加载历史任务
   useEffect(() => {
