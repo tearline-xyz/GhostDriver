@@ -32,7 +32,6 @@ import {
   TO_EXPAND_SYMBOL,
 } from "./models/symbols"
 import {
-  EMPTY_TASK_CONTEXT,
   TASK_ACTIVE_STATES,
   TaskContext,
   TaskState,
@@ -95,8 +94,7 @@ function App() {
   )
 
   /** 控制任务状态 */
-  const [taskContext, setTaskContext] =
-    useState<TaskContext>(EMPTY_TASK_CONTEXT)
+  const [taskContext, setTaskContext] = useState<TaskContext | null>(null)
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -740,10 +738,13 @@ function App() {
       ])
 
       // 更新任务状态为运行中
-      setTaskContext((prev) => ({
-        ...prev,
-        state: TaskState.RUNNING,
-      }))
+      setTaskContext((prev) => {
+        if (!prev) return null
+        return {
+          ...prev,
+          state: TaskState.RUNNING,
+        }
+      })
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred"
@@ -774,8 +775,8 @@ function App() {
 
   // 切换暂停/恢复状态
   const toggleTaskPauseState = async () => {
-    hideNotification() // Hide notification on pause/resume
-    if (taskContext.id) {
+    hideNotification()
+    if (taskContext?.id) {
       try {
         // Determine the target state based on current running state
         const targetState =
@@ -790,10 +791,13 @@ function App() {
         )
 
         // Update task state after successful API call
-        setTaskContext((prev) => ({
-          ...prev,
-          state: targetState,
-        }))
+        setTaskContext((prev) => {
+          if (!prev) return null
+          return {
+            ...prev,
+            state: targetState,
+          }
+        })
       } catch (error) {
         console.error("Error toggling task state:", error)
         setNotification({
@@ -808,7 +812,7 @@ function App() {
   const terminateTaskOrConnection = async () => {
     // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so
     if (
-      taskContext.state &&
+      taskContext?.state &&
       TASK_ACTIVE_STATES.has(taskContext.state) &&
       taskContext.id
     ) {
@@ -840,7 +844,7 @@ function App() {
   // 停止任务
   const stopTask = async () => {
     hideNotification()
-    if (taskContext.id) {
+    if (taskContext?.id) {
       try {
         await terminateTaskOrConnection()
 
@@ -851,9 +855,15 @@ function App() {
         }
 
         // Reset states but keep taskId
-        setTaskContext({
-          id: taskContext.id,
-          state: TaskState.STOPPED,
+        setTaskContext((prev) => {
+          if (!prev) return null
+          return {
+            id: prev.id,
+            state: TaskState.STOPPED,
+            content: prev.content,
+            created_at: prev.created_at,
+            chat_model_tag: prev.chat_model_tag,
+          }
         })
         setInteractionToggle((prev) => ({
           ...prev,
@@ -895,7 +905,7 @@ function App() {
       }
 
       // Reset task state
-      setTaskContext(EMPTY_TASK_CONTEXT)
+      setTaskContext(null)
 
       // Clear input and events
       setInput("")
@@ -984,7 +994,7 @@ function App() {
   }, [])
 
   const handleShareAction = async () => {
-    if (!taskContext.id) return
+    if (!taskContext?.id) return
 
     try {
       // 跳转到 history 页面，并携带 task id 和 share 动作参数
@@ -1124,7 +1134,7 @@ function App() {
 
           <div className="right-controls">
             {interactionToggle.taskControls.visible &&
-              taskContext.state &&
+              taskContext?.state &&
               TASK_ACTIVE_STATES.has(taskContext.state) && (
                 // NOTE: Not show control buttons when task state is created as there is no agent being attached to the task
                 <div className="task-control-buttons">
@@ -1151,7 +1161,7 @@ function App() {
                 </div>
               )}
             {interactionToggle.shareButton.visible &&
-              taskContext.state &&
+              taskContext?.state &&
               taskContext.state === TaskState.COMPLETED && (
                 <button
                   className="share-button"
@@ -1187,7 +1197,7 @@ function App() {
 
       {/* Display task ID when notification is closed and we have a task running */}
       {interactionToggle.taskId.visible &&
-        taskContext.id &&
+        taskContext?.id &&
         !notification.visible && (
           <div className="task-id-display">
             <small>
@@ -1279,7 +1289,7 @@ function App() {
         })}
 
         {/* progress indicator - shown when task is working, stopped,... */}
-        {taskContext.state && (
+        {taskContext?.state && (
           <div
             className={`progress-indicator ${taskContext.state === TaskState.RUNNING ? "working" : taskContext.state}`}
           >

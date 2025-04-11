@@ -8,7 +8,7 @@ import {
   VERSION,
 } from "../common/settings"
 import { CopyIcon, UserIcon, ErrorIcon, ClearAllIcon } from "../../assets/icons"
-import { TaskContext, EMPTY_TASK_CONTEXT, TaskState } from "../common/models/task"
+import { TaskContext, TaskState } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import TaskResultModal from "./components/TaskResultModal"
@@ -35,7 +35,7 @@ const App: React.FC = () => {
     DEFAULT_SETTINGS.modeConfig
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext>(EMPTY_TASK_CONTEXT);
+  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext | null>(null);
   const [allTasks, setAllTasks] = useState<TaskContext[]>([]);
 
   const { authStatus, userInfo, handleLogin, handleLogout } = useAuth();
@@ -86,11 +86,11 @@ const App: React.FC = () => {
           if (taskContext) {
             setFocusedTaskContext(taskContext)
           } else {
-            setFocusedTaskContext(EMPTY_TASK_CONTEXT)
+            setFocusedTaskContext(null)
           }
         } catch (error) {
           console.error("Error fetching task data:", error)
-          setFocusedTaskContext(EMPTY_TASK_CONTEXT)
+          setFocusedTaskContext(null)
         }
       }
       fetchTaskData()
@@ -135,8 +135,8 @@ const App: React.FC = () => {
   // 初始化 Reveal.js
   useEffect(() => {
     console.log('Current focusedTaskContext:', focusedTaskContext)
-    console.log('History data:', focusedTaskContext.result?.history)
-  }, [focusedTaskContext.result?.history])
+    console.log('History data:', focusedTaskContext?.result?.history)
+  }, [focusedTaskContext?.result?.history])
 
   // 加载历史任务
   useEffect(() => {
@@ -423,7 +423,7 @@ const App: React.FC = () => {
                 const taskId = urlParams.get("taskId")
                 const action = urlParams.get("action")
 
-                if (taskId && action === "share") {
+                if (taskId && action === "share" && focusedTaskContext) {
                   return (
                     <TaskResultModal
                       taskContext={focusedTaskContext}

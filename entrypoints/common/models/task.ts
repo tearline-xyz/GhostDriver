@@ -23,12 +23,12 @@ export const TASK_ACTIVE_STATES: Set<TaskState> = new Set([
 
 // 任务上下文类型
 export interface TaskContext {
-  id?: string
-  state?: TaskState
-  content?: string
-  created_at?: string
+  id: string
+  state: TaskState
+  content: string
+  created_at: string
+  chat_model_tag: string
   initial_actions?: any
-  chat_model_tag?: string
   result?: {
     history: Array<{
       model_output: {
@@ -65,17 +65,6 @@ export interface TaskContext {
       }
     }>
   }
-}
-
-// 空的 TaskContext 对象，用于初始化
-export const EMPTY_TASK_CONTEXT: TaskContext = {
-  id: undefined,
-  state: undefined,
-  content: undefined,
-  created_at: undefined,
-  initial_actions: undefined,
-  chat_model_tag: undefined,
-  result: undefined
 }
 
 /**
