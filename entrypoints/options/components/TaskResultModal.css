@@ -5,52 +5,44 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(3px);  /* 减轻了模糊效果 */
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
-  background: #2b2b39;
-  padding: 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  width: 80%;
-  max-width: 1000px;
-  height: 80vh;
+  background: linear-gradient(145deg, #2d2d3a 0%, #1f1f2b 100%);
+  border-radius: 12px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  width: 85%;
+  max-width: 1200px;
+  height: 85vh;
   display: flex;
   flex-direction: column;
   position: relative;
   color: #fff;
+  overflow: hidden;
+  animation: slideUp 0.4s ease;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  height: 32px;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #fff;
-  font-size: 24px;
-  font-weight: 200;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  letter-spacing: -0.02em;
-}
-
-.task-id-title {
-  margin: 0;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 400;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  letter-spacing: -0.02em;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-body {
@@ -63,35 +55,35 @@
 }
 
 .modal-footer {
-  padding: 8px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  background: linear-gradient(145deg, #2b2b39 0%, #1f1f2b 100%);
-  height: 32px;
+  background: rgba(0, 0, 0, 0.2);
+  height: auto;
+  gap: 12px;
 }
 
 .modal-close {
-  width: 20px;
-  height: 20px;
+  width: 32px;
+  height: 32px;
   opacity: 0.8;
   cursor: pointer;
-  background: none;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
+  border-radius: 50%;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  z-index: 10;
-  position: relative;
 }
 
 .modal-close:hover {
-  background-color: #1565c0;
+  background-color: rgba(255, 255, 255, 0.2);
   opacity: 1;
-  transform: scale(1.1);
+  transform: rotate(90deg);
 }
 
 .modal-close::before,
@@ -113,25 +105,62 @@
 }
 
 .share-button {
-  background-color: #1976d2;
+  background: linear-gradient(45deg, #2196F3, #00BCD4);
   border: none;
-  padding: 4px 12px;
-  height: 28px;
-  line-height: 20px;
+  padding: 6px 18px;
+  height: 32px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   transition: all 0.2s ease;
   color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
 }
 
 .share-button:hover {
-  background-color: #1565c0;
-  transform: translateY(-1px);
+  background: linear-gradient(45deg, #1E88E5, #00ACC1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.share-button::before {
+  content: "↗";
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.cancel-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 18px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+}
+
+.cancel-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+}
+
+.cancel-button::before {
+  content: "✕";
+  margin-right: 8px;
+  font-size: 14px;
 }
 
 .loading {
@@ -152,97 +181,140 @@
 
 /* 浏览器框架样式 */
 .browser-frame {
-  background: #2b2b2b;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: #1a1a1a;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.15);
   width: 100%;
-  height: 75vh;
+  height: 70vh;
   position: relative;
   margin-top: 20px;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  outline: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .browser-header {
-  background: #3b3b3b;
-  padding: 8px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  background: linear-gradient(to right, #303030, #242424);
+  padding: 12px 16px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  height: 40px;
+  gap: 12px;
+  height: auto;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .browser-controls {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .browser-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
+  transition: all 0.2s;
 }
 
 .dot-red { background: #ff5f56; }
 .dot-yellow { background: #ffbd2e; }
 .dot-green { background: #27c93f; }
 
+.browser-controls:hover .dot-red { box-shadow: 0 0 6px 2px rgba(255, 95, 86, 0.6); }
+.browser-controls:hover .dot-yellow { box-shadow: 0 0 6px 2px rgba(255, 189, 46, 0.6); }
+.browser-controls:hover .dot-green { box-shadow: 0 0 6px 2px rgba(39, 201, 63, 0.6); }
+
 .browser-address-bar {
   flex: 1;
-  background: #2b2b2b;
-  border-radius: 4px;
-  margin: 0 8px;
-  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 20px;
+  margin: 0 12px;
+  padding: 8px 16px;
   color: #fff;
   font-size: 14px;
+  font-family: monospace;
   display: flex;
   align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.browser-address-bar::before {
+  content: "🔒";
+  margin-right: 8px;
+  opacity: 0.7;
+  font-size: 12px;
 }
 
 .browser-content {
-  height: calc(100% - 40px);
-  background: #fff;
+  height: calc(100% - 48px);
+  background: #f0f0f0;
   position: relative;
+  overflow: hidden;
 }
 
 /* 浮动信息样式 */
 .step-info {
   position: absolute;
-  top: 20px;
+  bottom: auto;
+  top: 60px;
   left: 20px;
+  right: 20px;
   z-index: 10;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 600px;
+  max-width: 800px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: fadeDown 0.5s ease;
+}
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .step-info p {
   margin: 0;
-  padding: 10px 15px;
-  font-size: 14px;
-  line-height: 1.4;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
-  border-radius: 20px;
+  padding: 8px 0;
+  font-size: 15px;
+  line-height: 1.5;
   color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: flex-start;
-  min-width: 500px;
-  max-width: 100%;
-  animation: fadeIn 0.3s ease-in-out;
-  white-space: pre-wrap;
-  word-break: break-word;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   text-align: left;
+}
+
+.step-info p:last-child {
+  border-bottom: none;
 }
 
 .step-info p strong {
   color: #64B5F6;
-  margin-right: 8px;
+  margin-right: 12px;
+  min-width: 100px;
   flex-shrink: 0;
-  padding-top: 2px;
+  text-align: left;
+}
+
+.step-info p .info-value {
+  text-align: left;
 }
 
 @keyframes fadeIn {
@@ -319,4 +391,97 @@
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* 任务内容样式 - 模仿 History 组件 */
+.modal-task-overview {
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 60vh;  /* 确保有足够的高度来实现居中效果 */
+}
+
+.modal-task-content {
+  margin: 1.5rem 0; /* 增加上下间距 */
+  padding: 1rem 0.75rem; /* 增加内边距 */
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #202124;
+  border-left: 3px solid #4285f4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-height: 40vh;
+  overflow-y: auto;
+  text-align: left; /* 确保文字左对齐 */
+}
+
+.modal-task-meta-info {
+  margin-top: 20px;
+  margin-bottom: 30px; /* 增加底部间距 */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.modal-task-meta-info span {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  font-size: 13px;
+}
+
+.modal-task-meta-info div {
+  margin-top: 10px;
+  width: 100%;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}
+
+.modal-task-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-task-meta-label {
+  min-width: 80px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-task-meta-value {
+  color: #4a90e2;
+  font-family: monospace;
+}
+
+.modal-task-powered-by {
+  margin-top: 40px; /* 已经有一定的上边距 */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .modal-task-meta-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -80,56 +80,28 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <div className="modal-header">
-          <span className="task-id-title">Task completed ✔</span>
-          <button className="modal-close" onClick={onClose} />
-        </div>
         <div className="modal-body">
           {!taskContext.result?.history ? (
             <div className="loading">Loading task history...</div>
           ) : (
             <div className="reveal" ref={deckDivRef}>
               <div className="slides">
-              <section>
-                {/* Overview Slide */}
+                {/* Redesigned Overview Slide with task content */}
                 <section data-auto-animate>
-                  <h2 style={{ fontSize: '24px' }}>Task Overview</h2>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '16px' }}>
-                    <p><strong>Task ID:</strong> {taskContext.id}</p>
-                    <p><strong>Generated on:</strong> {taskContext.created_at}</p>
-                    <p><strong>Powered by:</strong> {EXTENSION_NAME} and {taskContext.chat_model_tag}</p>
-                    <p><strong>Final State:</strong> {taskContext.state}</p>
-                    <p><strong>Total Steps:</strong> {taskContext.result.history.length}</p>
-                  </div>
-                </section>
+                  <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>Overview</h2>
 
-                {/* Task Details Slide */}
-                <section data-auto-animate>
-                  <h2 style={{ fontSize: '24px', marginBottom: '20px' }}>Task Details</h2>
-                  <pre style={{
-                    margin: '0 20px',
-                    padding: '15px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    borderRadius: '8px',
-                    overflowY: 'auto',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    fontFamily: 'monospace',
-                    lineHeight: '1.5',
-                    textAlign: 'left',
-                    height: 'calc(100% - 100px)',
-                    maxHeight: '100%',
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(0, 0, 0, 0.1)'
-                  }}>
-                    <code className="language-markdown" style={{
-                      display: 'block',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
-                      fontSize: '16px',
-                      color: '#e0e0e0'
-                    }}>{taskContext.content}</code>
-                  </pre>
+                  <div className="modal-task-overview">
+                    <div className="modal-task-meta-info">
+                      <span>{taskContext.id}</span>
+                      <span>{taskContext.state} after {taskContext.result.history.length} steps</span>
+                    </div>
+
+                    <div className="modal-task-content">{taskContext.content}</div>
+
+                    <div className="modal-task-powered-by">
+                      Powered by {EXTENSION_NAME} and {taskContext.chat_model_tag}
+                    </div>
+                  </div>
                 </section>
 
                 {/* Journey Slide */}
@@ -176,14 +148,16 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
                     </div>
                   </section>
                 ))}
-                </section>
               </div>
             </div>
           )}
         </div>
         <div className="modal-footer">
           <button className="share-button" onClick={onClose}>
-            Share
+            Confirm and Share
+          </button>
+          <button className="cancel-button" onClick={onClose}>
+            Cancel
           </button>
         </div>
       </div>
