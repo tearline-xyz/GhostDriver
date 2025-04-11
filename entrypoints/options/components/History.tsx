@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { ClearAllIcon, ShareIcon } from "../../../assets/icons"
 import { TaskContext, TaskState } from "../../common/models/task"
 import TaskResultModal from "./TaskResultModal"
@@ -6,17 +6,39 @@ import "./History.css"
 
 interface HistoryProps {
   allTasks: TaskContext[];
-  focusedTaskContext: TaskContext | null;
   handleClearHistory: () => void;
   showStatus: (message: string, type: string, duration?: number) => void;
 }
 
 const History: React.FC<HistoryProps> = ({
   allTasks,
-  focusedTaskContext,
   handleClearHistory,
   showStatus,
 }) => {
+  // 使用React state管理模态窗口显示状态和当前选中的任务
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  // 获取当前选中的任务上下文
+  const selectedTaskContext = allTasks.find(task => task.id === selectedTaskId) || null;
+
+  // 从URL参数中获取任务ID和动作
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const taskId = urlParams.get("taskId");
+    const action = urlParams.get("action");
+
+    // 如果URL中有任务ID和share动作，打开相应的模态窗口
+    if (taskId && action === "share") {
+      const task = allTasks.find(task => task.id === taskId);
+      if (task) {
+        setSelectedTaskId(taskId);
+        setIsModalOpen(true);
+        showStatus("Opening share modal...", "info");
+      }
+    }
+  }, [allTasks, showStatus]);
+
   // 获取状态标签的样式
   const getStateStyle = (state: TaskState) => {
     switch (state) {
@@ -28,6 +50,26 @@ const History: React.FC<HistoryProps> = ({
         return { background: '#e8f0fe', color: '#1a73e8' };
       default:
         return { background: '#f1f3f4', color: '#5f6368' };
+    }
+  };
+
+  // 打开分享模态窗口
+  const openShareModal = (taskId: string) => {
+    setSelectedTaskId(taskId);
+    setIsModalOpen(true);
+    showStatus("Opening share modal...", "info");
+  };
+
+  // 关闭分享模态窗口
+  const closeShareModal = () => {
+    setIsModalOpen(false);
+    setSelectedTaskId(null);
+
+    // 如果是通过URL参数打开的，关闭后清除URL参数
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("taskId") && urlParams.has("action")) {
+      const newUrl = window.location.pathname + "?page=History";
+      window.history.replaceState({}, "", newUrl);
     }
   };
 
@@ -60,12 +102,7 @@ const History: React.FC<HistoryProps> = ({
                   {task.state === TaskState.COMPLETED && (
                     <button
                       className="icon-share-button"
-                      onClick={() => {
-                        const newUrl = `${window.location.pathname}?page=History&taskId=${task.id}&action=share`;
-                        window.history.pushState({}, "", newUrl);
-                        window.location.reload();
-                        showStatus("Opening share modal...", "info");
-                      }}
+                      onClick={() => openShareModal(task.id)}
                       title="Share"
                     >
                       <img src={ShareIcon} alt="Share" />
@@ -77,26 +114,14 @@ const History: React.FC<HistoryProps> = ({
             ))}
           </div>
         )}
-        {/* 模态窗口 */}
-        {(() => {
-          const urlParams = new URLSearchParams(window.location.search)
-          const taskId = urlParams.get("taskId")
-          const action = urlParams.get("action")
 
-          if (taskId && action === "share" && focusedTaskContext) {
-            return (
-              <TaskResultModal
-                taskContext={focusedTaskContext}
-                onClose={() => {
-                  const newUrl = window.location.pathname + "?page=History"
-                  window.history.replaceState({}, "", newUrl)
-                  window.location.reload()
-                }}
-              />
-            )
-          }
-          return null
-        })()}
+        {/* 使用React状态控制模态窗口显示 */}
+        {isModalOpen && selectedTaskContext && (
+          <TaskResultModal
+            taskContext={selectedTaskContext}
+            onClose={closeShareModal}
+          />
+        )}
       </div>
     </>
   )

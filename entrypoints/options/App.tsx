@@ -14,7 +14,6 @@ import About from "./components/About"
 import DeveloperSettings from "./components/DeveloperSettings"
 import History from "./components/History"
 import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
-import { getTaskById } from "../db/taskStore"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
@@ -34,7 +33,6 @@ const App: React.FC = () => {
     DEFAULT_SETTINGS.modeConfig
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [focusedTaskContext, setFocusedTaskContext] = useState<TaskContext | null>(null);
   const [allTasks, setAllTasks] = useState<TaskContext[]>([]);
 
   const showStatus = useCallback(
@@ -69,30 +67,6 @@ const App: React.FC = () => {
       setActivePage(pageParam);
     }
   }, []);
-
-  // 在组件挂载时检查 URL 参数并获取任务数据
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const taskId = urlParams.get("taskId")
-    const action = urlParams.get("action")
-
-    if (taskId && action === "share") {
-      const fetchTaskData = async () => {
-        try {
-          const taskContext = await getTaskById(taskId)
-          if (taskContext) {
-            setFocusedTaskContext(taskContext)
-          } else {
-            setFocusedTaskContext(null)
-          }
-        } catch (error) {
-          console.error("Error fetching task data:", error)
-          setFocusedTaskContext(null)
-        }
-      }
-      fetchTaskData()
-    }
-  }, [])
 
   // Save settings to chrome.storage.sync
   const saveOptions = useCallback(() => {
@@ -178,7 +152,6 @@ const App: React.FC = () => {
         return (
           <History
             allTasks={allTasks}
-            focusedTaskContext={focusedTaskContext}
             handleClearHistory={handleClearHistory}
             showStatus={showStatus}
           />
