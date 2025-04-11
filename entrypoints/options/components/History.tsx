@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react"
 import { ClearAllIcon, ShareIcon } from "../../../assets/icons"
 import { TaskContext, TaskState } from "../../common/models/task"
 import TaskResultModal from "./TaskResultModal"
+import useAuth from "../../auth/useAuth"
+import { AuthStatus } from "../../auth/models"
 import "./History.css"
 
 interface HistoryProps {
@@ -18,6 +20,7 @@ const History: React.FC<HistoryProps> = ({
   // 使用React state管理模态窗口显示状态和当前选中的任务
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const { authStatus } = useAuth();
 
   // 获取当前选中的任务上下文
   const selectedTaskContext = allTasks.find(task => task.id === selectedTaskId) || null;
@@ -85,6 +88,15 @@ const History: React.FC<HistoryProps> = ({
       window.history.replaceState({}, "", newUrl);
     }
   };
+
+  // 如果用户未登录，只显示提示文本
+  if (authStatus !== AuthStatus.SUCCESS) {
+    return (
+      <div className="login-notice">
+        Please login before viewing history.
+      </div>
+    );
+  }
 
   return (
     <>
