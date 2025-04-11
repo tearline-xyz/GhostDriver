@@ -89,7 +89,7 @@
 
 .share-button {
   padding: 0.35rem 1rem;
-  background: #4a90e2;
+  background: #2b7eef;
   color: white;
   border: none;
   border-radius: 6px;
@@ -151,7 +151,7 @@
 
 .icon-share-button:hover {
   transform: translateY(-1px);
-  background-color: #4a90e2; /* background changes to blue on hover */
+  background-color: #2b7eef; /* background changes to blue on hover */
 }
 
 .icon-share-button:active {

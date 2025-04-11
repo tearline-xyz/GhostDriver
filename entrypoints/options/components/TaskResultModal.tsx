@@ -324,7 +324,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
       <div className="modal-content">
         <div className="modal-body">
           {!taskContext.result?.history ? (
-            <div className="loading">Loading task history...</div>
+            <div className="modal-loading">Loading task history...</div>
           ) : (
             <div className="reveal" ref={deckDivRef}>
               <div className="slides">
@@ -423,10 +423,10 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
           )}
         </div>
         <div className="modal-footer">
-          <button className="share-button" onClick={onClose}>
+          <button className="modal-share-button" onClick={onClose}>
             Confirm and Share
           </button>
-          <button className="cancel-button" onClick={onClose}>
+          <button className="modal-cancel-button" onClick={onClose}>
             Cancel
           </button>
         </div>

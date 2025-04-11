@@ -859,7 +859,7 @@
 
 .icon-share-button:hover {
   transform: translateY(-1px);
-  background-color: #4a90e2; /* 悬停时背景变为蓝色 */
+  background-color: #2b7eef; /* 悬停时背景变为蓝色 */
 }
 
 .icon-share-button:active {

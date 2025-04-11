@@ -65,47 +65,8 @@
   gap: 12px;
 }
 
-.modal-close {
-  width: 32px;
-  height: 32px;
-  opacity: 0.8;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 50%;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  opacity: 1;
-  transform: rotate(90deg);
-}
-
-.modal-close::before,
-.modal-close::after {
-  content: '';
-  position: absolute;
-  width: 2px;
-  height: 16px;
-  background-color: #fff;
-  border-radius: 1px;
-}
-
-.modal-close::before {
-  transform: rotate(45deg);
-}
-
-.modal-close::after {
-  transform: rotate(-45deg);
-}
-
-.share-button {
-  background: linear-gradient(45deg, #2196F3, #00BCD4);
+.modal-share-button {
+  background: #2b7eef;
   border: none;
   padding: 6px 18px;
   height: 32px;
@@ -121,19 +82,19 @@
   align-items: center;
 }
 
-.share-button:hover {
-  background: linear-gradient(45deg, #1E88E5, #00ACC1);
+.modal-share-button:hover {
+  background: #1659b7;
   transform: translateY(-2px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
 }
 
-.share-button::before {
+.modal-share-button::before {
   content: "↗";
   margin-right: 8px;
   font-size: 16px;
 }
 
-.cancel-button {
+.modal-cancel-button {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 6px 18px;
@@ -150,20 +111,20 @@
   align-items: center;
 }
 
-.cancel-button:hover {
+.modal-cancel-button:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
 }
 
-.cancel-button::before {
+.modal-cancel-button::before {
   content: "✕";
   margin-right: 8px;
   font-size: 14px;
 }
 
-.loading {
+.modal-loading {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -459,11 +420,6 @@
   min-width: 80px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.7);
-}
-
-.modal-task-meta-value {
-  color: #4a90e2;
-  font-family: monospace;
 }
 
 .modal-task-powered-by {
