@@ -5,7 +5,7 @@ import "./style.css"
 import { authService } from "../auth/authService"
 import LoginPrompt from "./components/LoginPrompt"
 import useAuth from "../auth/useAuth"
-import { AuthMessageType } from "../auth/models"
+import { AuthMessageType, AuthStatus } from "../auth/models"
 
 const SidePanelApp: React.FC = () => {
   const showStatus = (message: string, type: string) => {
@@ -14,16 +14,16 @@ const SidePanelApp: React.FC = () => {
 
   const { authStatus, handleLogin } = useAuth();
 
-  const updateAuthStatus = useCallback((newStatus: "none" | "pending" | "success" | "error", error?: boolean) => {
+  const updateAuthStatus = useCallback((newStatus: AuthStatus, error?: boolean) => {
     if (error) {
-      console.error(`Login ${newStatus === "error" ? "failed" : "timed out"}`);
+      console.error(`Login ${newStatus === AuthStatus.ERROR ? "failed" : "timed out"}`);
     }
   }, []);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       const loggedIn = await authService.isLoggedIn()
-      updateAuthStatus(loggedIn ? "success" : "none")
+      updateAuthStatus(loggedIn ? AuthStatus.SUCCESS : AuthStatus.NONE)
     }
     checkLoginStatus()
   }, [updateAuthStatus])
@@ -31,11 +31,11 @@ const SidePanelApp: React.FC = () => {
   useEffect(() => {
     const messageListener = (message) => {
       if (message.type === AuthMessageType.LOGIN_STATE_CHANGED) {
-        updateAuthStatus("success", true);
+        updateAuthStatus(AuthStatus.SUCCESS, true);
       }
 
       if (message.type === AuthMessageType.LOGOUT_STATE_CHANGED) {
-        updateAuthStatus("none", true);
+        updateAuthStatus(AuthStatus.NONE, true);
       }
     };
 
@@ -49,10 +49,10 @@ const SidePanelApp: React.FC = () => {
 
   return (
     <React.StrictMode>
-      {authStatus === "success" ? (
+      {authStatus === AuthStatus.SUCCESS ? (
         <App />
       ) : (
-        <LoginPrompt onLogin={() => handleLogin(showStatus)} />
+        <LoginPrompt onLogin={() => handleLogin(showStatus)} authStatus={authStatus as AuthStatus} />
       )}
     </React.StrictMode>
   )
