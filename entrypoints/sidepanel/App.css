@@ -506,21 +506,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 20px; /* 添加固定高度 */
+  height: 20px; /* Set fixed height */
 }
 
 .toolbar-left {
   display: flex;
   gap: 8px;
   align-items: center;
-  height: 100%; /* 确保子元素高度一致 */
+  height: 100%; /* Ensure consistent height for child elements */
 }
 
 .toolbar-right {
   display: flex;
   gap: 8px;
   align-items: center;
-  height: 100%; /* 确保子元素高度一致 */
+  height: 100%; /* Ensure consistent height for child elements */
 }
 
 .new-task-button {
@@ -812,7 +812,6 @@
   filter: brightness(0) invert(1) saturate(2);
 }
 
-/* 为了让设置图标看起来更协调，我们需要调整它的大小 */
 .settings-button svg {
   width: 16px;
   height: 16px;
@@ -847,19 +846,19 @@
   align-items: center;
   justify-content: center;
   width: 32px;
-  height: 24px; /* 从28px改为24px，与其他按钮一致 */
+  height: 24px; /* To be consistent with the other buttons */
   border: none;
   background: transparent;
   cursor: pointer;
   padding: 0;
   transition: all 0.2s ease;
-  margin-left: 8px; /* 与其他元素保持一定间距 */
-  border-radius: 4px; /* 添加圆角使悬停效果更美观 */
+  margin-left: 8px;
+  border-radius: 4px;
 }
 
 .icon-share-button:hover {
   transform: translateY(-1px);
-  background-color: #2b7eef; /* 悬停时背景变为蓝色 */
+  background-color: #2b7eef;
 }
 
 .icon-share-button:active {
@@ -869,12 +868,12 @@
 .icon-share-button img {
   width: 18px;
   height: 18px;
-  filter: brightness(0) invert(1) opacity(0.8); /* 修改为白色图标以适应暗色背景 */
+  filter: brightness(0) invert(1) opacity(0.8);
   transition: filter 0.2s ease;
 }
 
 .icon-share-button:hover img {
-  filter: brightness(0) invert(1); /* 悬停时图标变为更亮的白色 */
+  filter: brightness(0) invert(1);
 }
 
 .icon-share-button:disabled {
