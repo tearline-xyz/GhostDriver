@@ -17,17 +17,14 @@ This project aims to enable users to describe tasks in natural language, which a
 
 ## Development
 
-### playwright-crx
+1. Build the playwright-crx:
+    `./auto/build-playwright-crx.sh`
 
-This extension project depends on [ruifigueira/playwright-crx](https://github.com/ruifigueira/playwright-crx), which we have modified to support WebSocket communication with the backend. The modified version can be found at [tearline-xyz/playwright-crx](https://github.com/tearline-xyz/playwright-crx). During development, whether initializing the project or making further modifications to playwright-crx, execute the following command in the root directory of this project:
+    > This extension project depends on [ruifigueira/playwright-crx](https://github.com/ruifigueira/playwright-crx), which we have modified to support WebSocket communication with the backend. The modified version can be found at the `tearline` branch of [tearline-xyz/playwright-crx](https://github.com/tearline-xyz/playwright-crx).
 
-```bash
-./auto/build-playwright-crx.sh
-```
-
-Additionally, if modifications are made to playwright-crx, ensure you are on the `tearline` branch, and do not forget to create a PR for this.
+2. `pnpm dev`
 
 ## [Publishing](https://wxt.dev/guide/essentials/publishing.html)
 
-1. Update the `version` field in `package.json`.
+1. Update the `version` in `package.json`.
 2. Run `pnpm zip` to generate a zip file with the version number in the `dist` directory.
