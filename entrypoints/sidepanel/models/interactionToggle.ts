@@ -1,12 +1,11 @@
-// UI状态接口
 export interface InteractionToggle {
-  // 输入区域控制
+  // Input area control
   input: {
     enabled: boolean
     visible: boolean
   }
 
-  // 任务控制按钮
+  // Task control buttons
   taskControls: {
     enabled: boolean
     visible: boolean
@@ -20,38 +19,42 @@ export interface InteractionToggle {
     }
   }
 
-  // 发送按钮
+  // Send button
   sendButton: {
     enabled: boolean
     visible: boolean
   }
 
-  // 分享按钮
+  // Share button
   shareButton: {
     enabled: boolean
     visible: boolean
   }
 
-  // 任务ID显示
+  // Task ID display
   taskId: {
-    enabled: boolean
     visible: boolean
   }
 
-  // 模式选择器
+  // Mode selector
   modeSelector: {
     enabled: boolean
     visible: boolean
   }
 
-  // LLM选择器
+  // LLM selector
   llmSelector: {
     enabled: boolean
     visible: boolean
   }
+
+  // New task button
+  newTaskButton: {
+    highlight: boolean,
+  },
 }
 
-// 默认UI状态
+// Default UI state
 export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
   input: {
     enabled: true,
@@ -74,11 +77,10 @@ export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
     visible: true,
   },
   shareButton: {
-    enabled: false,
-    visible: false,
+    enabled: true,
+    visible: true,
   },
   taskId: {
-    enabled: true,
     visible: true,
   },
   modeSelector: {
@@ -88,5 +90,8 @@ export const DEFAULT_INTERACTION_TOGGLE: InteractionToggle = {
   llmSelector: {
     enabled: true,
     visible: true,
+  },
+  newTaskButton: {
+    highlight: false,
   },
 }

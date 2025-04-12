@@ -2,7 +2,7 @@
   "name": "ghost-driver",
   "description": "manifest.json description",
   "private": true,
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "type": "module",
   "scripts": {
     "dev": "WXT_GHOST_DRIVER_DEV_VERSION=dev.alpha.$(date +%Y%m%d%H%M%S) wxt",
@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@types/reveal.js": "^5.0.5",
-    "highlight.js": "^11.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reveal.js": "^5.2.1",

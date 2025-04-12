@@ -506,21 +506,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 20px; /* 添加固定高度 */
+  height: 20px; /* Set fixed height */
 }
 
 .toolbar-left {
   display: flex;
   gap: 8px;
   align-items: center;
-  height: 100%; /* 确保子元素高度一致 */
+  height: 100%; /* Ensure consistent height for child elements */
 }
 
 .toolbar-right {
   display: flex;
   gap: 8px;
   align-items: center;
-  height: 100%; /* 确保子元素高度一致 */
+  height: 100%; /* Ensure consistent height for child elements */
 }
 
 .new-task-button {
@@ -541,6 +541,18 @@
   transition: all 0.2s;
   font-weight: 500;
   outline: none;
+}
+
+/* Add highlight effect for New Task button - like Send button */
+.new-task-button[data-highlight="true"] {
+  background-color: #2b7eef;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.new-task-button[data-highlight="true"]:hover {
+  background-color: #1659b7; /* Darker blue on hover, same as Send button hover */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .new-task-button:hover {
@@ -800,7 +812,6 @@
   filter: brightness(0) invert(1) saturate(2);
 }
 
-/* 为了让设置图标看起来更协调，我们需要调整它的大小 */
 .settings-button svg {
   width: 16px;
   height: 16px;
@@ -828,4 +839,53 @@
 .history-button:focus-visible,
 .settings-button:focus-visible {
   box-shadow: 0 0 0 2px #1659b7;
+}
+
+.icon-share-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 24px; /* To be consistent with the other buttons */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+  margin-left: 8px;
+  border-radius: 4px;
+}
+
+.icon-share-button:hover {
+  transform: translateY(-1px);
+  background-color: #2b7eef;
+}
+
+.icon-share-button:active {
+  transform: translateY(1px);
+}
+
+.icon-share-button img {
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1) opacity(0.8);
+  transition: filter 0.2s ease;
+}
+
+.icon-share-button:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.icon-share-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.icon-share-button:disabled:hover {
+  background-color: transparent;
+  transform: none;
+}
+
+.icon-share-button:disabled img {
+  filter: brightness(0) invert(1) opacity(0.4);
 }

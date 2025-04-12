@@ -32,7 +32,6 @@ import {
   TO_EXPAND_SYMBOL,
 } from "./models/symbols"
 import {
-  EMPTY_TASK_CONTEXT,
   TASK_ACTIVE_STATES,
   TaskContext,
   TaskState,
@@ -43,7 +42,8 @@ import {
   DEFAULT_NOTIFICATION_STATE,
 } from "./models/notification"
 import { ApiService } from "../common/services/api"
-import { HistoryIcon, SettingsIcon, CopyIcon } from "../../assets/icons"
+import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
+import { addTask, updateTask } from "../db/taskStore"
 
 function App() {
   /** Main input text content */
@@ -83,19 +83,18 @@ function App() {
   /** Value of user input field */
   const [userInputValue, setUserInputValue] = useState("")
 
-  /** 操作结果信息 */
+  /** Operation result information */
   const [notification, setNotification] = useState<NotificationState>(
     DEFAULT_NOTIFICATION_STATE
   )
 
-  /** 控制UI状态 */
+  /** Control UI state */
   const [interactionToggle, setInteractionToggle] = useState<InteractionToggle>(
     DEFAULT_INTERACTION_TOGGLE
   )
 
-  /** 控制任务状态 */
-  const [taskContext, setTaskContext] =
-    useState<TaskContext>(EMPTY_TASK_CONTEXT)
+  /** Control task state */
+  const [taskContext, setTaskContext] = useState<TaskContext | null>(null)
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
@@ -260,7 +259,7 @@ function App() {
           }
           break
         case "Enter":
-          e.preventDefault() // 阻止默认行为
+          e.preventDefault() // Prevent default behavior
           break
         case "Escape":
           e.preventDefault()
@@ -339,7 +338,10 @@ function App() {
       lastAtSymbolPosition !== -1 &&
       cursorPos > lastAtSymbolPosition
     ) {
-      const newSearchTerm = value.substring(lastAtSymbolPosition + 1, cursorPos)
+      const newSearchTerm = value.substring(
+        lastAtSymbolPosition + 1,
+        cursorPos
+      )
       setSearchTerm(newSearchTerm)
       setShowSuggestions(true)
 
@@ -684,6 +686,26 @@ function App() {
     }
   }, [])
 
+  /** 处理任务状态更新 */
+  const onPlaywrightServerDisconnectCallback = async (taskId: string) => {
+    try {
+      const taskContext = await apiService.getTask(taskId)
+      setTaskContext(taskContext)
+      await updateTask(taskContext)
+
+      // Highlight the New Task button when task completes
+      setInteractionToggle((prev) => ({
+        ...prev,
+        newTaskButton: {
+          ...prev.newTaskButton,
+          highlight: true
+        },
+      }))
+    } catch (error) {
+      console.error("Error fetching task status:", error)
+    }
+  }
+
   const handleTaskSubmission = async () => {
     hideNotification()
 
@@ -708,27 +730,17 @@ function App() {
         throw new Error("Failed to get task ID from server")
       }
 
+      // 保存任务到数据库
+      await addTask(taskContext)
+
       // 开始任务，使用从响应中获取的taskId
-      setTaskContext({
-        id: taskId,
-        state: taskContext.state as TaskState,
-      })
+      setTaskContext(taskContext)
 
       // 使用 Promise.all 并行处理连接操作
       await Promise.all([
         connectToPlaywrightServer(
           apiService.getPlaywrightWebSocketUrl(taskId),
-          async () => {
-            try {
-              const taskContext = await apiService.getTask(taskId)
-              setTaskContext((prev) => ({
-                ...prev,
-                state: taskContext.state as TaskState,
-              }))
-            } catch (error) {
-              console.error("Error fetching task status:", error)
-            }
-          }
+          () => onPlaywrightServerDisconnectCallback(taskId)
         ),
         // 创建一个 Promise 来连接事件流
         new Promise<void>((resolve) => {
@@ -738,10 +750,13 @@ function App() {
       ])
 
       // 更新任务状态为运行中
-      setTaskContext((prev) => ({
-        ...prev,
-        state: TaskState.RUNNING,
-      }))
+      setTaskContext((prev) => {
+        if (!prev) return null
+        return {
+          ...prev,
+          state: TaskState.RUNNING,
+        }
+      })
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "An unknown error occurred"
@@ -772,8 +787,8 @@ function App() {
 
   // 切换暂停/恢复状态
   const toggleTaskPauseState = async () => {
-    hideNotification() // Hide notification on pause/resume
-    if (taskContext.id) {
+    hideNotification()
+    if (taskContext?.id) {
       try {
         // Determine the target state based on current running state
         const targetState =
@@ -788,10 +803,13 @@ function App() {
         )
 
         // Update task state after successful API call
-        setTaskContext((prev) => ({
-          ...prev,
-          state: targetState,
-        }))
+        setTaskContext((prev) => {
+          if (!prev) return null
+          return {
+            ...prev,
+            state: targetState,
+          }
+        })
       } catch (error) {
         console.error("Error toggling task state:", error)
         setNotification({
@@ -806,7 +824,7 @@ function App() {
   const terminateTaskOrConnection = async () => {
     // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so
     if (
-      taskContext.state &&
+      taskContext?.state &&
       TASK_ACTIVE_STATES.has(taskContext.state) &&
       taskContext.id
     ) {
@@ -838,7 +856,7 @@ function App() {
   // 停止任务
   const stopTask = async () => {
     hideNotification()
-    if (taskContext.id) {
+    if (taskContext?.id) {
       try {
         await terminateTaskOrConnection()
 
@@ -849,9 +867,15 @@ function App() {
         }
 
         // Reset states but keep taskId
-        setTaskContext({
-          id: taskContext.id,
-          state: TaskState.STOPPED,
+        setTaskContext((prev) => {
+          if (!prev) return null
+          return {
+            id: prev.id,
+            state: TaskState.STOPPED,
+            content: prev.content,
+            created_at: prev.created_at,
+            chat_model_tag: prev.chat_model_tag,
+          }
         })
         setInteractionToggle((prev) => ({
           ...prev,
@@ -893,13 +917,20 @@ function App() {
       }
 
       // Reset task state
-      setTaskContext(EMPTY_TASK_CONTEXT)
+      setTaskContext(null)
 
       // Clear input and events
       setInput("")
       setEvents([])
+
       // 重置UI状态
-      setInteractionToggle(DEFAULT_INTERACTION_TOGGLE)
+      setInteractionToggle((prev) => ({
+        ...DEFAULT_INTERACTION_TOGGLE,
+        newTaskButton: {
+          ...DEFAULT_INTERACTION_TOGGLE.newTaskButton,
+          highlight: false // Make sure highlight is turned off for new tasks
+        }
+      }))
 
       // Focus on the textarea
       if (textareaRef.current) {
@@ -982,7 +1013,7 @@ function App() {
   }, [])
 
   const handleShareAction = async () => {
-    if (!taskContext.id) return
+    if (!taskContext?.id) return
 
     try {
       // 跳转到 history 页面，并携带 task id 和 share 动作参数
@@ -1005,7 +1036,11 @@ function App() {
       {/* Toolbar container that can hold multiple buttons */}
       <div className="toolbar-container">
         <div className="toolbar-left">
-          <button className="new-task-button" onClick={resetToNewTask}>
+          <button
+            className="new-task-button"
+            onClick={resetToNewTask}
+            data-highlight={interactionToggle.newTaskButton.highlight}
+          >
             New Task
           </button>
           {/* Future buttons can be added here */}
@@ -1024,7 +1059,9 @@ function App() {
           </button>
           <button
             className="settings-button"
-            onClick={() => chrome.runtime.openOptionsPage()}
+            onClick={() => chrome.tabs.create({
+              url: chrome.runtime.getURL("options.html?page=Account")
+            })}
             title="Settings"
           >
             <img src={SettingsIcon} alt="Settings" className="toolbar-icon" />
@@ -1120,7 +1157,7 @@ function App() {
 
           <div className="right-controls">
             {interactionToggle.taskControls.visible &&
-              taskContext.state &&
+              taskContext?.state &&
               TASK_ACTIVE_STATES.has(taskContext.state) && (
                 // NOTE: Not show control buttons when task state is created as there is no agent being attached to the task
                 <div className="task-control-buttons">
@@ -1147,14 +1184,15 @@ function App() {
                 </div>
               )}
             {interactionToggle.shareButton.visible &&
-              taskContext.state &&
+              taskContext?.state &&
               taskContext.state === TaskState.COMPLETED && (
                 <button
-                  className="share-button"
+                  className="icon-share-button"
                   onClick={handleShareAction}
+                  title="Share"
                   disabled={!interactionToggle.shareButton.enabled}
                 >
-                  Share
+                  <img src={ShareIcon} alt="Share" />
                 </button>
               )}
             {interactionToggle.sendButton.visible && (
@@ -1183,7 +1221,7 @@ function App() {
 
       {/* Display task ID when notification is closed and we have a task running */}
       {interactionToggle.taskId.visible &&
-        taskContext.id &&
+        taskContext?.id &&
         !notification.visible && (
           <div className="task-id-display">
             <small>
@@ -1275,7 +1313,7 @@ function App() {
         })}
 
         {/* progress indicator - shown when task is working, stopped,... */}
-        {taskContext.state && (
+        {taskContext?.state && (
           <div
             className={`progress-indicator ${taskContext.state === TaskState.RUNNING ? "working" : taskContext.state}`}
           >

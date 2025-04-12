@@ -1,6 +1,6 @@
 /**
- * 父级事件模式集合
- * 用于识别事件流中的主要事件
+ * Collection of parent event patterns
+ * Used to identify main events in the event stream
  */
 export const PARENT_EVENT_KEYWORDS = [
   "🚀 Starting",
