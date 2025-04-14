@@ -12,7 +12,7 @@ This project aims to enable users to describe tasks in natural language, which a
 
 ## Installation
 
-1. Download ZIP file from the release page.
+1. Download ZIP file from the [release page](https://github.com/tearline-xyz/GhostDriver/releases).
 
 2. Install the extension in the Chrome browser:
 
