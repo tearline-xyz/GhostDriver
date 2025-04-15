@@ -2,6 +2,7 @@ import { TaskContext, TaskState } from "../models/task"
 
 export class ApiService {
   private apiHost: string
+  private apiVersion: string = 'api/v1'
 
   constructor(apiHost: string) {
     this.apiHost = apiHost
@@ -16,7 +17,7 @@ export class ApiService {
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     try {
-      const response = await fetch(`${this.apiHost}/tasks`, {
+      const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +46,7 @@ export class ApiService {
   }
 
   async getTask(taskId: string): Promise<TaskContext> {
-    const response = await fetch(`${this.apiHost}/tasks/${taskId}`, {
+    const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks/${taskId}`, {
       method: "GET",
       headers: {
         "accept": "application/json",
@@ -60,7 +61,7 @@ export class ApiService {
   }
 
   async updateTaskState(taskId: string, targetState: TaskState): Promise<void> {
-    const response = await fetch(`${this.apiHost}/tasks/${taskId}`, {
+    const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks/${taskId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -76,11 +77,11 @@ export class ApiService {
   }
 
   getEventStreamUrl(taskId: string): string {
-    return `${this.apiHost}/tasks/${taskId}/events/stream`
+    return `${this.apiHost}/${this.apiVersion}/tasks/${taskId}/events/stream`
   }
 
   getPlaywrightWebSocketUrl(taskId: string): string {
-    return `${this.apiHost}/ws/playwright?task_id=${taskId}`
+    return `${this.apiHost}/${this.apiVersion}/ws/playwright?task_id=${taskId}`
   }
 
   private async handleErrorResponse(response: Response, defaultMessage: string): Promise<never> {
