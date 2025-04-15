@@ -1,7 +1,7 @@
 // AuthService: Centralized service for handling authentication
 
 import { AUTHINFO_KEY } from "../common/settings"
-import { AuthInfo, AuthMessageType } from "./models"
+import { AuthInfo, AuthMessageType, TokenData } from "./models"
 
 // Time before expiration to trigger refresh (15 minutes)
 const AUTH_TOKEN_REFRESH_THRESHOLD_MS = 15 * 60 * 1000
@@ -14,6 +14,27 @@ class AuthService {
         resolve(result[AUTHINFO_KEY] || null)
       })
     })
+  }
+
+  // Parse raw token data to extract user info
+  parseTokenString(tokenStr: string): TokenData | null {
+    try {
+      const tokenData = JSON.parse(tokenStr)
+      if (tokenData.data) {
+        return {
+          userId: tokenData.data.user_id,
+          email: tokenData.data.email,
+          name: tokenData.data.name,
+          authId: tokenData.data.auth_id,
+          expired: tokenData.data.expired,
+          isNew: tokenData.data.is_new,
+          isActive: tokenData.data.is_active
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing token string:", error)
+    }
+    return null
   }
 
   async setAuthInfo(authInfo: AuthInfo): Promise<void> {

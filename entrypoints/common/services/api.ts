@@ -1,4 +1,5 @@
 import { TaskContext, TaskState } from "../models/task"
+import { authService } from "../../auth/authService"
 
 export class ApiService {
   private apiHost: string
@@ -12,16 +13,36 @@ export class ApiService {
     this.apiHost = apiHost
   }
 
+  private async buildHeaders(): Promise<HeadersInit> {
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    }
+
+    try {
+      const authInfo = await authService.getAuthInfo();
+      if (authInfo?.token) {
+        const tokenData = authService.parseTokenString(authInfo.token);
+        if (tokenData?.authId) {
+          headers["Authorization"] = `Bearer ${tokenData.authId}`;
+        }
+      }
+    } catch (error) {
+      console.error("Error getting auth token:", error)
+    }
+
+    return headers
+  }
+
   async createTask(content: string): Promise<TaskContext> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
     try {
+      const headers = await this.buildHeaders();
+
       const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           content,
           crx_mode: true,
@@ -46,9 +67,12 @@ export class ApiService {
   }
 
   async getTask(taskId: string): Promise<TaskContext> {
+    const headers = await this.buildHeaders();
+
     const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks/${taskId}`, {
       method: "GET",
       headers: {
+        ...headers,
         "accept": "application/json",
       },
     })
@@ -61,11 +85,11 @@ export class ApiService {
   }
 
   async updateTaskState(taskId: string, targetState: TaskState): Promise<void> {
+    const headers = await this.buildHeaders();
+
     const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks/${taskId}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         target_state: targetState,
       }),

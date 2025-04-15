@@ -2,11 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { authService } from './authService';
 import { TEARLINE_WEBSITE } from '../common/settings';
 import { authStateMachineActor } from './models';
-import { AuthEventType, AuthMessageType } from './models';
+import { AuthEventType, AuthMessageType, TokenData } from './models';
 
 const useAuth = () => {
   const [authStatus, setAuthStatus] = useState(authStateMachineActor.getSnapshot().value);
-  const [userInfo, setUserInfo] = useState<{ name?: string; email?: string; userId?: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<TokenData | null>(null);
   const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null);
 
   const loadAuthStatus = useCallback(async () => {
@@ -15,29 +15,21 @@ const useAuth = () => {
       if (isLoggedIn) {
         const authInfo = await authService.getAuthInfo();
 
-        let parsedUserInfo: {
-          email?: string;
-          name?: string;
-          userId?: string;
-        } | null = null;
+        let userData: TokenData | null = null;
 
         if (authInfo?.token) {
-          try {
-            const parsedToken = JSON.parse(authInfo.token);
-            if (parsedToken.data) {
-              parsedUserInfo = {
-                email: parsedToken.data.email,
-                name: parsedToken.data.name,
-                userId: parsedToken.data.user_id,
-              };
-            }
-          } catch (err) {
-            console.error("Error parsing token data:", err);
-          }
+          userData = authService.parseTokenString(authInfo.token);
+        } else if (authInfo?.user) {
+          // 如果没有有效的token数据但有user信息，将user转换为TokenData格式
+          userData = {
+            name: authInfo.user.name,
+            email: authInfo.user.email,
+            // 没有userId和authId
+          };
         }
 
         authStateMachineActor.send({ type: AuthEventType.LOGIN_SUCCESS });
-        setUserInfo(parsedUserInfo || authInfo?.user || null);
+        setUserInfo(userData);
       } else {
         authStateMachineActor.send({ type: AuthEventType.LOGOUT });
         setUserInfo(null);

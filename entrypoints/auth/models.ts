@@ -30,6 +30,16 @@ export interface AuthInfo {
   }
 }
 
+export interface TokenData {
+  userId?: string
+  email?: string
+  name?: string
+  authId?: string
+  expired?: number
+  isNew?: boolean
+  isActive?: boolean
+}
+
 export interface AuthMessage {
   type: AuthMessageType.LOGIN | AuthMessageType.LOGOUT | AuthMessageType.LOGIN_STATE_CHANGED | AuthMessageType.LOGOUT_STATE_CHANGED
   data?: string
