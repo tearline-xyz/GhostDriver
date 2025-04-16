@@ -41,9 +41,10 @@ import {
   NotificationState,
   DEFAULT_NOTIFICATION_STATE,
 } from "./models/notification"
-import { ApiService } from "../common/services/api"
+import { ApiService, InvalidTokenError } from "../common/services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
 import { addTask, updateTask } from "../db/taskStore"
+import { AuthMessageType } from "../auth/models"
 
 function App() {
   /** Main input text content */
@@ -702,9 +703,26 @@ function App() {
         },
       }))
     } catch (error) {
+      // 处理InvalidTokenError
+      if (error instanceof InvalidTokenError) {
+        handleTokenRefresh();
+      }
       console.error("Error fetching task status:", error)
     }
   }
+
+  // 添加刷新token的方法在handleTaskSubmission之前
+  const handleTokenRefresh = () => {
+    // 显示更友好、更明确的通知
+    setNotification({
+      message: "Your login session has expired. Please sign in again to continue.",
+      type: "warning",
+      visible: true,
+    });
+
+    // 发送刷新token的请求
+    chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
+  };
 
   const handleTaskSubmission = async () => {
     hideNotification()
@@ -758,16 +776,21 @@ function App() {
         }
       })
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred"
+      // 处理InvalidTokenError
+      if (error instanceof InvalidTokenError) {
+        handleTokenRefresh();
+      } else {
+        const errorMessage =
+          error instanceof Error ? error.message : "An unknown error occurred"
 
-      setNotification({
-        message: isConnectionRefusedError(errorMessage)
-          ? `Unable to connect to ${apiHost}`
-          : errorMessage,
-        type: "error",
-        visible: true,
-      })
+        setNotification({
+          message: isConnectionRefusedError(errorMessage)
+            ? `Unable to connect to ${apiHost}`
+            : errorMessage,
+          type: "error",
+          visible: true,
+        })
+      }
 
       // 发生错误时恢复 UI 状态
       setInteractionToggle((prev) => ({
@@ -811,6 +834,12 @@ function App() {
           }
         })
       } catch (error) {
+        // 处理InvalidTokenError
+        if (error instanceof InvalidTokenError) {
+          handleTokenRefresh();
+          return;
+        }
+
         console.error("Error toggling task state:", error)
         setNotification({
           message: `Failed to ${taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING} task: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -844,6 +873,14 @@ function App() {
           hideNotification()
         }, 1000)
       } catch (error) {
+        // 处理InvalidTokenError
+        if (error instanceof InvalidTokenError) {
+          handleTokenRefresh();
+          // 即使Token无效，也尝试通过关闭WebSocket连接来停止任务
+          await disconnectFromPlaywrightServer();
+          return;
+        }
+
         console.warn(
           "Error stopping task so that the websocket will be closed directly:",
           error

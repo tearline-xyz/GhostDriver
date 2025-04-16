@@ -285,6 +285,10 @@
   background-color: #3889f0;
 }
 
+.notification-warning {
+  background-color: #f0ad4e; /* 使用黄色/琥珀色作为警告色 */
+}
+
 .notification-close {
   background: none;
   border: none;

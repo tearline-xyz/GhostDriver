@@ -2,6 +2,14 @@ import { TaskContext, TaskState } from "../models/task"
 import { authService } from "../../auth/authService"
 import { AuthMessageType } from "../../auth/models"
 
+// 自定义Token无效异常类（包括过期、缺失、格式错误等情况）
+export class InvalidTokenError extends Error {
+  constructor(message = "Authentication token is invalid or expired") {
+    super(message)
+    this.name = "InvalidTokenError"
+  }
+}
+
 export class ApiService {
   private apiHost: string
   private apiVersion: string = 'api/v1'
@@ -24,11 +32,8 @@ export class ApiService {
       const isLoggedIn = await authService.isLoggedIn();
       if (!isLoggedIn) {
         console.warn("User is not logged in or token has expired");
-        // 尝试刷新token，即使当前未登录
-        chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
-        // 注意: 此时仍然返回没有Authorization的headers
-        // 当前请求可能会失败，但下一次请求可能会成功(如果用户完成了登录)
-        return headers;
+        // 抛出InvalidTokenError而不是静默继续
+        throw new InvalidTokenError();
       }
 
       // 检查token是否需要刷新（接近过期）
@@ -44,9 +49,17 @@ export class ApiService {
       const authInfo = await authService.getAuthInfo();
       if (authInfo?.data?.authId) {
         headers["Authorization"] = `Bearer ${authInfo.data.authId}`;
+      } else {
+        // 如果没有authId，也应该抛出异常
+        throw new InvalidTokenError("Authentication token is missing or invalid");
       }
     } catch (error) {
+      // 重新抛出InvalidTokenError，保留其他错误的原始类型
+      if (error instanceof InvalidTokenError) {
+        throw error;
+      }
       console.error("Error getting auth token:", error)
+      // 其他类型的错误不应该阻止API调用继续
     }
 
     return headers
@@ -136,11 +149,8 @@ export class ApiService {
       console.warn("Received 401 Unauthorized response, token might be expired");
       // 清除当前可能过期的token
       await authService.clearAuthInfo();
-      // 通知用户需要重新登录
-      errorMessage = "Authentication failed. Please log in again.";
-      // 请求刷新token
-      chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
-      throw new Error(errorMessage);
+      // 这里我们抛出InvalidTokenError而不是一般错误
+      throw new InvalidTokenError("Authentication failed. Please sign in again.");
     }
 
     try {
