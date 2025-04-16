@@ -16,41 +16,18 @@ class AuthService {
     })
   }
 
-  // Parse raw token data to extract user info
-  parseTokenString(tokenStr: string): TokenData | null {
-    try {
-      const tokenData = JSON.parse(tokenStr)
-      if (tokenData.data) {
-        return {
-          userId: tokenData.data.user_id,
-          email: tokenData.data.email,
-          authId: tokenData.data.auth_id,
-          expired: tokenData.data.expired,
-          isNew: tokenData.data.is_new,
-          isActive: tokenData.data.is_active
-        }
-      }
-    } catch (error) {
-      console.error("Error parsing token string:", error)
-    }
-    return null
-  }
-
   // Build user display data from auth info
   buildUserDisplayData(authInfo: AuthInfo | null): UserDisplayData | null {
     if (!authInfo) {
       return null
     }
 
-    // 从token中提取用户信息
-    if (authInfo.token) {
-      const tokenData = this.parseTokenString(authInfo.token)
-      if (tokenData) {
-        return {
-          userId: tokenData.userId,
-          email: tokenData.email,
-          isActive: tokenData.isActive
-        }
+    // 从数据中提取用户信息
+    if (authInfo.data) {
+      return {
+        userId: authInfo.data.userId,
+        email: authInfo.data.email,
+        isActive: authInfo.data.isActive
       }
     }
 
@@ -71,12 +48,12 @@ class AuthService {
 
   async isLoggedIn(): Promise<boolean> {
     const authInfo = await this.getAuthInfo()
-    if (!authInfo || !authInfo.token) {
+    if (!authInfo || !authInfo.data) {
       return false
     }
 
     // Check if token is expired
-    if (authInfo.expiresAt < Date.now()) {
+    if (authInfo.data.expired && authInfo.data.expired < Date.now() / 1000) {
       // Token expired, clear it
       await this.clearAuthInfo()
       return false
@@ -87,12 +64,12 @@ class AuthService {
 
   async shouldRefreshToken(): Promise<boolean> {
     const authInfo = await this.getAuthInfo()
-    if (!authInfo) {
+    if (!authInfo || !authInfo.data || !authInfo.data.expired) {
       return false
     }
 
-    // Check if token is approaching expiration
-    return authInfo.expiresAt - Date.now() < AUTH_TOKEN_REFRESH_THRESHOLD_MS
+    // NOTE: The expired field is a Unix timestamp in seconds, and the JavaScript Date.now() returns a millisecond timestamp. Hence we need to multiply expired by 1000
+    return (authInfo.data.expired * 1000) - Date.now() < AUTH_TOKEN_REFRESH_THRESHOLD_MS
   }
 
   // Broadcast login state to all extension components
@@ -112,12 +89,23 @@ class AuthService {
     try {
       // Try to parse as JSON first
       const parsed = JSON.parse(authData)
-      if (!parsed.expiresAt) {
-        throw new Error('Missing expiresAt in auth data')
+
+      // Validate data structure
+      if (!parsed.data) {
+        throw new Error('Missing data field in auth data')
       }
+
+      // Return the parsed structure directly as AuthInfo
       return {
-        token: parsed.token || parsed.accessToken || authData,
-        expiresAt: parsed.expiresAt,
+        data: {
+          userId: parsed.data.user_id,
+          email: parsed.data.email,
+          authId: parsed.data.auth_id,
+          expired: parsed.data.expired,
+          isNew: parsed.data.is_new,
+          isActive: parsed.data.is_active
+        },
+        expire: parsed.expire
       }
     } catch (e) {
       // If parsing failed or required data is missing, rethrow

@@ -20,11 +20,8 @@ export class ApiService {
 
     try {
       const authInfo = await authService.getAuthInfo();
-      if (authInfo?.token) {
-        const tokenData = authService.parseTokenString(authInfo.token);
-        if (tokenData?.authId) {
-          headers["Authorization"] = `Bearer ${tokenData.authId}`;
-        }
+      if (authInfo?.data?.authId) {
+        headers["Authorization"] = `Bearer ${authInfo.data.authId}`;
       }
     } catch (error) {
       console.error("Error getting auth token:", error)

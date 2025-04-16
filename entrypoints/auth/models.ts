@@ -21,14 +21,16 @@ export type AuthEvent =
   | { type: AuthEventType.LOGOUT };
 
 export interface AuthInfo {
-  token: string
-  expiresAt: number // Timestamp when token expires
+  data: TokenData
+  // NOTE: Do not use expire below as it's not always available(e.g. null), use data.expired instead
+  expire: number | null
 }
 
 export interface TokenData {
   userId?: string
   email?: string
   authId?: string
+  // NOTE: `expired` is a Unix timestamp (i.e. the number of seconds since UTC on January 1, 1970). 1745984721 stands for `Wed Apr 30 11:45:21 CST 2025`
   expired?: number
   isNew?: boolean
   isActive?: boolean
