@@ -1,5 +1,6 @@
 import { TaskContext, TaskState } from "../models/task"
 import { authService } from "../../auth/authService"
+import { AuthMessageType } from "../../auth/models"
 
 export class ApiService {
   private apiHost: string
@@ -19,6 +20,27 @@ export class ApiService {
     }
 
     try {
+      // 检查是否已登录（这会同时检查token是否过期）
+      const isLoggedIn = await authService.isLoggedIn();
+      if (!isLoggedIn) {
+        console.warn("User is not logged in or token has expired");
+        // 尝试刷新token，即使当前未登录
+        chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
+        // 注意: 此时仍然返回没有Authorization的headers
+        // 当前请求可能会失败，但下一次请求可能会成功(如果用户完成了登录)
+        return headers;
+      }
+
+      // 检查token是否需要刷新（接近过期）
+      const needsRefresh = await authService.shouldRefreshToken();
+      if (needsRefresh) {
+        console.log("Token is about to expire, attempting to refresh");
+        // 使用chrome.runtime.sendMessage来请求background脚本刷新token
+        chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
+        // 注意：这里我们不等待刷新完成，继续使用当前token
+        // 如果刷新失败，下次请求时用户可能需要重新登录
+      }
+
       const authInfo = await authService.getAuthInfo();
       if (authInfo?.data?.authId) {
         headers["Authorization"] = `Bearer ${authInfo.data.authId}`;
@@ -108,6 +130,18 @@ export class ApiService {
   private async handleErrorResponse(response: Response, defaultMessage: string): Promise<never> {
     let errorMessage = defaultMessage;
     let responseBody: any;
+
+    // 检查是否是认证错误(401)，可能是token过期
+    if (response.status === 401) {
+      console.warn("Received 401 Unauthorized response, token might be expired");
+      // 清除当前可能过期的token
+      await authService.clearAuthInfo();
+      // 通知用户需要重新登录
+      errorMessage = "Authentication failed. Please log in again.";
+      // 请求刷新token
+      chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
+      throw new Error(errorMessage);
+    }
 
     try {
       responseBody = await response.clone().json();
