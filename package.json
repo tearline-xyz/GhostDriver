@@ -16,7 +16,7 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "@types/reveal.js": "^5.0.5",
+    "event-source-plus": "^0.1.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reveal.js": "^5.2.1",
@@ -26,6 +26,7 @@
     "@types/chrome": "^0.0.280",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "@types/reveal.js": "^5.0.5",
     "@wxt-dev/module-react": "^1.1.2",
     "prettier": "^3.5.3",
     "typescript": "^5.6.3",

@@ -45,6 +45,7 @@ import { ApiService, InvalidTokenError } from "../common/services/api"
 import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
 import { addTask, updateTask } from "../db/taskStore"
 import { AuthMessageType } from "../auth/models"
+import { EventSourcePlus, EventSourceController } from "event-source-plus"
 
 function App() {
   /** Main input text content */
@@ -123,7 +124,10 @@ function App() {
   const eventStreamRef = useRef<HTMLDivElement>(null)
 
   /** Reference to the event source connection */
-  const eventSourceRef = useRef<EventSource | null>(null)
+  const eventSourceRef = useRef<EventSourcePlus | null>(null)
+
+  /** Reference to the event source controller for aborting connections */
+  const eventControllerRef = useRef<EventSourceController | null>(null)
 
   /** Whether to auto-scroll to bottom when new events arrive */
   const [autoScroll, setAutoScroll] = useState(true)
@@ -536,81 +540,90 @@ function App() {
    * Sets up an EventSource connection to stream task events
    * @param taskId - The ID of the current task
    */
-  const connectToEventStream = (taskId: string) => {
+  const connectToEventStream = async (taskId: string) => {
     // Close any existing connection
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
+    if (eventControllerRef.current) {
+      eventControllerRef.current.abort();
+      eventControllerRef.current = null;
     }
+
+    eventSourceRef.current = null;
 
     // Clear previous events when starting a new task
     setEvents([])
 
-    // Create a new EventSource connection
-    const eventSource = new EventSource(apiService.getEventStreamUrl(taskId))
+    try {
+      // Create EventSourcePlus object with authentication
+      const eventSource = await apiService.createEventSource(taskId);
 
-    // Handle connection open
-    eventSource.onopen = () => {
-      console.log(`EventSource connection established for task: ${taskId}`)
-    }
+      // Connect to event stream using listen method
+      const controller = eventSource.listen({
+        onMessage(message) {
+          try {
+            const data = JSON.parse(message.data) as TaskEvent
 
-    // Handle incoming events
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data) as TaskEvent
+            // Check for completion message from server
+            if (
+              data.type === TaskEventType.SYSTEM &&
+              (data.payload as SystemPayload).status ===
+                SystemEventStatus.EVENT_STREAM_END
+            ) {
+              console.log("Server indicated event stream end")
 
-        // Check for completion message from server
-        if (
-          data.type === TaskEventType.SYSTEM &&
-          (data.payload as SystemPayload).status ===
-            SystemEventStatus.EVENT_STREAM_END
-        ) {
-          console.log("Server indicated event stream end")
+              // Clean up event source connection
+              if (eventControllerRef.current) {
+                eventControllerRef.current.abort();
+                eventControllerRef.current = null;
+              }
+              eventSourceRef.current = null;
+              return
+            }
 
-          // Clean up event source connection
-          eventSource.close()
-          eventSourceRef.current = null
-          return
+            // Log non-LOG type events to console but still add them to the events array
+            if (data.type !== TaskEventType.LOG) {
+              console.log("Received non-log event:", data)
+            }
+
+            setEvents((prev) => [...prev, data])
+          } catch (error) {
+            console.error("Error parsing event data:", error)
+          }
+        },
+        onRequestError({ error }) {
+          console.log("EventSource connection error occurred", error)
+
+          // This is a real error, not a normal close
+          setNotification({
+            message:
+              "Connection to event stream failed. Task may still be running.",
+            type: "error",
+            visible: true,
+          })
+
+          // Clean up references
+          eventControllerRef.current = null;
+          eventSourceRef.current = null;
         }
+      });
 
-        // Log non-LOG type events to console but still add them to the events array
-        if (data.type !== TaskEventType.LOG) {
-          console.log("Received non-log event:", data)
-        }
+      // Store event source and controller references for cleanup
+      eventSourceRef.current = eventSource;
+      eventControllerRef.current = controller;
 
-        setEvents((prev) => [...prev, data])
-      } catch (error) {
-        console.error("Error parsing event data:", error)
-      }
-    }
+    } catch (error) {
+      console.error("Failed to connect to event stream:", error);
 
-    // Handle connection errors or server-initiated closures
-    eventSource.onerror = (error) => {
-      console.log("EventSource connection closed or error occurred", error)
-
-      // Check if connection was closed normally (readyState === 2)
-      if (eventSource.readyState === 2) {
-        console.log("EventSource connection closed")
-
-        // Only update UI if this is still the current connection
-        if (eventSourceRef.current === eventSource) {
-          eventSourceRef.current = null
-        }
+      // Handle authentication errors
+      if (error instanceof InvalidTokenError) {
+        handleTokenRefresh();
       } else {
-        console.warn("EventSource error:", error)
-        // This is a real error, not a normal close
         setNotification({
-          message:
-            "Connection to event stream lost. Task may still be running.",
+          message: `Unable to connect to event stream: ${error instanceof Error ? error.message : 'Unknown error'}`,
           type: "error",
           visible: true,
-        })
+        });
       }
-
-      eventSource.close()
     }
-
-    // Store reference for cleanup
-    eventSourceRef.current = eventSource
   }
 
   // Add scroll event listener to detect when user scrolls away from bottom
@@ -681,13 +694,15 @@ function App() {
   // Cleanup event source on component unmount
   useEffect(() => {
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
+      if (eventControllerRef.current) {
+        eventControllerRef.current.abort();
+        eventControllerRef.current = null;
       }
+      eventSourceRef.current = null;
     }
   }, [])
 
-  /** 处理任务状态更新 */
+  /** Update task status */
   const onPlaywrightServerDisconnectCallback = async (taskId: string) => {
     try {
       const taskContext = await apiService.getTask(taskId)
@@ -703,7 +718,7 @@ function App() {
         },
       }))
     } catch (error) {
-      // 处理InvalidTokenError
+      // Handle InvalidTokenError
       if (error instanceof InvalidTokenError) {
         handleTokenRefresh();
       }
@@ -711,18 +726,58 @@ function App() {
     }
   }
 
-  // 添加刷新token的方法在handleTaskSubmission之前
+  // Add token refresh method before handleTaskSubmission
   const handleTokenRefresh = () => {
-    // 显示更友好、更明确的通知
+    // Show more friendly, clearer notification
     setNotification({
       message: "Your login session has expired. Please sign in again to continue.",
       type: "warning",
       visible: true,
     });
 
-    // 发送刷新token的请求
+    // Send token refresh request
     chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
   };
+
+  const terminateTaskOrConnection = async () => {
+    // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so
+    if (
+      taskContext?.state &&
+      TASK_ACTIVE_STATES.has(taskContext.state) &&
+      taskContext.id
+    ) {
+      try {
+        // Show loading notification
+        setNotification({
+          message: "Stopping task...",
+          type: "info",
+          visible: true,
+        })
+
+        await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
+        console.log(`Task stopped: ${taskContext.id}`)
+
+        // Hide notification after 1 second
+        setTimeout(() => {
+          hideNotification()
+        }, 1000)
+      } catch (error) {
+        // Handle InvalidTokenError
+        if (error instanceof InvalidTokenError) {
+          handleTokenRefresh();
+          // Even if token is invalid, try to close the WebSocket connection to stop the task
+          await disconnectFromPlaywrightServer();
+          return;
+        }
+
+        console.warn(
+          "Error stopping task so that the websocket will be closed directly:",
+          error
+        )
+        await disconnectFromPlaywrightServer()
+      }
+    }
+  }
 
   const handleTaskSubmission = async () => {
     hideNotification()
@@ -748,26 +803,26 @@ function App() {
         throw new Error("Failed to get task ID from server")
       }
 
-      // 保存任务到数据库
+      // Save task to database
       await addTask(taskContext)
 
-      // 开始任务，使用从响应中获取的taskId
+      // Start task using taskId from response
       setTaskContext(taskContext)
 
-      // 使用 Promise.all 并行处理连接操作
+      // Use Promise.all to process connections in parallel
       await Promise.all([
         connectToPlaywrightServer(
           apiService.getPlaywrightWebSocketUrl(taskId),
           () => onPlaywrightServerDisconnectCallback(taskId)
         ),
-        // 创建一个 Promise 来连接事件流
+        // Create a Promise to connect to event stream
         new Promise<void>((resolve) => {
           connectToEventStream(taskId)
           resolve()
         }),
       ])
 
-      // 更新任务状态为运行中
+      // Update task state to running
       setTaskContext((prev) => {
         if (!prev) return null
         return {
@@ -776,7 +831,7 @@ function App() {
         }
       })
     } catch (error) {
-      // 处理InvalidTokenError
+      // Handle InvalidTokenError
       if (error instanceof InvalidTokenError) {
         handleTokenRefresh();
       } else {
@@ -792,7 +847,7 @@ function App() {
         })
       }
 
-      // 发生错误时恢复 UI 状态
+      // Restore UI state when error occurs
       setInteractionToggle((prev) => ({
         ...prev,
         input: { ...prev.input, enabled: true },
@@ -808,7 +863,7 @@ function App() {
     }
   }
 
-  // 切换暂停/恢复状态
+  // Toggle pause/resume state
   const toggleTaskPauseState = async () => {
     hideNotification()
     if (taskContext?.id) {
@@ -834,7 +889,7 @@ function App() {
           }
         })
       } catch (error) {
-        // 处理InvalidTokenError
+        // Handle InvalidTokenError
         if (error instanceof InvalidTokenError) {
           handleTokenRefresh();
           return;
@@ -850,47 +905,50 @@ function App() {
     }
   }
 
-  const terminateTaskOrConnection = async () => {
-    // NOTE: check if the task is in TASK_ACTIVE_STATES, and stop it if so
-    if (
-      taskContext?.state &&
-      TASK_ACTIVE_STATES.has(taskContext.state) &&
-      taskContext.id
-    ) {
-      try {
-        // 显示加载中的通知
-        setNotification({
-          message: "Stopping task...",
-          type: "info",
-          visible: true,
-        })
+  // Reset to new task state
+  const resetToNewTask = async () => {
+    hideNotification()
+    try {
+      await terminateTaskOrConnection()
 
-        await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
-        console.log(`Task stopped: ${taskContext.id}`)
-
-        // 延迟1秒后隐藏通知
-        setTimeout(() => {
-          hideNotification()
-        }, 1000)
-      } catch (error) {
-        // 处理InvalidTokenError
-        if (error instanceof InvalidTokenError) {
-          handleTokenRefresh();
-          // 即使Token无效，也尝试通过关闭WebSocket连接来停止任务
-          await disconnectFromPlaywrightServer();
-          return;
-        }
-
-        console.warn(
-          "Error stopping task so that the websocket will be closed directly:",
-          error
-        )
-        await disconnectFromPlaywrightServer()
+      // Close event source connection if exists
+      if (eventControllerRef.current) {
+        eventControllerRef.current.abort();
+        eventControllerRef.current = null;
       }
+      eventSourceRef.current = null;
+
+      // Reset task state
+      setTaskContext(null)
+
+      // Clear input and events
+      setInput("")
+      setEvents([])
+
+      // Reset UI state
+      setInteractionToggle((prev) => ({
+        ...DEFAULT_INTERACTION_TOGGLE,
+        newTaskButton: {
+          ...DEFAULT_INTERACTION_TOGGLE.newTaskButton,
+          highlight: false // Make sure highlight is turned off for new tasks
+        }
+      }))
+
+      // Focus on the textarea
+      if (textareaRef.current) {
+        textareaRef.current.focus()
+      }
+    } catch (error) {
+      console.error("Error disconnecting from Playwright server:", error)
+      setNotification({
+        message: "Failed to disconnect from Playwright server",
+        type: "error",
+        visible: true,
+      })
     }
   }
 
-  // 停止任务
+  // Stop the task
   const stopTask = async () => {
     hideNotification()
     if (taskContext?.id) {
@@ -898,10 +956,11 @@ function App() {
         await terminateTaskOrConnection()
 
         // Close the event stream connection
-        if (eventSourceRef.current) {
-          eventSourceRef.current.close()
-          eventSourceRef.current = null
+        if (eventControllerRef.current) {
+          eventControllerRef.current.abort();
+          eventControllerRef.current = null;
         }
+        eventSourceRef.current = null;
 
         // Reset states but keep taskId
         setTaskContext((prev) => {
@@ -938,48 +997,6 @@ function App() {
           visible: true,
         })
       }
-    }
-  }
-
-  // 新增: 重置为新任务状态
-  const resetToNewTask = async () => {
-    hideNotification()
-    try {
-      await terminateTaskOrConnection()
-
-      // Close event source connection if exists
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
-        eventSourceRef.current = null
-      }
-
-      // Reset task state
-      setTaskContext(null)
-
-      // Clear input and events
-      setInput("")
-      setEvents([])
-
-      // 重置UI状态
-      setInteractionToggle((prev) => ({
-        ...DEFAULT_INTERACTION_TOGGLE,
-        newTaskButton: {
-          ...DEFAULT_INTERACTION_TOGGLE.newTaskButton,
-          highlight: false // Make sure highlight is turned off for new tasks
-        }
-      }))
-
-      // Focus on the textarea
-      if (textareaRef.current) {
-        textareaRef.current.focus()
-      }
-    } catch (error) {
-      console.error("Error disconnecting from Playwright server:", error)
-      setNotification({
-        message: "Failed to disconnect from Playwright server",
-        type: "error",
-        visible: true,
-      })
     }
   }
 

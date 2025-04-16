@@ -1,8 +1,9 @@
 import { TaskContext, TaskState } from "../models/task"
 import { authService } from "../../auth/authService"
 import { AuthMessageType } from "../../auth/models"
+import { EventSourcePlus } from "event-source-plus"
 
-// 自定义Token无效异常类（包括过期、缺失、格式错误等情况）
+// Custom Token Invalid Exception Class (covering expired, missing, wrong format, etc.)
 export class InvalidTokenError extends Error {
   constructor(message = "Authentication token is invalid or expired") {
     super(message)
@@ -28,38 +29,38 @@ export class ApiService {
     }
 
     try {
-      // 检查是否已登录（这会同时检查token是否过期）
+      // Check if logged in (this also checks if token is expired)
       const isLoggedIn = await authService.isLoggedIn();
       if (!isLoggedIn) {
         console.warn("User is not logged in or token has expired");
-        // 抛出InvalidTokenError而不是静默继续
+        // Throw InvalidTokenError instead of continuing silently
         throw new InvalidTokenError();
       }
 
-      // 检查token是否需要刷新（接近过期）
+      // Check if token needs refreshing (approaching expiration)
       const needsRefresh = await authService.shouldRefreshToken();
       if (needsRefresh) {
         console.log("Token is about to expire, attempting to refresh");
-        // 使用chrome.runtime.sendMessage来请求background脚本刷新token
+        // Use chrome.runtime.sendMessage to request token refresh from background script
         chrome.runtime.sendMessage({ type: AuthMessageType.REFRESH_TOKEN_REQUEST });
-        // 注意：这里我们不等待刷新完成，继续使用当前token
-        // 如果刷新失败，下次请求时用户可能需要重新登录
+        // Note: We don't wait for refresh to complete, continuing with current token
+        // If refresh fails, user may need to login again on next request
       }
 
       const authInfo = await authService.getAuthInfo();
       if (authInfo?.data?.authId) {
         headers["Authorization"] = `Bearer ${authInfo.data.authId}`;
       } else {
-        // 如果没有authId，也应该抛出异常
+        // Throw exception if authId is missing
         throw new InvalidTokenError("Authentication token is missing or invalid");
       }
     } catch (error) {
-      // 重新抛出InvalidTokenError，保留其他错误的原始类型
+      // Re-throw InvalidTokenError, preserve original type for other errors
       if (error instanceof InvalidTokenError) {
         throw error;
       }
       console.error("Error getting auth token:", error)
-      // 其他类型的错误不应该阻止API调用继续
+      // Other types of errors should not prevent API call from continuing
     }
 
     return headers
@@ -140,16 +141,51 @@ export class ApiService {
     return `${this.apiHost}/${this.apiVersion}/ws/playwright?task_id=${taskId}`
   }
 
+  /**
+   * Create an EventSourcePlus object with authentication
+   * @param taskId Task ID
+   * @returns Promise<EventSourcePlus> Returns a Promise that resolves to configured EventSourcePlus instance
+   */
+  async createEventSource(taskId: string): Promise<EventSourcePlus> {
+    try {
+      // Get current authentication headers
+      const headers = await this.buildHeaders();
+
+      // Remove potentially undefined values to avoid type errors
+      const cleanHeaders = {};
+      Object.entries(headers).forEach(([key, value]) => {
+        if (value !== undefined) {
+          cleanHeaders[key] = value;
+        }
+      });
+
+      // Create and return EventSourcePlus instance
+      return new EventSourcePlus(this.getEventStreamUrl(taskId), {
+        headers: cleanHeaders,
+        method: 'get'
+      });
+    } catch (error) {
+      // Handle authentication errors
+      if (error instanceof InvalidTokenError) {
+        console.warn("Authentication error: Failed to create EventSource:", error.message);
+        throw error;
+      }
+      // Handle other errors
+      console.error("Failed to create EventSource:", error);
+      throw new Error(`Failed to create EventSource: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   private async handleErrorResponse(response: Response, defaultMessage: string): Promise<never> {
     let errorMessage = defaultMessage;
     let responseBody: any;
 
-    // 检查是否是认证错误(401)，可能是token过期
+    // Check if it's an authentication error (401), which might be an expired token
     if (response.status === 401) {
       console.warn("Received 401 Unauthorized response, token might be expired");
-      // 清除当前可能过期的token
+      // Clear the potentially expired token
       await authService.clearAuthInfo();
-      // 这里我们抛出InvalidTokenError而不是一般错误
+      // Throw InvalidTokenError instead of a general error
       throw new InvalidTokenError("Authentication failed. Please sign in again.");
     }
 
