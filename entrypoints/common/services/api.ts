@@ -137,8 +137,12 @@ export class ApiService {
     return `${this.apiHost}/${this.apiVersion}/tasks/${taskId}/events/stream`
   }
 
-  getPlaywrightWebSocketUrl(taskId: string): string {
-    return `${this.apiHost}/${this.apiVersion}/ws/playwright?task_id=${taskId}`
+  async getPlaywrightWebSocketUrl(taskId: string): Promise<string> {
+    const authInfo = await authService.getAuthInfo();
+    if (!authInfo?.data?.authId) {
+      throw new InvalidTokenError("Authentication token is missing or invalid");
+    }
+    return `${this.apiHost}/${this.apiVersion}/ws/playwright?task_id=${taskId}&token=${authInfo.data.authId}`;
   }
 
   /**

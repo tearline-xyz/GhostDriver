@@ -809,10 +809,13 @@ function App() {
       // Start task using taskId from response
       setTaskContext(taskContext)
 
+      // Get WebSocket URL first - this could throw InvalidTokenError
+      const wsUrl = await apiService.getPlaywrightWebSocketUrl(taskId);
+
       // Use Promise.all to process connections in parallel
       await Promise.all([
         connectToPlaywrightServer(
-          apiService.getPlaywrightWebSocketUrl(taskId),
+          wsUrl,
           () => onPlaywrightServerDisconnectCallback(taskId)
         ),
         // Create a Promise to connect to event stream
