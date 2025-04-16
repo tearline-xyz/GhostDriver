@@ -22,7 +22,7 @@ export type AuthEvent =
 
 export interface AuthInfo {
   token: string
-  expiresAt?: number // Timestamp when token expires
+  expiresAt: number // Timestamp when token expires
 }
 
 export interface TokenData {

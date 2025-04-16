@@ -58,11 +58,6 @@ class AuthService {
   }
 
   async setAuthInfo(authInfo: AuthInfo): Promise<void> {
-    // Add expiresAt if not provided (default 24 hours from now)
-    if (!authInfo.expiresAt) {
-      authInfo.expiresAt = Date.now() + 24 * 60 * 60 * 1000
-    }
-
     return new Promise((resolve) => {
       chrome.storage.local.set({ [AUTHINFO_KEY]: authInfo }, resolve)
     })
@@ -81,7 +76,7 @@ class AuthService {
     }
 
     // Check if token is expired
-    if (authInfo.expiresAt && authInfo.expiresAt < Date.now()) {
+    if (authInfo.expiresAt < Date.now()) {
       // Token expired, clear it
       await this.clearAuthInfo()
       return false
@@ -92,7 +87,7 @@ class AuthService {
 
   async shouldRefreshToken(): Promise<boolean> {
     const authInfo = await this.getAuthInfo()
-    if (!authInfo || !authInfo.expiresAt) {
+    if (!authInfo) {
       return false
     }
 
@@ -117,16 +112,16 @@ class AuthService {
     try {
       // Try to parse as JSON first
       const parsed = JSON.parse(authData)
+      if (!parsed.expiresAt) {
+        throw new Error('Missing expiresAt in auth data')
+      }
       return {
         token: parsed.token || parsed.accessToken || authData,
-        expiresAt: parsed.expiresAt || Date.now() + 24 * 60 * 60 * 1000,
+        expiresAt: parsed.expiresAt,
       }
     } catch (e) {
-      // If not valid JSON, use as raw token
-      return {
-        token: authData,
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-      }
+      // If parsing failed or required data is missing, rethrow
+      throw new Error('Invalid auth data format: ' + e.message)
     }
   }
 }
