@@ -13,7 +13,7 @@ export class InvalidTokenError extends Error {
 
 export class ApiService {
   private apiHost: string
-  private apiVersion: string = 'api/v1'
+  private apiPrefix: string = 'api/v1'
 
   constructor(apiHost: string) {
     this.apiHost = apiHost
@@ -73,7 +73,7 @@ export class ApiService {
     try {
       const headers = await this.buildHeaders();
 
-      const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks`, {
+      const response = await fetch(`${this.apiHost}/${this.apiPrefix}/tasks`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -102,7 +102,7 @@ export class ApiService {
   async getTask(taskId: string): Promise<TaskContext> {
     const headers = await this.buildHeaders();
 
-    const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks/${taskId}`, {
+    const response = await fetch(`${this.apiHost}/${this.apiPrefix}/tasks/${taskId}`, {
       method: "GET",
       headers: {
         ...headers,
@@ -120,7 +120,7 @@ export class ApiService {
   async updateTaskState(taskId: string, targetState: TaskState): Promise<void> {
     const headers = await this.buildHeaders();
 
-    const response = await fetch(`${this.apiHost}/${this.apiVersion}/tasks/${taskId}`, {
+    const response = await fetch(`${this.apiHost}/${this.apiPrefix}/tasks/${taskId}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({
@@ -134,7 +134,7 @@ export class ApiService {
   }
 
   getEventStreamUrl(taskId: string): string {
-    return `${this.apiHost}/${this.apiVersion}/tasks/${taskId}/events/stream`
+    return `${this.apiHost}/${this.apiPrefix}/tasks/${taskId}/events/stream`
   }
 
   async getPlaywrightWebSocketUrl(taskId: string): Promise<string> {
@@ -142,7 +142,7 @@ export class ApiService {
     if (!authInfo?.data?.authId) {
       throw new InvalidTokenError("Authentication token is missing or invalid");
     }
-    return `${this.apiHost}/${this.apiVersion}/ws/playwright?task_id=${taskId}&token=${authInfo.data.authId}`;
+    return `${this.apiHost}/${this.apiPrefix}/ws/playwright?task_id=${taskId}&token=${authInfo.data.authId}`;
   }
 
   /**
