@@ -23,20 +23,20 @@ export type AuthEvent =
 export interface AuthInfo {
   token: string
   expiresAt?: number // Timestamp when token expires
-  user?: {
-    name?: string
-    email?: string
-    avatar?: string
-  }
 }
 
 export interface TokenData {
   userId?: string
   email?: string
-  name?: string
   authId?: string
   expired?: number
   isNew?: boolean
+  isActive?: boolean
+}
+
+export interface UserDisplayData {
+  userId?: string
+  email?: string
   isActive?: boolean
 }
 

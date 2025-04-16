@@ -1,7 +1,7 @@
 // AuthService: Centralized service for handling authentication
 
 import { AUTHINFO_KEY } from "../common/settings"
-import { AuthInfo, AuthMessageType, TokenData } from "./models"
+import { AuthInfo, AuthMessageType, TokenData, UserDisplayData } from "./models"
 
 // Time before expiration to trigger refresh (15 minutes)
 const AUTH_TOKEN_REFRESH_THRESHOLD_MS = 15 * 60 * 1000
@@ -24,7 +24,6 @@ class AuthService {
         return {
           userId: tokenData.data.user_id,
           email: tokenData.data.email,
-          name: tokenData.data.name,
           authId: tokenData.data.auth_id,
           expired: tokenData.data.expired,
           isNew: tokenData.data.is_new,
@@ -34,6 +33,27 @@ class AuthService {
     } catch (error) {
       console.error("Error parsing token string:", error)
     }
+    return null
+  }
+
+  // Build user display data from auth info
+  buildUserDisplayData(authInfo: AuthInfo | null): UserDisplayData | null {
+    if (!authInfo) {
+      return null
+    }
+
+    // 从token中提取用户信息
+    if (authInfo.token) {
+      const tokenData = this.parseTokenString(authInfo.token)
+      if (tokenData) {
+        return {
+          userId: tokenData.userId,
+          email: tokenData.email,
+          isActive: tokenData.isActive
+        }
+      }
+    }
+
     return null
   }
 
@@ -99,7 +119,6 @@ class AuthService {
       const parsed = JSON.parse(authData)
       return {
         token: parsed.token || parsed.accessToken || authData,
-        user: parsed.user || undefined,
         expiresAt: parsed.expiresAt || Date.now() + 24 * 60 * 60 * 1000,
       }
     } catch (e) {

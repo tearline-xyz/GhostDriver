@@ -2,11 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { authService } from './authService';
 import { TEARLINE_WEBSITE } from '../common/settings';
 import { authStateMachineActor } from './models';
-import { AuthEventType, AuthMessageType, TokenData } from './models';
+import { AuthEventType, AuthMessageType, UserDisplayData } from './models';
 
 const useAuth = () => {
   const [authStatus, setAuthStatus] = useState(authStateMachineActor.getSnapshot().value);
-  const [userInfo, setUserInfo] = useState<TokenData | null>(null);
+  const [userInfo, setUserInfo] = useState<UserDisplayData | null>(null);
   const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null);
 
   const loadAuthStatus = useCallback(async () => {
@@ -14,19 +14,7 @@ const useAuth = () => {
       const isLoggedIn = await authService.isLoggedIn();
       if (isLoggedIn) {
         const authInfo = await authService.getAuthInfo();
-
-        let userData: TokenData | null = null;
-
-        if (authInfo?.token) {
-          userData = authService.parseTokenString(authInfo.token);
-        } else if (authInfo?.user) {
-          // 如果没有有效的token数据但有user信息，将user转换为TokenData格式
-          userData = {
-            name: authInfo.user.name,
-            email: authInfo.user.email,
-            // 没有userId和authId
-          };
-        }
+        const userData = authService.buildUserDisplayData(authInfo);
 
         authStateMachineActor.send({ type: AuthEventType.LOGIN_SUCCESS });
         setUserInfo(userData);
