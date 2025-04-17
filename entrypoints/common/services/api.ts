@@ -124,7 +124,9 @@ export class ApiService {
       method: "PATCH",
       headers,
       body: JSON.stringify({
-        target_state: targetState,
+        state: {
+          target: targetState,
+        },
       }),
     })
 
