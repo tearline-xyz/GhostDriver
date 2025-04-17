@@ -620,21 +620,21 @@
   display: inline-block;
   width: 12px;
   text-align: left;
-  animation: dots 1.5s infinite;
+  animation: dots 0.6s infinite;
 }
 
 @keyframes dots {
   0% {
-    content: ".";
+    content: "•";
   }
   33% {
-    content: "..";
+    content: "••";
   }
   66% {
-    content: "...";
+    content: "•••";
   }
   100% {
-    content: ".";
+    content: "•";
   }
 }
 
