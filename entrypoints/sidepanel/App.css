@@ -285,6 +285,10 @@
   background-color: #3889f0;
 }
 
+.notification-warning {
+  background-color: #f0ad4e; /* 使用黄色/琥珀色作为警告色 */
+}
+
 .notification-close {
   background: none;
   border: none;
@@ -616,21 +620,21 @@
   display: inline-block;
   width: 12px;
   text-align: left;
-  animation: dots 1.5s infinite;
+  animation: dots 0.6s infinite;
 }
 
 @keyframes dots {
   0% {
-    content: ".";
+    content: "•";
   }
   33% {
-    content: "..";
+    content: "••";
   }
   66% {
-    content: "...";
+    content: "•••";
   }
   100% {
-    content: ".";
+    content: "•";
   }
 }
 

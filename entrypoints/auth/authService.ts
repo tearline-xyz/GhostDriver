@@ -1,7 +1,7 @@
 // AuthService: Centralized service for handling authentication
 
 import { AUTHINFO_KEY } from "../common/settings"
-import { AuthInfo, AuthMessageType } from "./models"
+import { AuthInfo, AuthMessageType, TokenData, UserDisplayData } from "./models"
 
 // Time before expiration to trigger refresh (15 minutes)
 const AUTH_TOKEN_REFRESH_THRESHOLD_MS = 15 * 60 * 1000
@@ -16,12 +16,25 @@ class AuthService {
     })
   }
 
-  async setAuthInfo(authInfo: AuthInfo): Promise<void> {
-    // Add expiresAt if not provided (default 24 hours from now)
-    if (!authInfo.expiresAt) {
-      authInfo.expiresAt = Date.now() + 24 * 60 * 60 * 1000
+  // Build user display data from auth info
+  buildUserDisplayData(authInfo: AuthInfo | null): UserDisplayData | null {
+    if (!authInfo) {
+      return null
     }
 
+    // 从数据中提取用户信息
+    if (authInfo.data) {
+      return {
+        userId: authInfo.data.userId,
+        email: authInfo.data.email,
+        isActive: authInfo.data.isActive
+      }
+    }
+
+    return null
+  }
+
+  async setAuthInfo(authInfo: AuthInfo): Promise<void> {
     return new Promise((resolve) => {
       chrome.storage.local.set({ [AUTHINFO_KEY]: authInfo }, resolve)
     })
@@ -35,12 +48,12 @@ class AuthService {
 
   async isLoggedIn(): Promise<boolean> {
     const authInfo = await this.getAuthInfo()
-    if (!authInfo || !authInfo.token) {
+    if (!authInfo || !authInfo.data) {
       return false
     }
 
     // Check if token is expired
-    if (authInfo.expiresAt && authInfo.expiresAt < Date.now()) {
+    if (authInfo.data.expired && authInfo.data.expired < Date.now() / 1000) {
       // Token expired, clear it
       await this.clearAuthInfo()
       return false
@@ -51,12 +64,12 @@ class AuthService {
 
   async shouldRefreshToken(): Promise<boolean> {
     const authInfo = await this.getAuthInfo()
-    if (!authInfo || !authInfo.expiresAt) {
+    if (!authInfo || !authInfo.data || !authInfo.data.expired) {
       return false
     }
 
-    // Check if token is approaching expiration
-    return authInfo.expiresAt - Date.now() < AUTH_TOKEN_REFRESH_THRESHOLD_MS
+    // NOTE: The expired field is a Unix timestamp in seconds, and the JavaScript Date.now() returns a millisecond timestamp. Hence we need to multiply expired by 1000
+    return (authInfo.data.expired * 1000) - Date.now() < AUTH_TOKEN_REFRESH_THRESHOLD_MS
   }
 
   // Broadcast login state to all extension components
@@ -76,17 +89,27 @@ class AuthService {
     try {
       // Try to parse as JSON first
       const parsed = JSON.parse(authData)
+
+      // Validate data structure
+      if (!parsed.data) {
+        throw new Error('Missing data field in auth data')
+      }
+
+      // Return the parsed structure directly as AuthInfo
       return {
-        token: parsed.token || parsed.accessToken || authData,
-        user: parsed.user || undefined,
-        expiresAt: parsed.expiresAt || Date.now() + 24 * 60 * 60 * 1000,
+        data: {
+          userId: parsed.data.user_id,
+          email: parsed.data.email,
+          authId: parsed.data.auth_id,
+          expired: parsed.data.expired,
+          isNew: parsed.data.is_new,
+          isActive: parsed.data.is_active
+        },
+        expire: parsed.expire
       }
     } catch (e) {
-      // If not valid JSON, use as raw token
-      return {
-        token: authData,
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000,
-      }
+      // If parsing failed or required data is missing, rethrow
+      throw new Error('Invalid auth data format: ' + e.message)
     }
   }
 }

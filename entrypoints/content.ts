@@ -98,6 +98,20 @@ export default defineContentScript({
         // Forward state changes to the page
         window.postMessage(message, window.location.origin)
       }
+
+      // 处理token刷新请求
+      if (message.type === AuthMessageType.REFRESH_TOKEN) {
+        console.log("Received token refresh request");
+        // 使用页面的localStorage检查是否有有效的token
+        const currentToken = localStorage.getItem(AUTHINFO_KEY);
+        if (currentToken) {
+          // 如果存在token，将它发送到background.js以更新存储
+          postLoginMessage(currentToken);
+          console.log("Token refreshed from current page");
+        } else {
+          console.warn("No token found in page, cannot refresh");
+        }
+      }
     })
   },
 })

@@ -2,11 +2,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { authService } from './authService';
 import { TEARLINE_WEBSITE } from '../common/settings';
 import { authStateMachineActor } from './models';
-import { AuthEventType, AuthMessageType } from './models';
+import { AuthEventType, AuthMessageType, UserDisplayData } from './models';
 
 const useAuth = () => {
   const [authStatus, setAuthStatus] = useState(authStateMachineActor.getSnapshot().value);
-  const [userInfo, setUserInfo] = useState<{ name?: string; email?: string; userId?: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<UserDisplayData | null>(null);
   const [loginTimeoutId, setLoginTimeoutId] = useState<number | null>(null);
 
   const loadAuthStatus = useCallback(async () => {
@@ -14,30 +14,10 @@ const useAuth = () => {
       const isLoggedIn = await authService.isLoggedIn();
       if (isLoggedIn) {
         const authInfo = await authService.getAuthInfo();
-
-        let parsedUserInfo: {
-          email?: string;
-          name?: string;
-          userId?: string;
-        } | null = null;
-
-        if (authInfo?.token) {
-          try {
-            const parsedToken = JSON.parse(authInfo.token);
-            if (parsedToken.data) {
-              parsedUserInfo = {
-                email: parsedToken.data.email,
-                name: parsedToken.data.name,
-                userId: parsedToken.data.user_id,
-              };
-            }
-          } catch (err) {
-            console.error("Error parsing token data:", err);
-          }
-        }
+        const userData = authService.buildUserDisplayData(authInfo);
 
         authStateMachineActor.send({ type: AuthEventType.LOGIN_SUCCESS });
-        setUserInfo(parsedUserInfo || authInfo?.user || null);
+        setUserInfo(userData);
       } else {
         authStateMachineActor.send({ type: AuthEventType.LOGOUT });
         setUserInfo(null);

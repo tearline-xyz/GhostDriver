@@ -43,6 +43,11 @@ export default defineBackground(() => {
       handleLogout()
     }
 
+    // Handle token refresh request
+    if (message.type === AuthMessageType.REFRESH_TOKEN_REQUEST) {
+      attemptTokenRefresh()
+    }
+
     // Forward login state changes to all extension views
     if (
       message.type === AuthMessageType.LOGIN_STATE_CHANGED ||
@@ -93,9 +98,25 @@ export default defineBackground(() => {
 
   // Attempt to refresh the token by opening Tearline in background
   async function attemptTokenRefresh() {
-    // Implementation depends on how token refresh works in your system
-    // This is a placeholder for the token refresh logic
     console.log("Attempting to refresh token")
+
+    // 获取当前登录状态
+    const isLoggedIn = await authService.isLoggedIn()
+    if (!isLoggedIn) {
+      console.log("Not logged in, cannot refresh token")
+      return
+    }
+
+    try {
+      // 创建新标签页并激活它，以便用户可以在此页面登录
+      await chrome.tabs.create({
+        url: `https://${TEARLINE_WEBSITE}`,
+        active: true // 在前台打开，以便用户可以进行登录操作
+      })
+      console.log("Opened Tearline tab for user to login and refresh token")
+    } catch (error) {
+      console.error("Error during token refresh:", error)
+    }
   }
 
   // @ts-ignore

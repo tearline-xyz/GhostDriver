@@ -67,6 +67,20 @@ export default defineUnlistedScript(() => {
         if (localStorage.getItem(AUTHINFO_KEY)) {
           originalRemoveItem.call(localStorage, AUTHINFO_KEY)
         }
+      } else if (data.type === AuthMessageType.REFRESH_TOKEN) {
+        // 处理刷新token请求
+        const currentAuth = localStorage.getItem(AUTHINFO_KEY)
+        if (currentAuth) {
+          // 如果存在token，触发一个更新事件
+          // 这将在更新的情况下通知content script
+          window.postMessage(
+            {
+              type: AuthMessageType.LOGIN,
+              data: currentAuth,
+            } as AuthMessage,
+            window.location.origin
+          )
+        }
       }
     })
   })()

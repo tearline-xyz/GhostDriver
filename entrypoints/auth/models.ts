@@ -21,17 +21,29 @@ export type AuthEvent =
   | { type: AuthEventType.LOGOUT };
 
 export interface AuthInfo {
-  token: string
-  expiresAt?: number // Timestamp when token expires
-  user?: {
-    name?: string
-    email?: string
-    avatar?: string
-  }
+  data: TokenData
+  // NOTE: Do not use expire below as it's not always available(e.g. null), use data.expired instead
+  expire: number | null
+}
+
+export interface TokenData {
+  userId?: string
+  email?: string
+  authId?: string
+  // NOTE: `expired` is a Unix timestamp (i.e. the number of seconds since UTC on January 1, 1970). 1745984721 stands for `Wed Apr 30 11:45:21 CST 2025`
+  expired?: number
+  isNew?: boolean
+  isActive?: boolean
+}
+
+export interface UserDisplayData {
+  userId?: string
+  email?: string
+  isActive?: boolean
 }
 
 export interface AuthMessage {
-  type: AuthMessageType.LOGIN | AuthMessageType.LOGOUT | AuthMessageType.LOGIN_STATE_CHANGED | AuthMessageType.LOGOUT_STATE_CHANGED
+  type: AuthMessageType.LOGIN | AuthMessageType.LOGOUT | AuthMessageType.LOGIN_STATE_CHANGED | AuthMessageType.LOGOUT_STATE_CHANGED | AuthMessageType.REFRESH_TOKEN | AuthMessageType.REFRESH_TOKEN_REQUEST
   data?: string
   timestamp?: number
 }
@@ -41,7 +53,9 @@ export enum AuthMessageType {
   LOGOUT_STATE_CHANGED = 'LOGOUT_STATE_CHANGED',
   INIT_LOGIN = 'INIT_LOGIN',
   LOGIN = 'LOGIN',
-  LOGOUT = 'LOGOUT'
+  LOGOUT = 'LOGOUT',
+  REFRESH_TOKEN = 'REFRESH_TOKEN',
+  REFRESH_TOKEN_REQUEST = 'REFRESH_TOKEN_REQUEST'
 }
 
 const authStateMachine = createMachine({

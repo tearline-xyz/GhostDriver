@@ -81,13 +81,6 @@ const Account: React.FC<AccountProps> = ({ showStatus }) => {
             </div>
 
             <div className="profile-info-container">
-              {userInfo?.name && (
-                <div className="profile-detail">
-                  <span className="detail-label">Name</span>
-                  <span className="detail-value">{userInfo.name}</span>
-                </div>
-              )}
-
               {userInfo?.email && (
                 <div className="profile-detail">
                   <span className="detail-label">Email</span>
@@ -116,8 +109,7 @@ const Account: React.FC<AccountProps> = ({ showStatus }) => {
                 </div>
               )}
 
-              {!userInfo?.name &&
-                !userInfo?.email &&
+              {!userInfo?.email &&
                 !userInfo?.userId && (
                   <div className="profile-detail">
                     <span className="detail-value">
