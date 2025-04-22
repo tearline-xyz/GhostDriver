@@ -189,8 +189,6 @@ export class ApiService {
     // Check if it's an authentication error (401), which might be an expired token
     if (response.status === 401) {
       console.warn("Received 401 Unauthorized response, token might be expired");
-      // Clear the potentially expired token
-      await authService.clearAuthInfo();
       // Throw InvalidTokenError instead of a general error
       throw new InvalidTokenError("Authentication failed. Please sign in again.");
     }

@@ -54,8 +54,6 @@ class AuthService {
 
     // Check if token is expired
     if (authInfo.data.expired && authInfo.data.expired < Date.now() / 1000) {
-      // Token expired, clear it
-      await this.clearAuthInfo()
       return false
     }
 
