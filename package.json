@@ -2,7 +2,7 @@
   "name": "ghost-driver",
   "description": "manifest.json description",
   "private": true,
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-beta.1",
   "type": "module",
   "scripts": {
     "dev": "WXT_APP_ENV=development wxt",

@@ -41,7 +41,7 @@ import {
   NotificationState,
   DEFAULT_NOTIFICATION_STATE,
 } from "./models/notification"
-import { ApiService, InvalidTokenError } from "../common/services/api"
+import { GhostDriverApi, InvalidTokenError } from "../common/services/ghost-driver-api"
 import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
 import { addTask, updateTask } from "../db/taskStore"
 import { AuthMessageType } from "../auth/models"
@@ -100,7 +100,7 @@ function App() {
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
-  const apiService = new ApiService(apiHost)
+  const apiService = new GhostDriverApi(apiHost)
 
   /** Whether @ syntax is enabled from settings */
   const [atSyntaxEnabled, setAtSyntaxEnabled] = useState<boolean>(

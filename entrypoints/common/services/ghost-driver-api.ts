@@ -11,7 +11,7 @@ export class InvalidTokenError extends Error {
   }
 }
 
-export class ApiService {
+export class GhostDriverApi {
   private apiHost: string
   private apiPrefix: string = 'api/v1'
 
