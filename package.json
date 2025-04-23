@@ -5,7 +5,8 @@
   "version": "1.0.0-alpha.3",
   "type": "module",
   "scripts": {
-    "dev": "WXT_GHOST_DRIVER_DEV_VERSION=dev.alpha.$(date +%Y%m%d%H%M%S) wxt",
+    "dev": "WXT_APP_ENV=development wxt",
+    "dev:prod": "wxt",
     "dev:firefox": "wxt -b firefox",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "build": "wxt build",

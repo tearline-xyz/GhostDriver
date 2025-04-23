@@ -110,7 +110,7 @@ export default defineBackground(() => {
     try {
       // 创建新标签页并激活它，以便用户可以在此页面登录
       await chrome.tabs.create({
-        url: `https://${TEARLINE_WEBSITE}`,
+        url: `https://${TEARLINE_WEBSITE}/tgLogin`,
         active: true // 在前台打开，以便用户可以进行登录操作
       })
       console.log("Opened Tearline tab for user to login and refresh token")

@@ -44,7 +44,7 @@ const useAuth = () => {
       }, 120000);
       setLoginTimeoutId(timeoutId);
 
-      const url = `https://${TEARLINE_WEBSITE}/#`;
+      const url = `https://${TEARLINE_WEBSITE}/tgLogin`;
       await chrome.tabs.create({ url });
     } catch (error) {
       console.error('Login error:', error);
