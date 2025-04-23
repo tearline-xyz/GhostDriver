@@ -18,16 +18,12 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
   const deckDivRef = useRef<HTMLDivElement>(null)
   const deckRef = useRef<Reveal.Api | null>(null)
 
-  // 初始化 Reveal.js
   useEffect(() => {
-    console.log("Current taskContext:", taskContext)
-    console.log("History data:", taskContext.result?.history)
-
     const initializeReveal = async () => {
       // Wait for one render cycle
       await new Promise((resolve) => setTimeout(resolve, 0))
 
-      if (!deckDivRef.current || !taskContext.result?.history) {
+      if (!deckDivRef.current || !taskContext.result?.agent_history_list?.history) {
         console.log("Missing required data for Reveal.js initialization")
         return
       }
@@ -317,13 +313,13 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
         deckRef.current = null
       }
     }
-  }, [taskContext.result?.history])
+  }, [])
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-body">
-          {!taskContext.result?.history ? (
+          {!taskContext.result?.agent_history_list?.history ? (
             <div className="modal-loading">Loading task history...</div>
           ) : (
             <div className="reveal" ref={deckDivRef}>
@@ -339,7 +335,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
                       <span>{taskContext.id}</span>
                       <span>
                         {taskContext.state} after{" "}
-                        {taskContext.result.history.length} steps
+                        {taskContext.result.agent_history_list.history.length} steps
                       </span>
                     </div>
 
@@ -355,7 +351,7 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
                 </section>
 
                 {/* Journey Slide */}
-                {taskContext.result.history.map((step, index) => (
+                {taskContext.result.agent_history_list.history.map((step, index) => (
                   <section key={`journey-${index}`} data-auto-animate>
                     <h2 style={{ fontSize: "24px", marginBottom: "10px" }}>
                       Step {index + 1}
