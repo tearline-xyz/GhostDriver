@@ -10,25 +10,25 @@
   padding: 2rem;
   text-align: center;
   font-size: 16px;
-  color: #5f6368;
-  background-color: #f8f9fa;
+  color: #b0b0b0;
+  background-color: #363636;
   border-radius: 8px;
-  border: 1px solid #e8eaed;
+  border: 1px solid #424242;
   margin: 2rem auto;
   max-width: 400px;
 }
 
 .task-item {
-  background: #ffffff;
-  border-radius: 8px; /* slightly reduced border radius */
-  padding: 0.75rem 1rem; /* reduced padding */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+  background: #363636;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 1px solid #eaeaea;
+  border: 1px solid #424242;
 }
 
 .task-item:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
 }
 
@@ -42,21 +42,21 @@
 
 .task-id {
   font-family: monospace;
-  color: #606060;
+  color: #e0e0e0;
   font-weight: 500;
 }
 
 .task-state {
   padding: 0.15rem 0.6rem;
   border-radius: 16px;
-  background: #e8f0fe;
-  color: #1a73e8;
+  background: #1a73e8;
+  color: #ffffff;
   font-weight: 500;
   letter-spacing: 0.3px;
 }
 
 .task-time {
-  color: #70757a;
+  color: #b0b0b0;
   margin-right: 8px;
 }
 
@@ -82,13 +82,13 @@
 }
 
 .points-consumption {
-  background-color: #fce8e6;
-  color: #c5221f;
+  background-color: #ae6260;
+  color: #ffffff;
 }
 
 .points-reward {
-  background-color: #e6f4ea;
-  color: #137333;
+  background-color: #447f58;
+  color: #ffffff;
 }
 
 .points-icon {
@@ -101,19 +101,18 @@
 }
 
 .task-input {
-  margin: 0.5rem 0; /* reduced vertical margins */
-  padding: 0.5rem 0.75rem; /* reduced padding */
-  background: #f8f9fa;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  background: #424242;
   border-radius: 6px;
-  font-size: 0.9rem; /* slightly smaller font size */
-  line-height: 1.4; /* reduced line height */
-  color: #202124;
-  border-left: 3px solid #4285f4;
-  white-space: pre-wrap; /* preserve original formatting such as line breaks */
-  word-wrap: break-word; /* ensure long text wraps automatically */
-  overflow-wrap: break-word; /* enhance automatic text wrapping support */
-  max-height: 300px; /* limit maximum height */
-  overflow-y: auto; /* show scrollbar when content overflows */
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #e0e0e0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .task-actions {
@@ -154,14 +153,14 @@
 }
 
 .share-button:disabled {
-  background-color: #cccccc;
-  color: #666666;
+  background-color: #424242;
+  color: #b0b0b0;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
 .share-button:disabled:hover {
-  background-color: #cccccc;
+  background-color: #424242;
 }
 
 .share-button:disabled img {
@@ -196,7 +195,7 @@
 .icon-share-button img {
   width: 18px;
   height: 18px;
-  filter: brightness(0) opacity(0.7); /* make the icon dark gray */
+  filter: brightness(0) invert(0.7);
   transition: filter 0.2s ease;
 }
 
@@ -216,7 +215,7 @@
   gap: 8px;
   padding: 8px 16px;
   background-color: transparent;
-  color: #333;
+  color: #e0e0e0;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -225,22 +224,24 @@
 }
 
 .clear-history-button:hover {
-  background-color: #f1f3f4;
-  color: #000;
+  background-color: #424242;
+  color: #ffffff;
 }
 
 .clear-history-button:disabled {
-  color: #cccccc;
+  color: #707070;
   cursor: not-allowed;
 }
 
 .clear-history-button img {
   width: 16px;
   height: 16px;
+  filter: brightness(0) invert(0.7);
 }
 
 .clear-history-button:disabled img {
   opacity: 0.5;
+  filter: brightness(0) invert(0.4);
 }
 
 .history-header {
@@ -249,7 +250,7 @@
   align-items: center;
   margin-bottom: 20px;
   height: 40px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #424242;
 }
 
 .history-header h2 {
@@ -257,4 +258,5 @@
   padding: 0;
   line-height: 1;
   border-bottom: none;
+  color: #ffffff;
 }

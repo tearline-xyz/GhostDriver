@@ -74,9 +74,9 @@
 }
 
 .profile-card {
-  background: #fff;
+  background: #363636;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 24px;
   width: 100%;
   max-width: 480px;
@@ -88,11 +88,11 @@
 }
 
 .profile-card.not-logged-in {
-  background: #f8f9fa;
+  background: #363636;
 }
 
 .profile-card.error {
-  border: 1px solid #ffebee;
+  border: 1px solid #ff5252;
 }
 
 .profile-card.logged-in {
@@ -106,19 +106,19 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background-color: #e9eef2;
-  color: #4b6584;
+  background-color: #424242;
+  color: #e0e0e0;
   margin-bottom: 16px;
 }
 
 .profile-avatar.error {
-  background-color: #ffebee;
-  color: #e53935;
+  background-color: #ff5252;
+  color: #ffffff;
 }
 
 .profile-avatar.success {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #4caf50;
+  color: #ffffff;
 }
 
 .profile-header {
@@ -133,18 +133,18 @@
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #37474f;
+  color: #ffffff;
 }
 
 .profile-message {
-  color: #78909c;
+  color: #b0b0b0;
   margin-bottom: 24px;
 }
 
 .profile-info-container {
   width: 100%;
-  border-top: 1px solid #eceff1;
-  border-bottom: 1px solid #eceff1;
+  border-top: 1px solid #424242;
+  border-bottom: 1px solid #424242;
   padding: 16px 0;
   margin-bottom: 24px;
 }
@@ -162,14 +162,14 @@
 .detail-label {
   font-size: 12px;
   text-transform: uppercase;
-  color: #78909c;
+  color: #b0b0b0;
   margin-bottom: 4px;
   letter-spacing: 0.5px;
 }
 
 .detail-value {
   font-size: 14px;
-  color: #37474f;
+  color: #e0e0e0;
   word-break: break-word;
 }
 
@@ -178,6 +178,7 @@
   padding: 0px;
   border-radius: 4px;
   font-size: 13px;
+  color: #ffffff;
 }
 
 .detail-value-with-action {
@@ -205,10 +206,11 @@
   min-width: 20px;
   min-height: 20px;
   flex-shrink: 0;
+  color: #e0e0e0;
 }
 
 .copy-button:hover {
-  background-color: #f1f3f4;
+  background-color: #424242;
 }
 
 .auth-button {
@@ -232,12 +234,12 @@
 }
 
 .logout-button {
-  background-color: #f5f5f5;
-  color: #555;
+  background-color: #424242;
+  color: #e0e0e0;
 }
 
 .logout-button:hover {
-  background-color: #e0e0e0;
+  background-color: #4a4a4a;
 }
 
 /* Auth button container and styling */
