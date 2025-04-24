@@ -854,14 +854,13 @@ function App() {
         }),
       ])
 
-      // Update task state to running
-      setTaskContext((prev) => {
-        if (!prev) return null
-        return {
-          ...prev,
-          state: TaskState.RUNNING,
-        }
-      })
+      const updatedTaskContext = {
+        ...taskContext,
+        state: TaskState.RUNNING,
+      }
+
+      setTaskContext(updatedTaskContext)
+      await updateTask(updatedTaskContext)
     } catch (error) {
       // Handle InvalidTokenError
       if (error instanceof InvalidTokenError) {
@@ -924,14 +923,13 @@ function App() {
           `Task ${taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING}: ${taskContext.id}`
         )
 
-        // Update task state after successful API call
-        setTaskContext((prev) => {
-          if (!prev) return null
-          return {
-            ...prev,
-            state: targetState,
-          }
-        })
+        const updatedTaskContext = {
+          ...taskContext,
+          state: targetState,
+        }
+
+        setTaskContext(updatedTaskContext)
+        await updateTask(updatedTaskContext)
       } catch (error) {
         // Handle InvalidTokenError
         if (error instanceof InvalidTokenError) {
