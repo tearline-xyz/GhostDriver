@@ -34,42 +34,43 @@
 
 .task-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem; /* reduced bottom margin */
-  font-size: 0.85rem; /* slightly smaller font size */
-  flex-wrap: wrap;
-  gap: 6px; /* reduced spacing between elements */
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
 }
 
 .task-id {
   font-family: monospace;
   color: #606060;
   font-weight: 500;
-  font-size: 0.8rem; /* smaller font size for ID */
 }
 
 .task-state {
-  padding: 0.15rem 0.6rem; /* reduced padding for status label */
+  padding: 0.15rem 0.6rem;
   border-radius: 16px;
   background: #e8f0fe;
   color: #1a73e8;
-  font-size: 0.75rem; /* smaller font size for status label */
   font-weight: 500;
   letter-spacing: 0.3px;
 }
 
 .task-time {
   color: #70757a;
-  font-size: 0.8rem;
-  margin-right: auto;
+  margin-right: 8px;
+}
+
+.task-points-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
 }
 
 .task-points {
   display: flex;
-  gap: 8px;
-  margin-right: 8px;
-  font-size: 0.8rem;
+  align-items: center;
+  gap: 4px;
 }
 
 .points-item {
@@ -77,29 +78,26 @@
   align-items: center;
   gap: 4px;
   padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
+}
+
+.points-consumption {
+  background-color: #fce8e6;
+  color: #c5221f;
+}
+
+.points-reward {
+  background-color: #e6f4ea;
+  color: #137333;
 }
 
 .points-icon {
   width: 16px;
   height: 16px;
-  object-fit: contain;
 }
 
-.points-label {
-  color: #5f6368;
-  text-transform: capitalize;
-}
-
-.points-consumption .points-value {
-  color: #923b0c;
-  font-weight: 600;
-}
-
-.points-reward .points-value {
-  color: #0f9d58;
-  font-weight: 600;
+.points-value {
+  font-weight: 500;
 }
 
 .task-input {
@@ -172,6 +170,7 @@
 }
 
 .icon-share-button {
+  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,7 +181,6 @@
   cursor: pointer;
   padding: 0;
   transition: all 0.2s ease;
-  margin-left: 8px; /* maintain some spacing from other elements */
   border-radius: 4px; /* add rounded corners for a nicer hover effect */
 }
 

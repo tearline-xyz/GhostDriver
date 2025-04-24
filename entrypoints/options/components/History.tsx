@@ -124,38 +124,40 @@ const History: React.FC<HistoryProps> = ({
                   <span className="task-time">
                     {formatLocalTime(task.created_at)}
                   </span>
-                  {task.result?.points_consumption && (
-                    <span className="task-points">
-                      {Object.entries(task.result.points_consumption)
-                        .filter(([_, value]) => value !== 0)
-                        .map(([key, value]) => (
-                          <span key={key} className="points-item points-consumption">
-                            <img
-                              src={key === 'power' ? PowerIcon : ComputingIcon}
-                              alt={key}
-                              className="points-icon"
-                            />
-                            <span className="points-value">-{value}</span>
-                          </span>
-                        ))}
-                    </span>
-                  )}
-                  {task.result?.points_reward && (
-                    <span className="task-points">
-                      {Object.entries(task.result.points_reward)
-                        .filter(([_, value]) => value !== 0)
-                        .map(([key, value]) => (
-                          <span key={key} className="points-item points-reward">
-                            <img
-                              src={key === 'power' ? PowerIcon : ComputingIcon}
-                              alt={key}
-                              className="points-icon"
-                            />
-                            <span className="points-value">+{value}</span>
-                          </span>
-                        ))}
-                    </span>
-                  )}
+                  <div className="task-points-container">
+                    {task.result?.points_consumption && (
+                      <span className="task-points">
+                        {Object.entries(task.result.points_consumption)
+                          .filter(([_, value]) => value !== 0)
+                          .map(([key, value]) => (
+                            <span key={key} className="points-item points-consumption">
+                              <img
+                                src={key === 'power' ? PowerIcon : ComputingIcon}
+                                alt={key}
+                                className="points-icon"
+                              />
+                              <span className="points-value">-{value}</span>
+                            </span>
+                          ))}
+                      </span>
+                    )}
+                    {task.result?.points_reward && (
+                      <span className="task-points">
+                        {Object.entries(task.result.points_reward)
+                          .filter(([_, value]) => value !== 0)
+                          .map(([key, value]) => (
+                            <span key={key} className="points-item points-reward">
+                              <img
+                                src={key === 'power' ? PowerIcon : ComputingIcon}
+                                alt={key}
+                                className="points-icon"
+                              />
+                              <span className="points-value">+{value}</span>
+                            </span>
+                          ))}
+                      </span>
+                    )}
+                  </div>
                   {task.state === TaskState.COMPLETED && (
                     <button
                       className="icon-share-button"
