@@ -4,7 +4,6 @@ import {
   DEFAULT_SETTINGS,
   ENABLE_DEVELOPER_SETTINGS,
   EXTENSION_NAME,
-  ModeConfig,
 } from "../common/settings"
 import { TaskContext } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
@@ -14,6 +13,7 @@ import About from "./components/About"
 import DeveloperSettings from "./components/DeveloperSettings"
 import History from "./components/History"
 import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
+import { ModeConfig } from "../common/models/mode"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);

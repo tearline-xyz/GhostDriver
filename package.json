@@ -5,8 +5,7 @@
   "version": "1.0.0-beta.1",
   "type": "module",
   "scripts": {
-    "dev": "WXT_APP_ENV=development wxt",
-    "dev:prod": "wxt",
+    "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "build": "wxt build",

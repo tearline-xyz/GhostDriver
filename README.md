@@ -23,6 +23,9 @@ This project aims to enable users to describe tasks in natural language, which a
 
 ## Development
 
+> [!IMPORTANT]
+> Please set `WXT_APP_ENV` environment variable when executing any `pnpm` commands. The value can be `development`, `test`, or `production`. For example: `WXT_APP_ENV=development pnpm dev`
+
 1. Build the playwright-crx:
     `./auto/build-playwright-crx.sh`
 

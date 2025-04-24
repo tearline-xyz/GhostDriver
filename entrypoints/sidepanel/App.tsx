@@ -3,7 +3,8 @@ import {
   connectToPlaywrightServer,
   disconnectFromPlaywrightServer,
 } from "../../playwright-crx/lib/index.mjs"
-import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
+import { DEFAULT_SETTINGS } from "../common/settings"
+import { ModeConfig } from "../common/models/mode"
 import "./App.css"
 import { isConnectionRefusedError } from "./models/errors"
 import {
