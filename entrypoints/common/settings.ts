@@ -18,6 +18,8 @@ export const ENABLE_DEVELOPER_SETTINGS = IS_DEVELOPMENT
   ? true
   : false
 
+export const ENABLE_HISTORICAL_TASK_SHARING = false
+
 export const AVAILABLE_HOSTS = IS_DEVELOPMENT
   ? [
     "http://localhost:8000",

@@ -4,7 +4,7 @@ import "reveal.js/dist/reveal.css"
 import "reveal.js/dist/theme/black.css"
 import "./TaskResultModal.css"
 import { TaskContext } from "../../common/models/task"
-import { EXTENSION_NAME } from "../../common/settings"
+import { EXTENSION_NAME, ENABLE_HISTORICAL_TASK_SHARING } from "../../common/settings"
 
 interface TaskResultModalProps {
   taskContext: TaskContext
@@ -419,9 +419,11 @@ const TaskResultModal: React.FC<TaskResultModalProps> = ({
           )}
         </div>
         <div className="modal-footer">
-          <button className="modal-share-button" onClick={onClose}>
-            Confirm and Share
-          </button>
+          {ENABLE_HISTORICAL_TASK_SHARING && (
+            <button className="modal-share-button" onClick={onClose}>
+              Confirm and Share
+            </button>
+          )}
           <button className="modal-cancel-button" onClick={onClose}>
             Cancel
           </button>
