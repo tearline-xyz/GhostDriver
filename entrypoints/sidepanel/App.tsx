@@ -910,6 +910,15 @@ function App() {
     hideNotification()
     if (taskContext?.id) {
       try {
+        // Disable pauseButton
+        setInteractionToggle((prev) => ({
+          ...prev,
+          taskControls: {
+            ...prev.taskControls,
+            pauseButton: { enabled: false, visible: true },
+          },
+        }))
+
         // Show loading notification
         setNotification({
           message: `${taskContext.state === TaskState.RUNNING ? "Pausing" : "Resuming"} task...`,
@@ -937,11 +946,29 @@ function App() {
         setTaskContext(updatedTaskContext)
         await updateTask(updatedTaskContext)
 
+        // Re-enable pauseButton
+        setInteractionToggle((prev) => ({
+          ...prev,
+          taskControls: {
+            ...prev.taskControls,
+            pauseButton: { enabled: true, visible: true },
+          },
+        }))
+
         // Hide notification after 1 second
         setTimeout(() => {
           hideNotification()
         }, 1000)
       } catch (error) {
+        // Re-enable pauseButton
+        setInteractionToggle((prev) => ({
+          ...prev,
+          taskControls: {
+            ...prev.taskControls,
+            pauseButton: { enabled: true, visible: true },
+          },
+        }))
+
         // Handle InvalidTokenError
         if (error instanceof InvalidTokenError) {
           handleTokenRefresh();
@@ -1279,7 +1306,7 @@ function App() {
                     className={`pause-resume-button ${taskContext.state}`}
                     onClick={toggleTaskPauseState}
                     disabled={
-                      !interactionToggle.taskControls.pauseButton.enabled
+                      !interactionToggle.taskControls.enabled || !interactionToggle.taskControls.pauseButton.enabled
                     }
                   >
                     {taskContext.state === TaskState.RUNNING
@@ -1290,7 +1317,7 @@ function App() {
                     className="stop-button"
                     onClick={stopTask}
                     disabled={
-                      !interactionToggle.taskControls.stopButton.enabled
+                      !interactionToggle.taskControls.enabled || !interactionToggle.taskControls.stopButton.enabled
                     }
                   >
                     {STOP_SYMBOL}
