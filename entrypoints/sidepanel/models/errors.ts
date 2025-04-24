@@ -8,6 +8,7 @@ const CONNECTION_REFUSED_ERROR_KEYWORDS = new Set([
   "networkerror",
   "network error",
   "<center>nginx",
+  "<h1>403",
 ])
 
 export function isConnectionRefusedError(errorMessage: string): boolean {

@@ -182,26 +182,19 @@ export class GhostDriverApi {
     }
   }
 
-  private async handleErrorResponse(response: Response, defaultMessage: string): Promise<never> {
-    let errorMessage = defaultMessage;
-    let responseBody: any;
-
-    // Check if it's an authentication error (401), which might be an expired token
+  private async handleErrorResponse(response: Response, baseErrorMessage: string): Promise<never> {
     if (response.status === 401) {
-      console.warn("Received 401 Unauthorized response, token might be expired");
-      // Throw InvalidTokenError instead of a general error
       throw new InvalidTokenError("Authentication failed. Please sign in again.");
     }
-
+    let errorMessage: string;
     try {
-      responseBody = await response.clone().json();
-      const msg = responseBody?.detail?.[0]?.msg;
-      errorMessage += msg ? `. ${msg}` : '';
+      const jsonResponse = await response.clone().json();
+      const detailMessage = jsonResponse?.detail;
+      errorMessage = `${baseErrorMessage}${detailMessage ? `. ${detailMessage}` : ''}`;
     } catch {
-      responseBody = await response.clone().text();
-      errorMessage += `. ${responseBody}`;
+      const textResponse = await response.clone().text();
+      errorMessage = `${baseErrorMessage}. ${textResponse}`;
     }
-
     throw new Error(errorMessage);
   }
 }
