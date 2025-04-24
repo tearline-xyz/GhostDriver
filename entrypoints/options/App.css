@@ -2,6 +2,7 @@
 .options-container {
   display: flex;
   height: 100vh;
+  min-width: 800px;
 }
 
 /* Sidebar styling */
