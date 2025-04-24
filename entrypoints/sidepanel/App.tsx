@@ -43,10 +43,11 @@ import {
   DEFAULT_NOTIFICATION_STATE,
 } from "./models/notification"
 import { GhostDriverApi, InvalidTokenError } from "../common/services/ghost-driver-api"
-import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
+import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon, PowerIcon } from "../../assets/icons"
 import { addTask, updateTask } from "../db/taskStore"
 import { AuthMessageType } from "../auth/models"
 import { EventSourcePlus, EventSourceController } from "event-source-plus"
+import { TearlineApi } from "../common/services/tearline-api"
 
 function App() {
   /** Main input text content */
@@ -102,6 +103,10 @@ function App() {
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
   const apiService = new GhostDriverApi(apiHost)
+  const tearlineApi = new TearlineApi(`https://${TEARLINE_WEBSITE}`)
+
+  /** Power balance state */
+  const [powerBalance, setPowerBalance] = useState<{ power: number } | null>(null)
 
   /** Whether @ syntax is enabled from settings */
   const [atSyntaxEnabled, setAtSyntaxEnabled] = useState<boolean>(
@@ -208,6 +213,29 @@ function App() {
       chrome.storage.onChanged.removeListener(handleStorageChange)
     }
   }, [mode])
+
+  // Fetch power balance on component mount and every 30 seconds
+  useEffect(() => {
+    const fetchPowerBalance = async () => {
+      try {
+        const balance = await tearlineApi.getPowerBalance()
+        setPowerBalance(balance)
+      } catch (error) {
+        console.error('Failed to fetch power balance:', error)
+      }
+    }
+
+    // Initial fetch
+    fetchPowerBalance()
+
+    // Set up interval for periodic updates
+    const intervalId = setInterval(fetchPowerBalance, 30000)
+
+    // Clean up interval on component unmount
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [taskContext?.state])
 
   /** Filtered menu items based on current search term */
   const filteredSuggestionMenuItems = currentSuggestionMenuItems.filter(
@@ -1113,7 +1141,14 @@ function App() {
           >
             New Task
           </button>
-          {/* Future buttons can be added here */}
+        </div>
+        <div className="toolbar-center">
+          {powerBalance && (
+            <div className="power-balance">
+              <img src={PowerIcon} alt="Power" className="power-icon" />
+              <span className="power-value">{powerBalance.power}</span>
+            </div>
+          )}
         </div>
         <div className="toolbar-right">
           <button
