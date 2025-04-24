@@ -366,14 +366,13 @@
 }
 
 .modal-task-content {
-  margin: 1.5rem 0; /* Increased vertical spacing */
-  padding: 1rem 0.75rem; /* Increased padding */
-  background: #f8f9fa;
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  background: #424242;
   border-radius: 6px;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: #202124;
-  border-left: 3px solid #4285f4;
+  color: #e0e0e0;
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: break-word;
