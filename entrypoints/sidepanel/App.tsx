@@ -784,7 +784,6 @@ function App() {
         })
 
         await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
-        console.log(`Task stopped: ${taskContext.id}`)
 
         // Hide notification after 1 second
         setTimeout(() => {
@@ -911,6 +910,13 @@ function App() {
     hideNotification()
     if (taskContext?.id) {
       try {
+        // Show loading notification
+        setNotification({
+          message: `${taskContext.state === TaskState.RUNNING ? "Pausing" : "Resuming"} task...`,
+          type: "info",
+          visible: true,
+        })
+
         // Determine the target state based on current running state
         const targetState =
           taskContext.state === TaskState.RUNNING
@@ -930,6 +936,11 @@ function App() {
 
         setTaskContext(updatedTaskContext)
         await updateTask(updatedTaskContext)
+
+        // Hide notification after 1 second
+        setTimeout(() => {
+          hideNotification()
+        }, 1000)
       } catch (error) {
         // Handle InvalidTokenError
         if (error instanceof InvalidTokenError) {
