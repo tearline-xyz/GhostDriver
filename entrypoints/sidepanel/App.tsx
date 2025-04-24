@@ -3,10 +3,10 @@ import {
   connectToPlaywrightServer,
   disconnectFromPlaywrightServer,
 } from "../../playwright-crx/lib/index.mjs"
-import { DEFAULT_SETTINGS } from "../common/settings"
+import { DEFAULT_SETTINGS, TEARLINE_WEBSITE } from "../common/settings"
 import { ModeConfig } from "../common/models/mode"
 import "./App.css"
-import { isConnectionRefusedError } from "./models/errors"
+import { isConnectionRefusedError, isInsufficientPowerError } from "./models/errors"
 import {
   ActionPayload,
   LogPayload,
@@ -567,7 +567,7 @@ function App() {
             if (
               data.type === TaskEventType.SYSTEM &&
               (data.payload as SystemPayload).status ===
-                SystemEventStatus.EVENT_STREAM_END
+              SystemEventStatus.EVENT_STREAM_END
             ) {
               console.log("Server indicated event stream end")
 
@@ -842,13 +842,25 @@ function App() {
         const errorMessage =
           error instanceof Error ? error.message : "An unknown error occurred"
 
-        setNotification({
-          message: isConnectionRefusedError(errorMessage)
-            ? `Unable to connect to ${apiHost}`
-            : errorMessage,
-          type: "error",
-          visible: true,
-        })
+        if (isInsufficientPowerError(errorMessage)) {
+          setNotification({
+            message: `${errorMessage} Please visit <a href="https://${TEARLINE_WEBSITE}/shop" target="_blank" rel="noopener noreferrer">Tearline Shop</a> to purchase.`,
+            type: "warning",
+            visible: true,
+          })
+        } else if (isConnectionRefusedError(errorMessage)) {
+          setNotification({
+            message: `Unable to connect to ${apiHost}`,
+            type: "error",
+            visible: true,
+          })
+        } else {
+          setNotification({
+            message: errorMessage,
+            type: "error",
+            visible: true,
+          })
+        }
       }
 
       // Restore UI state when error occurs
@@ -1269,7 +1281,7 @@ function App() {
       {notification.visible && (
         <div className={`notification notification-${notification.type}`}>
           <div className="notification-content">
-            <span>{notification.message}</span>
+            <span dangerouslySetInnerHTML={{ __html: notification.message }} />
             <button className="notification-close" onClick={hideNotification}>
               ×
             </button>

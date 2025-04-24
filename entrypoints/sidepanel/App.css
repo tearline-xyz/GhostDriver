@@ -273,6 +273,17 @@
   display: block;
 }
 
+.notification-content a {
+  color: white;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.notification-content a:hover {
+  color: #2b2bef;
+  opacity: 0.8;
+}
+
 .notification-success {
   background-color: #28a745;
 }
@@ -286,7 +297,7 @@
 }
 
 .notification-warning {
-  background-color: #f0ad4e; /* 使用黄色/琥珀色作为警告色 */
+  background-color: #c38a3b;
 }
 
 .notification-close {
