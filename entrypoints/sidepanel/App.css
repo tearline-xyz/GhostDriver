@@ -525,7 +525,6 @@
 }
 
 .toolbar-left,
-.toolbar-center,
 .toolbar-right {
   display: flex;
   gap: 8px;
@@ -533,16 +532,10 @@
   height: 100%; /* Ensure consistent height for child elements */
 }
 
-.toolbar-center {
-  flex: 1;
-  justify-content: center;
-}
-
 .power-balance {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
   border-radius: 4px;
 }
 
