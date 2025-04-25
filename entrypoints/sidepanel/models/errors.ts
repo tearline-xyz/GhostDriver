@@ -1,17 +1,22 @@
-/**
- * Collection of connection error keywords
- * Used to determine if an error message is of connection error type
- */
-const CONNECTION_REFUSED_ERROR_KEYWORDS = new Set([
-  "err_connection_refused",
-  "failed to fetch",
-  "networkerror",
-  "network error",
-  "<center>nginx",
-])
-
 export function isConnectionRefusedError(errorMessage: string): boolean {
-  return Array.from(CONNECTION_REFUSED_ERROR_KEYWORDS).some((keyword) =>
+  const connectionRefusedErrorKeywords = new Set([
+    "err_connection_refused",
+    "failed to fetch",
+    "networkerror",
+    "network error",
+    "<center>nginx",
+    "<h1>403",
+  ])
+  return Array.from(connectionRefusedErrorKeywords).some((keyword) =>
+    errorMessage.toLowerCase().includes(keyword)
+  )
+}
+
+export function isInsufficientPowerError(errorMessage: string): boolean {
+  const insufficientPowerErrorKeywords = new Set([
+    "insufficient power",
+  ])
+  return Array.from(insufficientPowerErrorKeywords).some((keyword) =>
     errorMessage.toLowerCase().includes(keyword)
   )
 }

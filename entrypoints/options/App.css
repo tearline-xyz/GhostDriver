@@ -2,6 +2,7 @@
 .options-container {
   display: flex;
   height: 100vh;
+  min-width: 1200px;
 }
 
 /* Sidebar styling */
@@ -52,20 +53,47 @@
   padding: 30px;
   box-sizing: border-box;
   overflow-y: auto;
+  background-color: #2d2d2d; /* 深灰色背景 */
+  color: #e0e0e0; /* 浅灰色文字 */
+}
+
+/* 通用文字样式 */
+.content h1,
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  color: #ffffff; /* 标题使用纯白色 */
+}
+
+.content p,
+.content span,
+.content div {
+  color: #e0e0e0; /* 普通文字使用浅灰色 */
+}
+
+.content a {
+  color: #4a9eff; /* 链接使用亮蓝色 */
+}
+
+.content a:hover {
+  color: #6bb1ff; /* 链接悬停时更亮 */
 }
 
 /* Status messages */
 .status {
   position: fixed;
   top: 0;
-  left: 250px; /* Match sidebar width to avoid overlapping it */
+  left: 250px;
   right: 0;
   padding: 12px 20px;
   text-align: center;
   z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease-in-out;
   transform: translateY(-100%);
+  background-color: #2d2d2d;
 }
 
 .status.visible {
@@ -73,16 +101,16 @@
 }
 
 .status.success {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #1b5e20;
+  color: #ffffff;
 }
 
 .status.error {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: #b71c1c;
+  color: #ffffff;
 }
 
 .status.warning {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: #f57f17;
+  color: #ffffff;
 }

@@ -1,4 +1,4 @@
-import "./svg.d"
+import "./image.d"
 
 export { default as HistoryIcon } from "./history.svg"
 export { default as SettingsIcon } from "./settings.svg"
@@ -8,3 +8,5 @@ export { default as ErrorIcon } from "./error.svg"
 export { default as TearlineLogo } from "./tearline.svg"
 export { default as ClearAllIcon } from "./clear-all.svg"
 export { default as ShareIcon } from "./share.svg"
+export { default as PowerIcon } from "./power.png"
+export { default as ComputingIcon } from "./computing.png"

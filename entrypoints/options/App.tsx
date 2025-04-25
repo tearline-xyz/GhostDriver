@@ -2,9 +2,8 @@ import React, { useEffect, useState, useCallback } from "react"
 import "./App.css"
 import {
   DEFAULT_SETTINGS,
+  ENABLE_DEVELOPER_SETTINGS,
   EXTENSION_NAME,
-  ModeConfig,
-  VERSION,
 } from "../common/settings"
 import { TaskContext } from "../common/models/task"
 import "reveal.js/dist/reveal.css"
@@ -14,6 +13,7 @@ import About from "./components/About"
 import DeveloperSettings from "./components/DeveloperSettings"
 import History from "./components/History"
 import { getAllTasksSortedByCreatedAt, clearAllTasks } from "../db/taskStore"
+import { ModeConfig } from "../common/models/mode"
 
 const App: React.FC = () => {
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost);
@@ -82,10 +82,6 @@ const App: React.FC = () => {
     })
   }, [apiHost, enableAtSyntax, enableLlmSelect, modeConfig, showStatus])
 
-  // Helper function to check if current version is alpha
-  const isAlphaVersion = useCallback(() => {
-    return VERSION.toLowerCase().includes("alpha")
-  }, [])
 
   // Load history tasks
   useEffect(() => {
@@ -176,7 +172,7 @@ const App: React.FC = () => {
           {[
             "Account",
             "History",
-            ...(isAlphaVersion() ? ["Developer settings"] : []),
+            ...(ENABLE_DEVELOPER_SETTINGS ? ["Developer settings"] : []),
             "About",
           ].map((page) => (
             <li

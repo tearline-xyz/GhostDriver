@@ -1,4 +1,3 @@
-// 任务状态枚举
 export enum TaskState {
   CREATED = "created",
   RUNNING = "running",
@@ -8,28 +7,26 @@ export enum TaskState {
   STOPPED = "stopped",
 }
 
-// 终端状态集合
 export const TASK_TERMINAL_STATES: Set<TaskState> = new Set([
   TaskState.COMPLETED,
   TaskState.FAILED,
   TaskState.STOPPED,
 ])
 
-// 活动状态集合
 export const TASK_ACTIVE_STATES: Set<TaskState> = new Set([
   TaskState.RUNNING,
   TaskState.PAUSED,
 ])
 
-// 任务上下文类型
-export interface TaskContext {
-  id: string
-  state: TaskState
-  content: string
-  created_at: string
-  chat_model_tag: string
-  initial_actions?: any
-  result?: {
+export interface Points {
+  power: number
+  computing: number
+}
+
+export interface TaskResult {
+  points_consumption?: Points
+  points_reward?: Points
+  agent_history_list?: {
     history: Array<{
       model_output: {
         current_state: {
@@ -65,6 +62,19 @@ export interface TaskContext {
       }
     }>
   }
+  total_input_tokens?: number
+  input_token_usage?: number[]
+  total_duration_seconds?: number
+}
+
+export interface TaskContext {
+  id: string
+  state: TaskState
+  content: string
+  created_at: string
+  chat_model_tag: string
+  initial_actions?: any
+  result?: TaskResult
 }
 
 /**

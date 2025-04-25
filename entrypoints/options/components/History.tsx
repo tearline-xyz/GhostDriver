@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { ClearAllIcon, ShareIcon } from "../../../assets/icons"
+import { ClearAllIcon, ShareIcon, PowerIcon, ComputingIcon } from "../../../assets/icons"
 import { TaskContext, TaskState } from "../../common/models/task"
 import TaskResultModal from "./TaskResultModal"
 import useAuth from "../../auth/useAuth"
@@ -46,13 +46,13 @@ const History: React.FC<HistoryProps> = ({
   const getStateStyle = (state: TaskState) => {
     switch (state) {
       case TaskState.COMPLETED:
-        return { background: '#e6f4ea', color: '#137333' };
+        return { background: '#447f58', color: '#ffffff' };
       case TaskState.FAILED:
-        return { background: '#fce8e6', color: '#c5221f' };
+        return { background: '#ae6260', color: '#ffffff' };
       case TaskState.RUNNING:
-        return { background: '#e8f0fe', color: '#1a73e8' };
+        return { background: '#1a73e8', color: '#ffffff' };
       default:
-        return { background: '#f1f3f4', color: '#5f6368' };
+        return { background: '#858585', color: '#ffffff' };
     }
   };
 
@@ -124,6 +124,40 @@ const History: React.FC<HistoryProps> = ({
                   <span className="task-time">
                     {formatLocalTime(task.created_at)}
                   </span>
+                  <div className="task-points-container">
+                    {task.result?.points_consumption && (
+                      <span className="task-points">
+                        {Object.entries(task.result.points_consumption)
+                          .filter(([_, value]) => value !== 0)
+                          .map(([key, value]) => (
+                            <span key={key} className="points-item points-consumption">
+                              <img
+                                src={key === 'power' ? PowerIcon : ComputingIcon}
+                                alt={key}
+                                className="points-icon"
+                              />
+                              <span className="points-value">-{value}</span>
+                            </span>
+                          ))}
+                      </span>
+                    )}
+                    {task.result?.points_reward && (
+                      <span className="task-points">
+                        {Object.entries(task.result.points_reward)
+                          .filter(([_, value]) => value !== 0)
+                          .map(([key, value]) => (
+                            <span key={key} className="points-item points-reward">
+                              <img
+                                src={key === 'power' ? PowerIcon : ComputingIcon}
+                                alt={key}
+                                className="points-icon"
+                              />
+                              <span className="points-value">+{value}</span>
+                            </span>
+                          ))}
+                      </span>
+                    )}
+                  </div>
                   {task.state === TaskState.COMPLETED && (
                     <button
                       className="icon-share-button"

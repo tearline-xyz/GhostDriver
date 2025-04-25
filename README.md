@@ -23,6 +23,9 @@ This project aims to enable users to describe tasks in natural language, which a
 
 ## Development
 
+> [!IMPORTANT]
+> Please set `WXT_APP_ENV` environment variable when executing any `pnpm` commands. The value can be `development`, `test`, or `production`. For example: `WXT_APP_ENV=development pnpm dev`
+
 1. Build the playwright-crx:
     `./auto/build-playwright-crx.sh`
 
@@ -39,7 +42,7 @@ This project aims to enable users to describe tasks in natural language, which a
 
 1. Create a git tag pointing to the corresponding commit:
     ```bash
-    VERSION_TAG=1.0.0-alpha.1
+    VERSION_TAG=1.0.0-beta.1
     GIT_COMMIT=105611016b04c66382c9df0f91c6ecc340d2f554
     git tag -a $VERSION_TAG $GIT_COMMIT -m "Release $VERSION_TAG"
     ```
@@ -48,3 +51,25 @@ This project aims to enable users to describe tasks in natural language, which a
     git push origin $VERSION_TAG
     ```
 3. Reference the tag when creating a new release on GitHub.
+
+## Release policy
+
+e.g.
+
+```
+1.0.0-alpha.1    (First internal alpha)
+1.0.0-alpha.2    (Internal alpha iteration)
+...
+1.0.0-alpha.n    (Last internal alpha)
+
+1.0.0-beta.1     (First external beta)
+1.0.0-beta.2     (External beta iteration)
+...
+1.0.0-beta.n     (Last external beta)
+
+1.0.0-rc.1       (Optional: First release candidate)
+1.0.0-rc.2       (Optional: Release candidate iteration)
+...
+
+1.0.0            (Official release)
+```

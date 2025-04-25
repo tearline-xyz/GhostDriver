@@ -3,9 +3,10 @@ import {
   connectToPlaywrightServer,
   disconnectFromPlaywrightServer,
 } from "../../playwright-crx/lib/index.mjs"
-import { DEFAULT_SETTINGS, ModeConfig } from "../common/settings"
+import { DEFAULT_SETTINGS, TEARLINE_WEBSITE } from "../common/settings"
+import { ModeConfig } from "../common/models/mode"
 import "./App.css"
-import { isConnectionRefusedError } from "./models/errors"
+import { isConnectionRefusedError, isInsufficientPowerError } from "./models/errors"
 import {
   ActionPayload,
   LogPayload,
@@ -41,11 +42,12 @@ import {
   NotificationState,
   DEFAULT_NOTIFICATION_STATE,
 } from "./models/notification"
-import { ApiService, InvalidTokenError } from "../common/services/api"
-import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon } from "../../assets/icons"
+import { GhostDriverApi, InvalidTokenError } from "../common/services/ghost-driver-api"
+import { HistoryIcon, SettingsIcon, CopyIcon, ShareIcon, PowerIcon } from "../../assets/icons"
 import { addTask, updateTask } from "../db/taskStore"
 import { AuthMessageType } from "../auth/models"
 import { EventSourcePlus, EventSourceController } from "event-source-plus"
+import { TearlineApi } from "../common/services/tearline-api"
 
 function App() {
   /** Main input text content */
@@ -100,7 +102,11 @@ function App() {
 
   /** apiHost from settings */
   const [apiHost, setApiHost] = useState<string>(DEFAULT_SETTINGS.apiHost)
-  const apiService = new ApiService(apiHost)
+  const apiService = new GhostDriverApi(apiHost)
+  const tearlineApi = new TearlineApi(`https://${TEARLINE_WEBSITE}`)
+
+  /** Power balance state */
+  const [powerBalance, setPowerBalance] = useState<{ power: number } | null>(null)
 
   /** Whether @ syntax is enabled from settings */
   const [atSyntaxEnabled, setAtSyntaxEnabled] = useState<boolean>(
@@ -207,6 +213,29 @@ function App() {
       chrome.storage.onChanged.removeListener(handleStorageChange)
     }
   }, [mode])
+
+  // Fetch power balance on component mount and every 30 seconds
+  useEffect(() => {
+    const fetchPowerBalance = async () => {
+      try {
+        const balance = await tearlineApi.getPowerBalance()
+        setPowerBalance(balance)
+      } catch (error) {
+        console.error('Failed to fetch power balance:', error)
+      }
+    }
+
+    // Initial fetch
+    fetchPowerBalance()
+
+    // Set up interval for periodic updates
+    const intervalId = setInterval(fetchPowerBalance, 30000)
+
+    // Clean up interval on component unmount
+    return () => {
+      clearInterval(intervalId)
+    }
+  }, [taskContext?.state])
 
   /** Filtered menu items based on current search term */
   const filteredSuggestionMenuItems = currentSuggestionMenuItems.filter(
@@ -566,7 +595,7 @@ function App() {
             if (
               data.type === TaskEventType.SYSTEM &&
               (data.payload as SystemPayload).status ===
-                SystemEventStatus.EVENT_STREAM_END
+              SystemEventStatus.EVENT_STREAM_END
             ) {
               console.log("Server indicated event stream end")
 
@@ -755,7 +784,6 @@ function App() {
         })
 
         await apiService.updateTaskState(taskContext.id, TaskState.STOPPED)
-        console.log(`Task stopped: ${taskContext.id}`)
 
         // Hide notification after 1 second
         setTimeout(() => {
@@ -825,14 +853,13 @@ function App() {
         }),
       ])
 
-      // Update task state to running
-      setTaskContext((prev) => {
-        if (!prev) return null
-        return {
-          ...prev,
-          state: TaskState.RUNNING,
-        }
-      })
+      const updatedTaskContext = {
+        ...taskContext,
+        state: TaskState.RUNNING,
+      }
+
+      setTaskContext(updatedTaskContext)
+      await updateTask(updatedTaskContext)
     } catch (error) {
       // Handle InvalidTokenError
       if (error instanceof InvalidTokenError) {
@@ -841,13 +868,25 @@ function App() {
         const errorMessage =
           error instanceof Error ? error.message : "An unknown error occurred"
 
-        setNotification({
-          message: isConnectionRefusedError(errorMessage)
-            ? `Unable to connect to ${apiHost}`
-            : errorMessage,
-          type: "error",
-          visible: true,
-        })
+        if (isInsufficientPowerError(errorMessage)) {
+          setNotification({
+            message: `${errorMessage} Please visit <a href="https://${TEARLINE_WEBSITE}/shop" target="_blank" rel="noopener noreferrer">Tearline Shop</a> to purchase.`,
+            type: "warning",
+            visible: true,
+          })
+        } else if (isConnectionRefusedError(errorMessage)) {
+          setNotification({
+            message: `Unable to connect to ${apiHost}`,
+            type: "error",
+            visible: true,
+          })
+        } else {
+          setNotification({
+            message: errorMessage,
+            type: "error",
+            visible: true,
+          })
+        }
       }
 
       // Restore UI state when error occurs
@@ -871,6 +910,22 @@ function App() {
     hideNotification()
     if (taskContext?.id) {
       try {
+        // Disable pauseButton
+        setInteractionToggle((prev) => ({
+          ...prev,
+          taskControls: {
+            ...prev.taskControls,
+            pauseButton: { enabled: false, visible: true },
+          },
+        }))
+
+        // Show loading notification
+        setNotification({
+          message: `${taskContext.state === TaskState.RUNNING ? "Pausing" : "Resuming"} task...`,
+          type: "info",
+          visible: true,
+        })
+
         // Determine the target state based on current running state
         const targetState =
           taskContext.state === TaskState.RUNNING
@@ -883,15 +938,37 @@ function App() {
           `Task ${taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING}: ${taskContext.id}`
         )
 
-        // Update task state after successful API call
-        setTaskContext((prev) => {
-          if (!prev) return null
-          return {
-            ...prev,
-            state: targetState,
-          }
-        })
+        const updatedTaskContext = {
+          ...taskContext,
+          state: targetState,
+        }
+
+        setTaskContext(updatedTaskContext)
+        await updateTask(updatedTaskContext)
+
+        // Re-enable pauseButton
+        setInteractionToggle((prev) => ({
+          ...prev,
+          taskControls: {
+            ...prev.taskControls,
+            pauseButton: { enabled: true, visible: true },
+          },
+        }))
+
+        // Hide notification after 1 second
+        setTimeout(() => {
+          hideNotification()
+        }, 1000)
       } catch (error) {
+        // Re-enable pauseButton
+        setInteractionToggle((prev) => ({
+          ...prev,
+          taskControls: {
+            ...prev.taskControls,
+            pauseButton: { enabled: true, visible: true },
+          },
+        }))
+
         // Handle InvalidTokenError
         if (error instanceof InvalidTokenError) {
           handleTokenRefresh();
@@ -1100,7 +1177,14 @@ function App() {
           >
             New Task
           </button>
-          {/* Future buttons can be added here */}
+        </div>
+        <div className="toolbar-center">
+          {powerBalance && (
+            <div className="power-balance">
+              <img src={PowerIcon} alt="Power" className="power-icon" />
+              <span className="power-value">{powerBalance.power}</span>
+            </div>
+          )}
         </div>
         <div className="toolbar-right">
           <button
@@ -1222,7 +1306,7 @@ function App() {
                     className={`pause-resume-button ${taskContext.state}`}
                     onClick={toggleTaskPauseState}
                     disabled={
-                      !interactionToggle.taskControls.pauseButton.enabled
+                      !interactionToggle.taskControls.enabled || !interactionToggle.taskControls.pauseButton.enabled
                     }
                   >
                     {taskContext.state === TaskState.RUNNING
@@ -1233,7 +1317,7 @@ function App() {
                     className="stop-button"
                     onClick={stopTask}
                     disabled={
-                      !interactionToggle.taskControls.stopButton.enabled
+                      !interactionToggle.taskControls.enabled || !interactionToggle.taskControls.stopButton.enabled
                     }
                   >
                     {STOP_SYMBOL}
@@ -1268,7 +1352,7 @@ function App() {
       {notification.visible && (
         <div className={`notification notification-${notification.type}`}>
           <div className="notification-content">
-            <span>{notification.message}</span>
+            <span dangerouslySetInnerHTML={{ __html: notification.message }} />
             <button className="notification-close" onClick={hideNotification}>
               ×
             </button>
