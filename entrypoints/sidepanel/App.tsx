@@ -749,6 +749,15 @@ function App() {
     } catch (error) {
       // Handle InvalidTokenError
       if (error instanceof InvalidTokenError) {
+        // Set task state to FAILED when token is invalid, which leads to failed to fetch task final context
+        if (taskContext) {
+          const updatedTaskContext = {
+            ...taskContext,
+            state: TaskState.FAILED,
+          }
+          setTaskContext(updatedTaskContext)
+          await updateTask(updatedTaskContext)
+        }
         handleTokenRefresh();
       }
       console.error("Error fetching task status:", error)
