@@ -189,7 +189,7 @@ export class GhostDriverApi {
     let errorMessage: string;
     try {
       const jsonResponse = await response.clone().json();
-      const detailMessage = jsonResponse?.detail;
+      const detailMessage = jsonResponse?.detail?.[0]?.msg || jsonResponse?.detail;
       errorMessage = `${baseErrorMessage}${detailMessage ? `. ${detailMessage}` : ''}`;
     } catch {
       const textResponse = await response.clone().text();
