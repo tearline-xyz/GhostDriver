@@ -221,7 +221,7 @@ function App() {
         const balance = await tearlineApi.getPowerBalance()
         setPowerBalance(balance)
       } catch (error) {
-        console.error('Failed to fetch power balance:', error)
+        console.warn('Failed to fetch power balance:', error)
       }
     }
 
@@ -615,7 +615,7 @@ function App() {
 
             setEvents((prev) => [...prev, data])
           } catch (error) {
-            console.error("Error parsing event data:", error)
+            console.warn("Error parsing event data:", error)
           }
         },
         onRequestError({ error }) {
@@ -640,7 +640,7 @@ function App() {
       eventControllerRef.current = controller;
 
     } catch (error) {
-      console.error("Failed to connect to event stream:", error);
+      console.warn("Failed to connect to event stream:", error);
 
       // Handle authentication errors
       if (error instanceof InvalidTokenError) {
@@ -747,20 +747,18 @@ function App() {
         },
       }))
     } catch (error) {
-      // Handle InvalidTokenError
-      if (error instanceof InvalidTokenError) {
-        // Set task state to FAILED when token is invalid, which leads to failed to fetch task final context
-        if (taskContext) {
-          const updatedTaskContext = {
-            ...taskContext,
-            state: TaskState.FAILED,
-          }
-          setTaskContext(updatedTaskContext)
-          await updateTask(updatedTaskContext)
+      console.warn("Error fetching task:", error)
+      if (taskContext) {
+        const updatedTaskContext = {
+          ...taskContext,
+          state: TaskState.FAILED,
         }
+        setTaskContext(updatedTaskContext)
+        await updateTask(updatedTaskContext)
+      }
+      if (error instanceof InvalidTokenError) {
         handleTokenRefresh();
       }
-      console.error("Error fetching task status:", error)
     }
   }
 
@@ -799,19 +797,15 @@ function App() {
           hideNotification()
         }, 1000)
       } catch (error) {
-        // Handle InvalidTokenError
-        if (error instanceof InvalidTokenError) {
-          handleTokenRefresh();
-          // Even if token is invalid, try to close the WebSocket connection to stop the task
-          await disconnectFromPlaywrightServer();
-          return;
-        }
-
+        hideNotification()
         console.warn(
           "Error stopping task so that the websocket will be closed directly:",
           error
         )
         await disconnectFromPlaywrightServer()
+        if (error instanceof InvalidTokenError) {
+          handleTokenRefresh();
+        }
       }
     }
   }
@@ -977,19 +971,17 @@ function App() {
             pauseButton: { enabled: true, visible: true },
           },
         }))
-
-        // Handle InvalidTokenError
-        if (error instanceof InvalidTokenError) {
-          handleTokenRefresh();
-          return;
-        }
-
-        console.error("Error toggling task state:", error)
+        hideNotification()
+        console.warn("Error toggling task state:", error)
         setNotification({
           message: `Failed to ${taskContext.state === TaskState.RUNNING ? TaskState.PAUSED : TaskState.RUNNING} task: ${error instanceof Error ? error.message : "Unknown error"}`,
           type: "error",
           visible: true,
         })
+        if (error instanceof InvalidTokenError) {
+          handleTokenRefresh();
+          return;
+        }
       }
     }
   }
@@ -1028,9 +1020,9 @@ function App() {
         textareaRef.current.focus()
       }
     } catch (error) {
-      console.error("Error disconnecting from Playwright server:", error)
+      console.warn("Error resetting to new task:", error)
       setNotification({
-        message: "Failed to disconnect from Playwright server",
+        message: "Failed to reset to new task",
         type: "error",
         visible: true,
       })
@@ -1075,11 +1067,7 @@ function App() {
           sendButton: { enabled: false, visible: false },
         }))
       } catch (error) {
-        console.warn(
-          "Error stopping task so that the websocket will be closed directly:",
-          error
-        )
-        await disconnectFromPlaywrightServer()
+        console.warn("Error stopping task:", error)
         setNotification({
           message: `Failed to stop task: ${error instanceof Error ? error.message : "Unknown error"}`,
           type: "error",
