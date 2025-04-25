@@ -1187,15 +1187,13 @@ function App() {
             New Task
           </button>
         </div>
-        <div className="toolbar-center">
+        <div className="toolbar-right">
           {powerBalance && (
             <div className="power-balance">
               <img src={PowerIcon} alt="Power" className="power-icon" />
               <span className="power-value">{powerBalance.power}</span>
             </div>
           )}
-        </div>
-        <div className="toolbar-right">
           <button
             className="history-button"
             onClick={() =>
