@@ -35,14 +35,12 @@ export default defineConfig({
     web_accessible_resources: [
       {
         resources: ["injectScript.js", "ghost-inject.js"],
-        matches: ["<all_urls>"],
+        matches: [`*://${TEARLINE_WEBSITE}/*`],
       },
     ],
     content_scripts: [
       {
-        matches: [
-          "<all_urls>",
-        ],
+        matches: [`*://${TEARLINE_WEBSITE}/*`],
         js: ["ghost-provider.js"],
         run_at: "document_start",
       },
