@@ -3,7 +3,8 @@ import { ModeConfig } from "../models/mode"
 // @ts-ignore
 export const VERSION = import.meta.env.WXT_APP_ENV
 
-export const TEARLINE_WEBSITE = "www1.test.tearline.io"
+export const TEARLINE_WEBSITE = "www.t.tearline.io"
+
 
 export const ENABLE_DEVELOPER_SETTINGS = true
 
