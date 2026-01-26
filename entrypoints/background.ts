@@ -48,6 +48,12 @@ export default defineBackground(() => {
       attemptTokenRefresh()
     }
 
+
+    // Handle open side panel request
+    if (message.type === AuthMessageType.OPEN_SIDEPANEL) {
+      handleOpenSidePanel(sender)
+    }
+
     // Forward login state changes to all extension views
     if (
       message.type === AuthMessageType.LOGIN_STATE_CHANGED ||
@@ -88,7 +94,14 @@ export default defineBackground(() => {
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach((tab) => {
         if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, message).catch(() => {
+          // chrome.tabs.sendMessage(tab.id, message).catch(() => {
+          chrome.tabs.sendMessage(tab.id, message).catch((error) => {
+            // Silently ignore errors from tabs that don't have the listener
+            // This is expected for tabs without our content scripts
+            if (error.message && !error.message.includes('Receiving end does not exist')) {
+              console.debug(`Failed to send message to tab ${tab.id}:`, error.message)
+            }
+
             // Ignore errors from tabs that don't have the listener
           })
         }
@@ -118,6 +131,31 @@ export default defineBackground(() => {
       console.error("Error during token refresh:", error)
     }
   }
+  // Handle open side panel request from content script
+  async function handleOpenSidePanel(sender: chrome.runtime.MessageSender) {
+    try {
+      // Get the tab ID from the sender
+      const tabId = sender.tab?.id
+
+      if (tabId) {
+        // Open the side panel for the specific tab
+        await chrome.sidePanel.open({ tabId })
+        // console.log(`Opened side panel for tab ${tabId}`)
+      } else {
+        // If no tab ID, try to open for the current window
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+        if (tab?.id) {
+          await chrome.sidePanel.open({ tabId: tab.id })
+          // console.log(`Opened side panel for current tab ${tab.id}`)
+        } else {
+          console.warn("Could not determine tab to open side panel")
+        }
+      }
+    } catch (error) {
+      console.error("Error opening side panel:", error)
+    }
+  }
+
 
   // @ts-ignore
   browser.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
