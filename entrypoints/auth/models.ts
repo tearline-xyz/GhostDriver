@@ -43,7 +43,7 @@ export interface UserDisplayData {
 }
 
 export interface AuthMessage {
-  type: AuthMessageType.LOGIN | AuthMessageType.LOGOUT | AuthMessageType.LOGIN_STATE_CHANGED | AuthMessageType.LOGOUT_STATE_CHANGED | AuthMessageType.REFRESH_TOKEN | AuthMessageType.REFRESH_TOKEN_REQUEST
+  type: AuthMessageType.LOGIN | AuthMessageType.LOGOUT | AuthMessageType.LOGIN_STATE_CHANGED | AuthMessageType.LOGOUT_STATE_CHANGED | AuthMessageType.REFRESH_TOKEN | AuthMessageType.REFRESH_TOKEN_REQUEST | AuthMessageType.OPEN_SIDEPANEL
   data?: string
   timestamp?: number
 }
@@ -55,7 +55,8 @@ export enum AuthMessageType {
   LOGIN = 'LOGIN',
   LOGOUT = 'LOGOUT',
   REFRESH_TOKEN = 'REFRESH_TOKEN',
-  REFRESH_TOKEN_REQUEST = 'REFRESH_TOKEN_REQUEST'
+  REFRESH_TOKEN_REQUEST = 'REFRESH_TOKEN_REQUEST',
+  OPEN_SIDEPANEL = 'OPEN_SIDEPANEL'
 }
 
 const authStateMachine = createMachine({
